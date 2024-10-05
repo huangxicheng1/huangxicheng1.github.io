@@ -5,18 +5,18 @@ subtitle: A awesome static site generator.
 author: Jeffrey
 categories: jekyll
 banner:
-  video: https://vjs.zencdn.net/v/oceans.mp4
+  video: https://thumbsnap.com/i/LWLEpRUn.mp4
   loop: true
   volume: 0.8
   start_at: 8.5
-  image: https://bit.ly/3xTmdUP
+  image: https://img.picui.cn/free/2024/09/30/66fa2e86c6b72.jpg
   opacity: 0.618
   background: "#000"
   height: "100vh"
   min_height: "38vh"
   heading_style: "font-size: 4.25em; font-weight: bold; text-decoration: underline"
   subheading_style: "color: gold"
-tags: jekyll theme yat
+tags: jekyll  
 top: 1
 sidebar: []
 ---
