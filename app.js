@@ -312,7 +312,12 @@
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s<>)"']+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    html = html.replace(/\[([^\]]+)\]\(#([\p{L}\p{N}_-]+)\)/gu, '<a href="#$2">$1</a>');
     return html.replace(/\uE000(\d+)\uE001/g, (_match, index) => codeSlots[Number(index)] || '');
+  }
+  function headingSlug(raw) {
+    return String(raw).replace(/`([^`]*)`/g, '$1').replace(/\*\*|\*/g, '')
+      .toLowerCase().replace(/[^\p{L}\p{N}_ -]/gu, '').trim().replace(/\s+/g, '-');
   }
   function highlightCode(source, language) {
     const js = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|\b(?:const|let|var|return|function|async|await|if|else|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()/g;
@@ -356,6 +361,7 @@
   function markdown(source) {
     const lines = String(source || '').replace(/\r\n/g,'\n').split('\n');
     const output = []; let paragraph = [], list = null, quote = [], code = [], fenced = false, codeLanguage = '';
+    const headingIds = new Map();
     const flushParagraph = () => { if (paragraph.length) { output.push(`<p>${inline(paragraph.join(' '))}</p>`); paragraph = []; } };
     const flushList = () => { if (list) { output.push(`</${list}>`); list = null; } };
     const flushQuote = () => { if (quote.length) { output.push(`<blockquote><p>${inline(quote.join(' '))}</p></blockquote>`); quote = []; } };
@@ -385,8 +391,18 @@
         continue;
       }
       if (!line.trim()) { flushParagraph(); flushList(); flushQuote(); continue; }
+      if (/^\s*(?:-{3,}|\*{3,})\s*$/.test(line)) { flushParagraph(); flushList(); flushQuote(); output.push('<hr>'); continue; }
       const heading = /^(#{1,4})\s+(.+)$/.exec(line);
-      if (heading) { flushParagraph(); flushList(); flushQuote(); const depth = Math.max(2, heading[1].length); output.push(`<h${depth}>${inline(heading[2])}</h${depth}>`); continue; }
+      if (heading) {
+        flushParagraph(); flushList(); flushQuote();
+        const depth = Math.max(2, heading[1].length);
+        const base = headingSlug(heading[2]) || 'section';
+        const count = headingIds.get(base) || 0;
+        headingIds.set(base, count + 1);
+        const id = count ? `${base}-${count}` : base;
+        output.push(`<h${depth} id="${escapeHTML(id)}">${inline(heading[2])}</h${depth}>`);
+        continue;
+      }
       const bullet = /^\s*[-*]\s+(.+)$/.exec(line);
       const numbered = /^\s*\d+\.\s+(.+)$/.exec(line);
       if (bullet || numbered) { flushParagraph(); flushQuote(); const target = bullet ? 'ul' : 'ol'; if (list && list !== target) flushList(); if (!list) { list = target; output.push(`<${target}>`); } output.push(`<li>${inline((bullet || numbered)[1])}</li>`); continue; }
