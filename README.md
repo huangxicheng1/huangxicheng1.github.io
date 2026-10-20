@@ -15,7 +15,7 @@
 
 直接用浏览器打开 `index.html`；也可以在项目目录运行 `python -m http.server 8000`，访问 `http://localhost:8000/`。演示文章已全部移除，首次部署时日历与笔记列表为空；以后将自己的 Markdown 放到 `content/` 并运行 `python build.py` 即可填充。
 
-你新下载的小狗动画已复制为项目根目录的 `dog.gif`，首页直接播放 GIF，不再对小狗整体施加跳动动画；从这张 GIF 第一帧提取的 `dog-still.png` 用于“减少动态效果”设置下的静止显示。两张图片无需联网，网站不会读取位置；天气模块和定位请求已经移除。每日寄语根据打开页面时的日期选定，当天固定；跨日后刷新页面，寄语、日历和复习清单会一起更新。
+你提供的鸟形插画裁掉透明外缘后保存在 `logo.png`，作为四个页面页眉、页脚的标识；从同一图案制作的 `favicon.ico` 和 `apple-touch-icon.png` 用于浏览器标签及加入主屏幕图标。你新下载的小狗动画已复制为项目根目录的 `dog.gif`，首页直接播放 GIF，不再对小狗整体施加跳动动画；从这张 GIF 第一帧提取的 `dog-still.png` 用于“减少动态效果”设置下的静止显示。图片无需联网，网站不会读取位置；天气模块和定位请求已经移除。每日寄语根据打开页面时的日期选定，当天固定；跨日后刷新页面，寄语、日历和复习清单会一起更新。
 
 ## 写 Markdown
 
@@ -51,7 +51,7 @@ draft: false
 
 1. 将项目推送到 GitHub 仓库的 `main` 分支。
 2. 在 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。
-3. 工作流 `.github/workflows/pages.yml` 会运行 `build.py`，将四个 HTML 页面、CSS、JS、公开记录索引以及 `dog.gif`、`dog-still.png` 一起发布；源 Markdown 不直接进入 Pages 产物。
+3. 工作流 `.github/workflows/pages.yml` 会运行 `build.py`，将四个 HTML 页面、CSS、JS、公开记录索引、`dog.gif`、`dog-still.png`、`logo.png`、`favicon.ico` 与 `apple-touch-icon.png` 一起发布；源 Markdown 不直接进入 Pages 产物。
 4. 在 Actions 中确认 `Publish diary` 运行成功，从 Pages 设置获取站点地址。
 
 GitHub Pages 公开可访问；即便使用私有仓库，发布的网站也不是私人保险箱。当前没有网站内编辑、账号、跨设备复习状态同步；只把明暗主题偏好存在当前浏览器。

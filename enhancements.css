@@ -1,4 +1,11 @@
 /* Multi-page additions. The original palette and background remain in styles.css. */
+/* The supplied bird illustration replaces the former crescent brand mark site-wide. */
+.site-header .brand{display:inline-flex;align-items:center;gap:12px;min-width:0}
+.site-header .brand-mark{display:grid;place-items:center;flex:none;width:54px;height:64px;overflow:hidden;border:1px solid #e8ba824d;border-radius:13px;background:linear-gradient(145deg,#1d2731,#111820);box-shadow:inset 0 0 18px #070e1780}
+.site-header .brand-logo{display:block;width:46px;height:58px;object-fit:contain}
+.footer-brand{display:inline-flex;align-items:center;gap:7px}
+.footer-brand .footer-logo{display:block;flex:none;width:23px;height:29px;object-fit:contain;padding:2px;border:1px solid #e8ba824d;border-radius:6px;background:#18212b}
+@media(max-width:760px){.site-header .brand{gap:8px}.site-header .brand-mark{width:42px;height:50px;border-radius:10px}.site-header .brand-logo{width:36px;height:46px}}
 /* Markdown reading: warm emphasis, low-glare code panels, and offline syntax colors. */
 .markdown-body strong{font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:4px}
 .markdown-body .md-highlight{color:#fff0d0;background:linear-gradient(transparent 12%,#ba855588 12%,#ba855588 90%,transparent 90%);padding:0 .18em;border-radius:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
