@@ -1,0 +1,5 @@
+/dist/
+/__pycache__/
+/preview-*.png
+/dog.png
+/image.gif
