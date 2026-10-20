@@ -11,6 +11,7 @@
 .markdown-body .md-highlight{color:#fff0d0;background:linear-gradient(transparent 12%,#ba855588 12%,#ba855588 90%,transparent 90%);padding:0 .18em;border-radius:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .markdown-body em{color:var(--gold)}
 .reader-panel .markdown-body h2{border-left:2px solid var(--gold);padding-left:14px;margin-top:34px}
+.reader-panel .markdown-body h4{font-size:15px;line-height:1.55;color:var(--ink);margin:22px 0 8px;font-weight:650}
 .markdown-body .md-code{margin:24px 0 28px;overflow:hidden;border:1px solid #3a4a56;border-radius:12px;background:#0f1924;box-shadow:0 14px 28px #070e1940}
 .markdown-body .md-code-head{display:flex;align-items:center;justify-content:space-between;padding:10px 17px;border-bottom:1px solid #34434e;background:#18242f;color:#b3bec2;font-size:10px;font-weight:700;letter-spacing:.13em}
 .markdown-body .code-dots{font-size:9px;letter-spacing:2px;color:#cc9169}
@@ -19,7 +20,14 @@
 .markdown-body .tok-keyword{color:#c7a8ed}.markdown-body .tok-string{color:#aacfa6}.markdown-body .tok-number{color:#eec48c}.markdown-body .tok-comment{color:#84959f;font-style:italic}.markdown-body .tok-function{color:#9ac9df}.markdown-body .tok-selector{color:#d9b09e}.markdown-body .tok-property{color:#91c4d6}.markdown-body .tok-tag{color:#d9b09e}
 body.light .markdown-body .md-highlight{color:#6b401a;background:linear-gradient(transparent 12%,#efc990af 12%,#efc990af 90%,transparent 90%)}
 body.light .markdown-body .md-code{background:#f0f2f0;border-color:#d5d8d3;box-shadow:0 10px 20px #b4aaa722}body.light .markdown-body .md-code-head{background:#e7eceb;border-color:#d5d8d3;color:#596867}body.light .markdown-body .md-code pre{background:transparent;color:#344a55}body.light .markdown-body .tok-keyword{color:#7852aa}body.light .markdown-body .tok-string{color:#32734c}body.light .markdown-body .tok-number{color:#a65f29}body.light .markdown-body .tok-comment{color:#758d8a}body.light .markdown-body .tok-function{color:#245f80}body.light .markdown-body .tok-selector{color:#984e4d}body.light .markdown-body .tok-property{color:#287187}body.light .markdown-body .tok-tag{color:#984e4d}
-@media(max-width:540px){.markdown-body .md-code pre{padding:15px 14px;font-size:11px}}
+.markdown-body .md-table-scroll{max-width:100%;margin:24px 0 28px;overflow-x:auto;border:1px solid var(--line);border-radius:10px;scrollbar-width:thin}
+.markdown-body .md-table-scroll:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.markdown-body .md-table-scroll table{width:100%;min-width:650px;border-collapse:collapse;font-size:12px;line-height:1.7}
+.markdown-body .md-table-scroll th,.markdown-body .md-table-scroll td{min-width:110px;padding:11px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.markdown-body .md-table-scroll th{color:var(--gold);background:var(--panel-2);font-weight:700;white-space:nowrap}
+.markdown-body .md-table-scroll tr:last-child td{border-bottom:0}.markdown-body .md-table-scroll th:last-child,.markdown-body .md-table-scroll td:last-child{border-right:0}
+.markdown-body .md-table-scroll tbody tr:nth-child(even){background:var(--gold-soft)}
+@media(max-width:540px){.markdown-body .md-code pre{padding:15px 14px;font-size:11px}.markdown-body .md-table-scroll th,.markdown-body .md-table-scroll td{padding:9px 11px}}
 .due-item{display:block}.quote-card blockquote{white-space:pre-line}
 .inner-page{padding-top:75px}.page-intro{max-width:760px;margin:0 0 42px}.page-intro h1{font-size:clamp(31px,4vw,47px);font-weight:600;line-height:1.4;letter-spacing:.02em;margin:0 0 13px}.page-intro h1 em{font-style:normal;color:var(--gold)}.page-intro>p:last-child{color:var(--muted);line-height:1.9;font-size:14px;margin:0}.bottom-navigation,.reader-more{display:flex;justify-content:space-between;gap:20px;padding:22px 0;color:var(--gold);font-size:12px}.bottom-navigation a:hover,.reader-more a:hover{text-decoration:underline}
 /* Annual contribution-style heatmap; every cell represents a local calendar day. */

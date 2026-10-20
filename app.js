@@ -318,21 +318,24 @@
     const js = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|\b(?:const|let|var|return|function|async|await|if|else|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()/g;
     const css = /\/\*[\s\S]*?\*\/|#[\da-fA-F]{3,8}\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[.#][\w-]+(?=\s*[{,:])|\b[\w-]+(?=\s*:)|\b\d+(?:\.\d+)?(?:px|rem|em|%|vh|vw)?\b/g;
     const html = /<!--[\s\S]*?-->|<\/?[A-Za-z][\w-]*|\/?>|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b[\w-]+(?==)/g;
+    const java = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|@\w+|\b(?:public|private|protected|class|new|return|if|else|try|catch|throw|final|static|void|long|int|boolean|true|false|null|this|extends|implements|import|package)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()/g;
+    const lua = /--[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:local|if|then|else|elseif|end|return|and|or|not|false|true|nil|function)\b|\b\d+\b|\b[A-Za-z_][\w]*(?=\s*\()/g;
+    const sql = /--[^\n]*|\/\*[\s\S]*?\*\/|'(?:''|[^'])*'|\b(?:SELECT|UPDATE|SET|WHERE|AND|OR|INSERT|INTO|VALUES|FROM|LIMIT|NOW|INTERVAL|MINUTE|NULL|NOT|INDEX|CREATE|UNIQUE|AS|ORDER|BY)\b|\b\d+\b|\b[A-Za-z_][\w]*(?=\s*\()/gi;
     const lang = String(language).toLowerCase();
-    const pattern = /^(js|javascript|ts|typescript|jsx)$/.test(lang) ? js : lang === 'css' ? css : lang === 'html' ? html : null;
+    const pattern = /^(js|javascript|ts|typescript|jsx)$/.test(lang) ? js : lang === 'css' ? css : lang === 'html' ? html : lang === 'java' ? java : lang === 'lua' ? lua : lang === 'sql' ? sql : null;
     if (!pattern) return escapeHTML(source);
     let result = '', last = 0, match;
     while ((match = pattern.exec(source)) !== null) {
       result += escapeHTML(source.slice(last, match.index));
       const token = match[0];
       let kind;
-      if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--')) kind = 'comment';
+      if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--') || token.startsWith('--')) kind = 'comment';
       else if (/^['"`]/.test(token)) kind = 'string';
       else if (/^\d/.test(token) || (lang === 'css' && token.startsWith('#'))) kind = 'number';
       else if (token.startsWith('<') || token === '>' || token === '/>') kind = 'tag';
-      else if (/^(const|let|var|return|function|async|await|if|else|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined)$/.test(token)) kind = 'keyword';
+      else if (/^(?:const|let|var|return|function|async|await|if|else|elseif|then|end|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined|public|private|protected|final|static|void|long|int|boolean|this|extends|implements|package|local|and|or|not|nil|SELECT|UPDATE|SET|WHERE|INSERT|INTO|VALUES|FROM|LIMIT|NOW|INTERVAL|MINUTE|NOT|INDEX|CREATE|UNIQUE|AS|ORDER|BY)$/i.test(token)) kind = 'keyword';
       else if (lang === 'css' && /^[.#]/.test(token)) kind = 'selector';
-      else if (lang === 'css' || lang === 'html') kind = 'property';
+      else if (lang === 'css' || lang === 'html' || token.startsWith('@')) kind = 'property';
       else kind = 'function';
       result += `<span class="tok tok-${kind}">${escapeHTML(token)}</span>`;
       last = pattern.lastIndex;
@@ -341,9 +344,14 @@
   }
   function codeBlock(lines, language) {
     const lang = /^[a-zA-Z0-9+#-]{1,20}$/.test(language) ? language.toLowerCase() : '';
-    const labels = {js:'JavaScript',javascript:'JavaScript',ts:'TypeScript',typescript:'TypeScript',css:'CSS',html:'HTML',json:'JSON'};
+    const labels = {js:'JavaScript',javascript:'JavaScript',ts:'TypeScript',typescript:'TypeScript',css:'CSS',html:'HTML',json:'JSON',java:'Java',lua:'Lua',sql:'SQL'};
     const label = Object.hasOwn(labels, lang) ? labels[lang] : (lang ? lang.toUpperCase() : 'CODE');
     return `<div class="md-code"><div class="md-code-head"><span class="code-dots" aria-hidden="true">● ● ●</span><span>${escapeHTML(label)}</span></div><pre><code>${highlightCode(lines.join('\n'), lang)}</code></pre></div>`;
+  }
+  function pipeCells(line) {
+    const trimmed = line.trim();
+    return trimmed.startsWith('|') && trimmed.endsWith('|')
+      ? trimmed.slice(1, -1).split('|').map(cell => cell.trim()) : null;
   }
   function markdown(source) {
     const lines = String(source || '').replace(/\r\n/g,'\n').split('\n');
@@ -351,7 +359,8 @@
     const flushParagraph = () => { if (paragraph.length) { output.push(`<p>${inline(paragraph.join(' '))}</p>`); paragraph = []; } };
     const flushList = () => { if (list) { output.push(`</${list}>`); list = null; } };
     const flushQuote = () => { if (quote.length) { output.push(`<blockquote><p>${inline(quote.join(' '))}</p></blockquote>`); quote = []; } };
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       if (/^```/.test(line)) {
         flushParagraph(); flushList(); flushQuote();
         if (fenced) { output.push(codeBlock(code, codeLanguage)); code = []; codeLanguage = ''; fenced = false; }
@@ -359,9 +368,25 @@
         continue;
       }
       if (fenced) { code.push(line); continue; }
+      const headers = pipeCells(line);
+      const separator = pipeCells(lines[i + 1] || '');
+      if (headers?.length && separator?.length === headers.length && separator.every(cell => /^:?-{3,}:?$/.test(cell))) {
+        flushParagraph(); flushList(); flushQuote();
+        const head = headers.map(cell => `<th scope="col">${inline(cell)}</th>`).join('');
+        const rows = [];
+        i++;
+        while (i + 1 < lines.length) {
+          const cells = pipeCells(lines[i + 1]);
+          if (!cells || cells.length !== headers.length) break;
+          rows.push(`<tr>${cells.map(cell => `<td>${inline(cell)}</td>`).join('')}</tr>`);
+          i++;
+        }
+        output.push(`<div class="md-table-scroll" role="region" aria-label="文章表格" tabindex="0"><table><thead><tr>${head}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`);
+        continue;
+      }
       if (!line.trim()) { flushParagraph(); flushList(); flushQuote(); continue; }
-      const heading = /^(#{1,3})\s+(.+)$/.exec(line);
-      if (heading) { flushParagraph(); flushList(); flushQuote(); const depth = heading[1].length >= 3 ? 3 : 2; output.push(`<h${depth}>${inline(heading[2])}</h${depth}>`); continue; }
+      const heading = /^(#{1,4})\s+(.+)$/.exec(line);
+      if (heading) { flushParagraph(); flushList(); flushQuote(); const depth = Math.max(2, heading[1].length); output.push(`<h${depth}>${inline(heading[2])}</h${depth}>`); continue; }
       const bullet = /^\s*[-*]\s+(.+)$/.exec(line);
       const numbered = /^\s*\d+\.\s+(.+)$/.exec(line);
       if (bullet || numbered) { flushParagraph(); flushQuote(); const target = bullet ? 'ul' : 'ol'; if (list && list !== target) flushList(); if (!list) { list = target; output.push(`<${target}>`); } output.push(`<li>${inline((bullet || numbered)[1])}</li>`); continue; }
