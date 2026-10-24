@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060a12">
+  <meta name="description" content="星烬游戏库 — 用原生 Canvas 打造的网页小游戏合集。首款：《星烬：最后一夜》。">
+  <title>游戏库 · 星烬 GAME LIBRARY</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=3">
+  <link rel="stylesheet" href="../portal.css">
+  <style>
+    /* 游戏库专属样式 */
+    .lib-hero { padding: 64px 0 34px; }
+    .lib-hero h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 900; color: #eafffb; letter-spacing: 3px; text-shadow: 0 0 22px rgba(255,176,84,.4); }
+    .lib-hero h1 em { font-style: normal; color: var(--orange); }
+    .lib-hero p { margin-top: 14px; color: var(--muted); line-height: 2; max-width: 560px; }
+    .lib-grid { display: grid; grid-template-columns: 1fr; gap: 26px; padding-bottom: 40px; }
+    .gcard {
+      display: grid; grid-template-columns: 380px 1fr; gap: 0;
+      background: var(--panel); border: 1px solid var(--line);
+      text-decoration: none; color: var(--text); overflow: hidden;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
+    }
+    .gcard:hover { transform: translateY(-4px); border-color: rgba(255,176,84,.55); box-shadow: 0 18px 44px rgba(0,0,0,.55), 0 0 26px rgba(255,176,84,.2); }
+    .gcard-art { position: relative; background: #0a0e16; border-right: 1px solid var(--line); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .gcard-art canvas { image-rendering: pixelated; width: 336px; height: 189px; border: 1px solid #1c2836; }
+    .gcard-art .badge {
+      position: absolute; top: 12px; left: 12px; font-size: 11px; letter-spacing: 2px;
+      color: #2a1506; background: var(--orange); padding: 3px 10px; font-weight: bold;
+    }
+    .gcard-body { padding: 26px 30px; display: flex; flex-direction: column; }
+    .gcard-body h2 { font-size: 24px; letter-spacing: 2px; color: var(--orange); text-shadow: 0 0 12px rgba(255,176,84,.45); }
+    .gcard-body .sub { font-size: 11px; letter-spacing: 3px; color: var(--muted); margin: 6px 0 14px; }
+    .gcard-body p { font-size: 14px; color: var(--muted); line-height: 2; }
+    .gcard-body .tags { margin: 14px 0 18px; }
+    .gcard-cta { margin-top: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .gcard-cta .btn.big { font-size: 16px; padding: 12px 30px; }
+    .gcard-cta .hint { font-size: 12px; color: #57708a; letter-spacing: 1px; line-height: 1.8; }
+    .soon {
+      border: 1px dashed #22303e; background: rgba(13, 21, 32, .5);
+      padding: 26px 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .soon .t { font-size: 15px; letter-spacing: 2px; color: #57708a; }
+    .soon .t b { color: var(--muted); }
+    .soon .en { font-size: 11px; letter-spacing: 4px; color: #3a5064; }
+    @media (max-width: 860px) {
+      .gcard { grid-template-columns: 1fr; }
+      .gcard-art { border-right: none; border-bottom: 1px solid var(--line); }
+      .gcard-art canvas { width: 100%; height: auto; }
+    }
+  </style>
+</head>
+<body data-page="games">
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-grid"></div>
+  <div class="bg-glow g1"></div>
+  <div class="bg-glow g2"></div>
+  <div class="bg-glow g3"></div>
+  <canvas id="embers" width="8" height="8" aria-hidden="true"></canvas>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">
+      <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+        <path d="M20 3 L24 14 L36 15 L27 23 L30 35 L20 28 L10 35 L13 23 L4 15 L16 14 Z"
+              fill="none" stroke="#4df0e2" stroke-width="2"/>
+        <circle cx="20" cy="20" r="3" fill="#ffb054"/>
+      </svg>
+      <b>星烬<i>STAR&nbsp;EMBER</i></b>
+    </a>
+    <nav class="links" aria-label="主导航">
+      <a href="../index.html">档案室</a>
+      <a href="./index.html" class="lib on">游戏库</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="lib-hero">
+    <p class="eyebrow">GAME&nbsp;LIBRARY&nbsp;·&nbsp;<b>可玩合集</b></p>
+    <h1>游戏<em>库</em></h1>
+    <p>用原生 Canvas 一像素一像素画出来的网页小游戏。无需安装、无需联网，点开即玩。第一款已经就位——去霓虹废墟里活过最后一夜。</p>
+  </section>
+
+  <div class="lib-grid">
+    <!-- 星烬：最后一夜 -->
+    <a class="gcard" href="./star-ember/index.html" target="_blank" rel="noopener">
+      <div class="gcard-art">
+        <canvas class="shot" data-thumb="star-ember" width="128" height="72"></canvas>
+        <span class="badge">▶ 可玩 · v1.0</span>
+      </div>
+      <div class="gcard-body">
+        <h2>星烬：最后一夜</h2>
+        <div class="sub">STAR&nbsp;EMBER:&nbsp;THE&nbsp;LAST&nbsp;NIGHT&nbsp;·&nbsp;像素动作肉鸽</div>
+        <p>霓虹废墟题材的俯视角像素动作肉鸽：自动瞄准射击、冲刺闪避、升级三选一构筑。在不断增强的怪潮中坚持十分钟，击败两阶段进化的最终首领「星烬主宰」。全部美术与音效由程序实时生成。</p>
+        <div class="tags"><i>HTML5 Canvas</i><i>原生 JavaScript</i><i>像素艺术</i><i>WebAudio</i><i>触屏适配</i></div>
+        <div class="gcard-cta">
+          <span class="btn big">开 始 游 戏 ▶</span>
+          <span class="hint">WASD 移动 · 空格冲刺 · P 暂停<br>一局约 10 分钟 · 支持触屏</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 占位：未来游戏（静态展示，不可点击） -->
+    <div class="soon" aria-label="更多游戏筹备中">
+      <span class="t"><b>下一款游戏</b> · 正在像素堆里施工中……</span>
+      <span class="en">MORE&nbsp;GAMES&nbsp;INCOMING</span>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-inner">
+    <b>STAR&nbsp;EMBER</b> · GAME&nbsp;LIBRARY · <span>深空无回应，于是自己发光</span>
+    <a class="up" href="#">回到顶部 ↑</a>
+  </div>
+</footer>
+
+<script src="../portal.js"></script>
+</body>
+</html>
