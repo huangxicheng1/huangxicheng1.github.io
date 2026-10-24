@@ -49,6 +49,30 @@ html[data-theme='dark'] {
   --shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* 站点骨架令牌同步：archive.css 的骨架组件（utility 通告条 / masthead 页头 / 页脚等）
+   只在它自己的 body.light 下切换夜间变量；工坊主题挂在 html[data-theme='dark']，
+   这里把站点夜间令牌整套搬过来（取值与 archive.css 的 body.light 完全一致），
+   否则骨架上的深墨色文字（--ink-soft 等）会叠在深色背景上几乎不可见。 */
+html[data-theme='dark'] {
+  --logo-shadow: rgba(233, 230, 223, 0.75);
+  --ink: #e9e6df;
+  --ink-soft: #b9b7ae;
+  --muted: #767a80;
+  --hair: rgba(233, 230, 223, 0.22);
+  --hair-soft: rgba(233, 230, 223, 0.08);
+  --orange-soft: rgba(255, 117, 0, 0.14);
+  --code-bg: #0a0b0d;
+  --code-ink: #e9e6df;
+  --tok-comment: #6f7378;
+  --tok-string: #57c58a;
+  --tok-number: #ff9a4d;
+  --tok-keyword: #ff9a4d;
+  --tok-function: #6ea8ff;
+  --tok-property: #b79bff;
+  --tok-tag: #ff8a6a;
+  --shadow-ink: #000000;
+}
+
 /* —— 基础 —— */
 
 .pl-page {
