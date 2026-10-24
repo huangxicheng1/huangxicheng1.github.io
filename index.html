@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8">
   <script>
-    /* 开屏动画握手：开屏就绪前先藏住页面本体，避免黑幕前闪出内容。
-       若 splash.js 3.2 秒内没能启动（如文件缺失），这里负责放行页面。 */
+    /* 开屏动画握手：开屏就绪前先藏住页面本体，避免黑幕前闪出内容。 */
     (function () {
       document.documentElement.classList.add('boot-pending');
       window.__MUSE_BOOT_AT__ = Date.now();
@@ -17,58 +16,187 @@
   </script>
   <style>html.boot-pending body > :not(#boot-root){visibility:hidden}html.boot-pending body{overflow:hidden}</style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111720">
-  <meta name="description" content="暮色手帖：用日历收藏生活，用笔记留住思考。">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="description" content="暮色手帖：用日历收藏生活，用笔记留住思考。莱茵生命档案室风格。">
   <link rel="icon" href="./favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <title>暮色手帖 · 写给时间的信</title>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./enhancements.css">
+  <title>档案室 · 暮色手帖</title>
+  <link rel="stylesheet" href="./archive.css">
   <link rel="stylesheet" href="./splash.css">
   <script defer src="./entries.js"></script>
   <script defer src="./app.js"></script>
   <script defer src="./splash.js"></script>
+  <script>
+    /* 首页真实统计：档案总数 / 记录天数 / 今日已录入 + 部门检索条 */
+    (function () {
+      function fill() {
+        var list = Array.isArray(window.SITE_ENTRIES) ? window.SITE_ENTRIES : [];
+        var days = new Set(list.map(function (e) { return e.date; }));
+        var get = function (id) { return document.getElementById(id); };
+        if (get('statFiles')) get('statFiles').textContent = list.length + ' FILES';
+        if (get('statDays')) get('statDays').textContent = days.size + ' DAYS';
+        var now = new Date();
+        var key = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        var n = list.filter(function (e) { return e.date === key; }).length;
+        if (get('statToday')) get('statToday').textContent = n + ' FILE' + (n > 1 ? 'S' : '');
+
+        /* 部门检索条：生活记录去日历，笔记分类去笔记库 */
+        var diaries = list.filter(function (e) { return e.type !== 'note'; });
+        if (get('deptAll')) get('deptAll').textContent = list.length;
+        if (get('deptLife')) get('deptLife').textContent = diaries.length;
+        var cats = [];
+        list.forEach(function (e) {
+          if (e.type !== 'note') return;
+          var name = e.category || '未分类';
+          if (!cats.some(function (c) { return c.name === name; })) cats.push({ name: name, count: 0 });
+          cats.find(function (c) { return c.name === name; }).count++;
+        });
+        var host = get('deptCats');
+        if (host) {
+          host.innerHTML = cats.map(function (c) {
+            return '<a class="dept-tab" href="./notes.html?category=' + encodeURIComponent(c.name) + '">' +
+              '<b>源石工艺部 · ' + c.name.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</b>' +
+              '<span>ORIGINIUM ARTS · ' + c.count + ' FILES</span></a>';
+          }).join('');
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
+    })();
+  </script>
 </head>
 <body data-page="home">
-  <div class="sky" aria-hidden="true"><div class="stars stars-a"></div><div class="stars stars-b"></div></div>
-  <div class="landscape" aria-hidden="true">
-    <svg viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" role="presentation">
-      <defs><linearGradient id="hill" x2="0" y2="1"><stop stop-color="#20363a"/><stop offset="1" stop-color="#111b22"/></linearGradient><radialGradient id="glow"><stop stop-color="#de9b56" stop-opacity=".55"/><stop offset="1" stop-color="#de9b56" stop-opacity="0"/></radialGradient></defs>
-      <ellipse cx="1105" cy="235" rx="260" ry="120" fill="url(#glow)"/>
-      <path d="M0 200 Q180 116 338 210 T695 201 Q865 125 1040 213 T1440 187 V320 H0Z" fill="#18242b"/>
-      <path d="M0 247 Q210 180 418 255 T858 251 Q1085 183 1440 239 V320 H0Z" fill="url(#hill)"/>
-      <g fill="#14232a"><path d="m68 265 20-95 20 95h-13v55H80v-55zm127 16 24-134 24 134h-17v39h-15v-39zm848-18 23-114 23 114h-15v57h-16v-57zm247 7 26-132 26 132h-17v50h-19v-50z"/><path d="m72 229 16-54 16 54zm123 5 24-78 24 78zm847-7 24-70 24 70zm246 0 28-82 28 82z"/></g>
-      <path d="M0 289 Q270 253 520 290 T1000 287 Q1200 253 1440 284 V320 H0Z" fill="#101a22"/>
-      <ellipse cx="1114" cy="286" rx="55" ry="14" fill="#dd8b45" opacity=".25"/>
-      <path d="M1106 288 Q1089 267 1104 252 Q1102 267 1113 268 Q1106 247 1120 234 Q1117 256 1127 260 Q1134 279 1117 289Z" fill="#e3a665"/>
-      <path d="M1110 286 Q1103 275 1114 265 Q1114 275 1119 276 Q1122 283 1115 288Z" fill="#f5c484"/>
-    </svg>
+
+<div class="utility">
+  <div class="wrap">
+    <span>RHINE DIARY ORGANIZATION <b>■</b> 暮色手帖 · 研究记录部</span>
+    <span>FILE VER 2.0 <b>●</b> ACCESS: PUBLIC</span>
   </div>
-  <div class="site-shell">
-    <header class="site-header">
-      <a class="brand" href="./index.html" aria-label="暮色手帖，回到首页"><span class="brand-mark" aria-hidden="true"><img class="brand-logo" src="./logo.png" alt="" width="380" height="500"></span><span><strong>暮色手帖</strong><small>letters to the days</small></span></a>
-      <nav class="primary-nav" aria-label="主导航"><a class="active" aria-current="page" href="./index.html">首页</a><a href="./calendar.html">日历</a><a href="./notes.html">笔记</a></nav>
-      <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题" title="切换明暗主题">☼</button>
-    </header>
-    <main id="main">
-      <section class="hero" id="home" aria-labelledby="heroTitle">
-        <div class="hero-content"><p class="eyebrow"><span class="tiny-star">✦</span> A QUIET PLACE TO RETURN TO</p><h1 id="heroTitle">把日子，<em>轻轻记下。</em></h1><p class="hero-copy">写下今天的片刻，也给未来的自己留一盏灯。<br>日记、学习笔记与那些值得反复回看的瞬间，都在这里。</p><div class="hero-actions"><a class="button button-primary" href="./calendar.html">翻开日历 <span aria-hidden="true">↗</span></a><a class="text-link" href="./notes.html">读一篇笔记 <span aria-hidden="true">→</span></a></div></div>
-        <div class="hero-side"><div class="today-label">TODAY'S PAGE</div><div class="hero-date" id="heroDate">—</div><p id="heroWeekday">今天，也值得被记住。</p><div class="hero-line"></div><span id="heroEntryHint">去日历里看看写过的日子</span></div>
-      </section>
-      <div class="content-grid"><div class="main-column">
-        <section class="panel calendar-panel" id="calendar" aria-labelledby="calendarTitle">
-          <div class="section-heading"><div><p class="eyebrow">A PAGE FOR EVERY DAY</p><h2 id="calendarTitle">日子的地图</h2><p class="section-copy">当天写下的内容就在日期里，点标题即可翻开。</p></div><div class="month-controls"><button class="icon-button" id="prevMonth" type="button" aria-label="上个月">‹</button><strong id="monthTitle" aria-live="polite"></strong><button class="icon-button" id="nextMonth" type="button" aria-label="下个月">›</button></div></div>
-          <div class="calendar-scroll" tabindex="0" aria-label="记录日历，窄屏可左右滚动"><div class="calendar-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="calendar-grid" id="calendarGrid" role="grid" aria-label="记录日历"></div></div><div class="calendar-footer"><div class="legend"><span><i class="legend-dot diary"></i>生活记录</span><span><i class="legend-dot note"></i>学习笔记</span></div><a class="quiet-button" href="./calendar.html">查看全年 ↗</a></div>
-        </section>
-        <section class="notes-section" id="notes" aria-labelledby="notesTitle"><div class="section-heading"><div><p class="eyebrow">THOUGHTS TO KEEP</p><h2 id="notesTitle">最近写下的</h2><p class="section-copy">从生活的碎片，到值得认真想一想的问题。</p></div><a class="quiet-button" href="./notes.html">按分类浏览全部笔记 →</a></div><div class="entry-list" id="recentList"></div></section>
-      </div><aside class="sidebar" aria-label="小狗与笔记提醒">
-        <section class="panel side-card dog-card" aria-labelledby="dogTitle"><p class="eyebrow">A LITTLE COMPANION</p><h2 id="dogTitle">今天也有它陪你 <span aria-hidden="true">✦</span></h2><div class="dog-stage"><span class="dog-sparkle dog-sparkle-left" aria-hidden="true">✧</span><picture class="dog-picture"><source media="(prefers-reduced-motion: reduce)" srcset="./dog-still.png"><img class="dog-sprite" id="dogSprite" src="./dog.gif" width="700" height="700" alt="一只会动的像素小狗" loading="eager"></picture><span class="dog-sparkle dog-sparkle-right" aria-hidden="true">✦</span><span class="dog-shadow" aria-hidden="true"></span></div><p class="dog-caption">慢慢写，它会在这里等你。</p><p class="dog-asset-hint" id="dogAssetHint" hidden>找不到小狗图片，请确认 dog.gif 与 dog-still.png 均在网站目录。</p></section>
-        <section class="panel side-card quote-card"><p class="eyebrow">A LITTLE NOTE</p><h2>今日寄语 <span aria-hidden="true">✳</span></h2><blockquote id="dailyQuote">给今天留一句温柔的话。</blockquote><div class="side-divider"></div><p class="soft-caption">每天一则，明天再来看看。</p></section>
-        <section class="panel side-card review-card"><p class="eyebrow">TIME TO REVISIT</p><h2>值得再看一眼</h2><p class="side-intro">不必急着记住全部。先试着回想，再打开答案。</p><div id="dueList" class="due-list"></div><a class="quiet-button" href="./notes.html">查看全部笔记 →</a></section>
-        <section class="sidebar-note"><span>✧</span><p>这里不是打卡工具。<br>忘记记录的日子，也一样认真地活过。</p></section>
-      </aside></div>
-    </main>
-    <footer class="site-footer"><span class="footer-brand"><img class="footer-logo" src="./logo.png" alt="" aria-hidden="true" width="380" height="500">暮色手帖</span><span>Made for the days worth remembering · <span id="footerYear"></span></span><a href="#home">回到顶部 ↑</a></footer>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark">暮</div>
+    <div class="logo-text">
+      <strong>暮色手帖</strong>
+      <small>TWILIGHT ARCHIVE — LETTERS TO THE DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept active" aria-current="page" href="./index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
   </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <section class="hero">
+      <div class="marks"><i></i><i></i></div>
+      <div class="hero-grid">
+        <div class="hero-main">
+          <p class="eyebrow">SYNTHESIZE <b>INFORMATION</b> — 研究记录公开档案</p>
+          <h1>把日子，<em>轻轻记下。</em></h1>
+          <p class="lede">写下今天的片刻，也给未来的自己留一盏灯。日记、学习笔记与那些值得反复回看的瞬间，都在这里——按档案编号排列，随时可以调阅。</p>
+          <div class="hero-cta">
+            <a class="btn" href="./calendar.html">翻开今日档案 ↗</a>
+            <a class="btn ghost" href="./notes.html">检索全部档案 →</a>
+          </div>
+        </div>
+        <aside class="hero-side">
+          <div>
+            <div class="side-label">TODAY'S PAGE · 今日档案</div>
+            <div class="big-date"><span id="heroDate">—</span><small id="heroWeekday">正在校准时间…</small></div>
+          </div>
+          <div class="tiny-rule"></div>
+          <div class="stat-line"><span>档案总数</span><b id="statFiles">—</b></div>
+          <div class="stat-line"><span>记录天数</span><b id="statDays">—</b></div>
+          <div class="stat-line"><span>今天已录入</span><b id="statToday">—</b></div>
+          <div class="tiny-rule"></div>
+          <div class="stat-line"><span>站点状态</span><b class="rec">● RECORDING</b></div>
+          <p class="section-copy" id="heroEntryHint">今天，还可以写下一页。</p>
+        </aside>
+      </div>
+    </section>
+
+    <nav class="dept-strip" aria-label="部门检索">
+      <a class="dept-tab" href="./notes.html"><b>全部档案</b><span>ARCHIVE · <em id="deptAll">0</em> FILES</span></a>
+      <a class="dept-tab" href="./calendar.html"><b>生态科 · 生活记录</b><span>ECOLOGY · <em id="deptLife">0</em> FILES</span></a>
+      <!-- 笔记分类部门由脚本按真实数据注入 -->
+      <span id="deptCats" class="dept-cats"></span>
+    </nav>
+
+    <div class="section-head">
+      <h2>档案检索</h2><span class="en">ARCHIVE INDEX — RECENT FILES</span>
+      <span class="idx">LATEST <b>05</b></span>
+    </div>
+    <div class="columns">
+      <div>
+        <div class="entry-list" id="recentList"></div>
+        <a class="quiet-button more-link" href="./notes.html">检索更早的档案 →</a>
+      </div>
+      <aside class="rail">
+        <div class="panel">
+          <span class="corner">RL-QT-01</span>
+          <div class="side-label">今日寄语 · DAILY NOTE</div>
+          <blockquote class="quote" id="dailyQuote">给今天留一句温柔的话。</blockquote>
+        </div>
+        <div class="panel">
+          <span class="corner">RL-RV-02</span>
+          <div class="side-label">复核队列 · REVIEW QUEUE</div>
+          <div id="dueList"></div>
+        </div>
+        <div class="panel">
+          <span class="corner">RL-PS-03</span>
+          <div class="side-label">收容舱 · KENNEL UNIT</div>
+          <div class="dog-stage">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./dog-still.png">
+              <img class="dog-sprite" id="dogSprite" src="./dog.gif" width="700" height="700" alt="一只会动的像素小狗" loading="eager">
+            </picture>
+          </div>
+          <p class="dog-caption">慢慢写，它会在这里等你。</p>
+          <p class="dog-asset-hint" id="dogAssetHint" hidden>找不到小狗图片，请确认 dog.gif 与 dog-still.png 均在网站目录。</p>
+        </div>
+        <div class="panel">
+          <span class="corner">RL-NT-04</span>
+          <div class="side-label">值班备注 · NOTE</div>
+          <p class="due-empty">这里不是打卡工具。忘记记录的日子，也一样认真地活过。</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="section-head">
+      <h2>日子的地图</h2><span class="en">A PAGE FOR EVERY DAY — 月视图</span>
+      <div class="month-controls">
+        <button class="icon-button" id="prevMonth" type="button" aria-label="上个月">‹</button>
+        <strong id="monthTitle" aria-live="polite"></strong>
+        <button class="icon-button" id="nextMonth" type="button" aria-label="下个月">›</button>
+      </div>
+    </div>
+    <section class="panel" aria-label="本月记录日历">
+      <div class="calendar-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="记录日历"></div>
+      <div class="calendar-footer">
+        <div class="legend"><span><i class="legend-dot diary"></i>生活记录</span><span><i class="legend-dot note"></i>学习笔记</span></div>
+        <a class="quiet-button" href="./calendar.html">查看全年足迹 ↗</a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>MUSE DIARY ORGANIZATION</b> — MADE FOR THE DAYS WORTH REMEMBERING · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
 </body>
 </html>

@@ -1,12 +1,87 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#111720"><meta name="description" content="分类整理的学习笔记与复习清单。"><title>分类笔记 · 暮色手帖</title><link rel="icon" href="./favicon.ico" sizes="any"><link rel="apple-touch-icon" href="./apple-touch-icon.png"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./enhancements.css"><script defer src="./entries.js"></script><script defer src="./app.js"></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="description" content="分类整理的学习笔记与复习清单。">
+  <link rel="icon" href="./favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <title>笔记库 · 暮色手帖</title>
+  <link rel="stylesheet" href="./archive.css">
+  <script defer src="./entries.js"></script>
+  <script defer src="./app.js"></script>
+</head>
 <body data-page="notes">
-  <div class="sky" aria-hidden="true"><div class="stars stars-a"></div><div class="stars stars-b"></div></div>
-  <div class="site-shell"><header class="site-header"><a class="brand" href="./index.html" aria-label="暮色手帖，回到首页"><span class="brand-mark" aria-hidden="true"><img class="brand-logo" src="./logo.png" alt="" width="380" height="500"></span><span><strong>暮色手帖</strong><small>letters to the days</small></span></a><nav class="primary-nav" aria-label="主导航"><a href="./index.html">首页</a><a href="./calendar.html">日历</a><a class="active" aria-current="page" href="./notes.html">笔记</a></nav><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题" title="切换明暗主题">☼</button></header>
-    <main id="main" class="inner-page"><div class="page-intro"><p class="eyebrow">A LIBRARY OF SMALL THOUGHTS</p><h1>把想明白的事，<em>放在一起。</em></h1><p>从八股文到偶然读到的一句话，按主题慢慢整理，不急着一次记牢。</p></div>
-      <section class="panel note-overview"><div><p class="eyebrow">A GENTLE REMINDER</p><h2>今日复习</h2><p id="notesDueSummary">正在整理今天的复习清单…</p></div><button type="button" class="button button-primary" id="showDue">只看待复习 <span aria-hidden="true">↗</span></button></section>
-      <section class="library" aria-labelledby="libraryTitle"><div class="section-heading"><div><p class="eyebrow">FIND YOUR WAY BACK</p><h2 id="libraryTitle">笔记分类</h2><p class="section-copy">分类是书架，标签是线索；选一个主题，或直接搜索。</p></div><label class="search-wrap"><span aria-hidden="true">⌕</span><span class="sr-only">搜索笔记</span><input id="noteSearch" type="search" placeholder="搜索标题、标签、正文…"></label></div><div class="category-grid" id="categoryGrid"></div><div class="library-toolbar"><strong id="libraryHeading">全部学习笔记</strong><span id="libraryCount"></span></div><div class="entry-list" id="notesList"></div><p class="empty-message" id="notesEmpty" hidden>这个分类暂时没有符合条件的笔记，换个词试试。</p></section>
-      <div class="bottom-navigation"><a href="./index.html">← 返回首页</a><a href="./calendar.html">去看全年日历 →</a></div>
-    </main><footer class="site-footer"><span class="footer-brand"><img class="footer-logo" src="./logo.png" alt="" aria-hidden="true" width="380" height="500">暮色手帖</span><span>Made for the days worth remembering · <span id="footerYear"></span></span><a href="#main">回到顶部 ↑</a></footer></div>
-</body></html>
+
+<div class="utility">
+  <div class="wrap">
+    <span>RHINE DIARY ORGANIZATION <b>■</b> 暮色手帖 · 研究记录部</span>
+    <span>LIBRARY UNIT <b>●</b> ACCESS: PUBLIC</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark">暮</div>
+    <div class="logo-text">
+      <strong>暮色手帖</strong>
+      <small>TWILIGHT ARCHIVE — LETTERS TO THE DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="./index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept active" aria-current="page" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
+  </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <div class="page-intro">
+      <p class="eyebrow">A LIBRARY OF SMALL THOUGHTS</p>
+      <h1>把想明白的事，<em>放在一起。</em></h1>
+      <p>从生活的碎片到值得认真想一想的问题，按主题慢慢整理，不急着一次记牢。</p>
+    </div>
+
+    <section class="panel note-overview" aria-label="今日复习">
+      <div>
+        <p class="eyebrow">A GENTLE REMINDER</p>
+        <h2 class="p-title">今日复习</h2>
+        <p id="notesDueSummary">正在整理今天的复习清单…</p>
+      </div>
+      <button type="button" class="btn" id="showDue">只看待复习 <span aria-hidden="true">↗</span></button>
+    </section>
+
+    <div class="section-head" id="libraryTitle">
+      <h2>笔记库</h2><span class="en">FIND YOUR WAY BACK</span>
+      <label class="search-wrap"><span aria-hidden="true">⌕</span><span class="sr-only">搜索笔记</span><input id="noteSearch" type="search" placeholder="搜索标题、标签、正文…"></label>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+    <div class="library-toolbar"><strong id="libraryHeading">全部学习笔记</strong><span id="libraryCount"></span></div>
+    <div class="entry-list" id="notesList"></div>
+    <p class="empty-message" id="notesEmpty" hidden>这个分类暂时没有符合条件的笔记，换个词试试。</p>
+
+    <div class="bottom-navigation">
+      <a href="./index.html">← 返回档案室</a>
+      <a href="./calendar.html">去看全年日历 →</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>MUSE DIARY ORGANIZATION</b> — MADE FOR THE DAYS WORTH REMEMBERING · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
+</body>
+</html>
