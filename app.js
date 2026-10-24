@@ -422,7 +422,7 @@
       $('#articleTitle').textContent = '找不到这一页';
       $('#articleSummary').textContent = '这篇记录可能已更名或尚未发布。可以从日历或分类笔记重新寻找。';
       $('#articleBody').textContent = '';
-      document.title = '找不到记录 · 暮色手帖';
+      document.title = '找不到记录 · Isaac’s life';
       return;
     }
     $('#articleKind').textContent = entry.type === 'note' ? `${entry.category || '未分类'} · 学习笔记` : '生活记录 · 写给日子的信';
@@ -436,7 +436,7 @@
     const link = el('a','',entry.type === 'note' ? '← 返回分类笔记' : '← 返回日历');
     link.href = entry.type === 'note' ? `./notes.html?category=${encodeURIComponent(entry.category || '未分类')}` : `./calendar.html?date=${entry.date}#month-view`;
     back.append(link);
-    document.title = `${entry.title} · 暮色手帖`;
+    document.title = `${entry.title} · Isaac’s life`;
   }
 
   initShared();

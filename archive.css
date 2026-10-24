@@ -100,7 +100,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
   font-family: var(--din); font-size: 24px; font-weight: 700;
   box-shadow: 4px 4px 0 var(--shadow-ink);
 }
-.logo-text strong { display: block; font-family: var(--din); font-size: 20px; font-weight: 700; letter-spacing: .3em; }
+.logo-text strong { display: block; font-family: var(--din); font-size: 20px; font-weight: 700; letter-spacing: .06em; }
 .logo-text small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 9px; letter-spacing: .3em; color: var(--muted); }
 .dept-nav { margin-left: auto; display: flex; gap: 4px; align-items: stretch; }
 .dept {
