@@ -2,6 +2,20 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <script>
+    /* 开屏动画握手：开屏就绪前先藏住页面本体，避免黑幕前闪出内容。
+       若 splash.js 3.2 秒内没能启动（如文件缺失），这里负责放行页面。 */
+    (function () {
+      document.documentElement.classList.add('boot-pending');
+      window.__MUSE_BOOT_AT__ = Date.now();
+      setTimeout(function () {
+        if (!window.__MUSE_BOOT_STARTED__) {
+          document.documentElement.classList.remove('boot-pending');
+        }
+      }, 3200);
+    })();
+  </script>
+  <style>html.boot-pending body > :not(#boot-root){visibility:hidden}html.boot-pending body{overflow:hidden}</style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111720">
   <meta name="description" content="暮色手帖：用日历收藏生活，用笔记留住思考。">
@@ -10,8 +24,10 @@
   <title>暮色手帖 · 写给时间的信</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./enhancements.css">
+  <link rel="stylesheet" href="./splash.css">
   <script defer src="./entries.js"></script>
   <script defer src="./app.js"></script>
+  <script defer src="./splash.js"></script>
 </head>
 <body data-page="home">
   <div class="sky" aria-hidden="true"><div class="stars stars-a"></div><div class="stars stars-b"></div></div>
