@@ -1,5 +1,5 @@
 /* ============================================================================
- * 暮色手帖 · 开屏动画（splash.js）
+ * THE BINDING OF ISAAC · 开屏动画（splash.js）
  * ----------------------------------------------------------------------------
  * 六幕开机序列（对齐 dsh-startup-screen 暗色版式）：黑色序幕（厂牌标识）→
  * 过曝洗白 → 暗色「技术档案」底板 → 六步访问授权（第一、二步需要点按 /
@@ -198,11 +198,11 @@
       '<section class="boot-black" aria-hidden="true">' +
         '<div class="boot-black-inner">' +
           '<div class="boot-mark"><i></i></div>' +
-          '<div class="boot-brand">暮色手帖</div>' +
-          '<div class="boot-brand-en">LETTERS TO THE DAYS</div>' +
+          '<div class="boot-brand">THE BINDING OF ISAAC</div>' +
+          '<div class="boot-brand-en">THE BINDING OF ORDINARY DAYS</div>' +
         '</div>' +
         '<div class="boot-log" id="btLog"></div>' +
-        '<div class="boot-black-foot">TWILIGHT ARCHIVE · BOOT SEQUENCE</div>' +
+        '<div class="boot-black-foot">ISAAC ARCHIVE · BOOT SEQUENCE</div>' +
       '</section>' +
       '<div class="boot-wash" aria-hidden="true"></div>' +
       '<section class="boot-plate" aria-hidden="true">' +
@@ -210,8 +210,8 @@
         '<i class="bt-corner c-tl"></i><i class="bt-corner c-tr"></i>' +
         '<i class="bt-corner c-bl"></i><i class="bt-corner c-br"></i>' +
         '<header class="boot-brand-block">' +
-          '<strong>暮色手帖</strong>' +
-          '<small>LETTERS TO THE DAYS</small>' +
+          '<strong>THE BINDING OF ISAAC</strong>' +
+          '<small>THE BINDING OF ORDINARY DAYS</small>' +
           '<div class="boot-rev"><span>REV 1.0 · HOME PAGE</span><b class="bt-rev-clock" id="btClock">--:--:--</b></div>' +
           '<div class="boot-dashes" id="btDashes"><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
         '</header>' +
@@ -261,7 +261,7 @@
           '</div>' +
           '<div class="boot-foot-r">' +
             '<span class="boot-idline" id="btIdLine">· ID CONFIRMED : ' + CFG.no + '</span>' +
-            '<span class="boot-powered">POWERED BY 暮色手帖<i aria-hidden="true"></i></span>' +
+            '<span class="boot-powered">POWERED BY THE BINDING OF ISAAC<i aria-hidden="true"></i></span>' +
           '</div>' +
         '</footer>' +
         '<div class="boot-progress"><i id="btBar"></i></div>' +
@@ -462,10 +462,11 @@
 
   /* ---------------- 黑色序幕的启动日志 ---------------- */
   var LOG_LINES = [
-    'BOOT MUSE-DIARY v2.6 ......... OK',
+    'BOOT ISAAC-OS v2.6 ........... OK',
     'LOADING NIGHT SKY ............ OK',
     'WARMING LAMPS ................ OK',
-    'FEEDING THE DOG .............. OK'
+    'FEEDING THE DOG .............. OK',
+    'ROLLING A D6 ................. OK'
   ];
   async function playLogs() {
     for (var i = 0; i < LOG_LINES.length; i++) {

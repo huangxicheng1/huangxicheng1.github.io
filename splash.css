@@ -109,11 +109,11 @@ html.boot-pending body { overflow: hidden; }
 }
 
 .boot-brand {
-  font-family: var(--bt-zh);
-  font-size: clamp(30px, 4.4vw, 52px);
+  font-family: var(--bt-din);
+  font-size: clamp(18px, 4.4vw, 52px);
   font-weight: 700;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
   color: #f2ede4;
   opacity: 0;
   transform: translateY(10px);
@@ -234,10 +234,10 @@ html.boot-pending body { overflow: hidden; }
 .boot-plate.on .boot-brand-block { opacity: 1; }
 .boot-brand-block strong {
   display: block;
-  font-family: var(--bt-zh);
+  font-family: var(--bt-din);
   font-size: 21px;
   font-weight: 700;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.12em;
   color: var(--bt-ink);
 }
 .boot-brand-block small {
