@@ -34,8 +34,8 @@ const PAGE_CSS = `
   .plm-hex { font-size: 12px; font-family: var(--font-mono); }
 `;
 
-// 预设色板 8 色（档案室色系：橙为主色，辅以低饱和档案色）
-const PALETTE = ['#ff7500', '#c95f00', '#2e9e63', '#1f5fa8', '#b3502e', '#6b4fa0', '#8b897f', '#b35400'];
+// 预设色板 8 色（档案室色系：橙为主色；全部为纸色/深色背景上都可辨的中深色）
+const PALETTE = ['#ff7500', '#c95f00', '#2e9e63', '#1f5fa8', '#b3502e', '#6b4fa0', '#33658a', '#8a4fb0'];
 // 颜色合法性（与后端 /api/collections 的校验一致）
 const COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 

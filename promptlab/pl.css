@@ -477,6 +477,65 @@ html[data-theme='dark'] {
 
 @keyframes pl-blink { to { visibility: hidden; } }
 
+/* —— 按钮紧凑化 —— */
+/* archive.css 的 .btn 是站点首页主 CTA 规格（12px 26px + 0.24em 字距 + 橙色硬阴影），
+   在工坊的工具栏与卡片里过大过重；这里统一收敛为工坊尺寸。 */
+.pl-page .btn {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pl-page .btn:hover { transform: none; box-shadow: 3px 3px 0 var(--accent); }
+
+/* 幽灵按钮：透明底在纸色背景上无边界，补细边框并降为次要视觉 */
+.pl-page .btn.ghost,
+.pl-page .btn-ghost {
+  padding: 4px 10px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.pl-page .btn.ghost:hover,
+.pl-page .btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--panel-2);
+  transform: none;
+  box-shadow: none;
+}
+
+.pl-page .btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  box-shadow: none;
+}
+
+.pl-page .btn-danger:hover {
+  background: var(--danger);
+  color: #ffffff;
+  transform: none;
+  box-shadow: none;
+}
+
+.pl-page .icon-btn {
+  padding: 3px 8px;
+  font-size: 13.5px;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+.pl-page .icon-btn:hover { transform: none; box-shadow: none; }
+
 /* —— 响应式 —— */
 
 @media (max-width: 880px) {
