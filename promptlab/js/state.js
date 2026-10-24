@@ -1,0 +1,79 @@
+// 响应式状态（观察者模式，零依赖，SPEC 8.4）。
+// 注意：本模块顶层不得访问 window/document（SPEC 第 0 节），
+// 因此 theme 的 localStorage 读取/写入都放在函数内（getSavedTheme/applyTheme）。
+
+/**
+ * 创建一个轻量响应式 store。
+ * @param {object} initial 初始状态（浅拷贝保留）
+ * @returns {{
+ *   get(): object,
+ *   set(patch: object): void,          // 浅合并并通知所有订阅者
+ *   subscribe(fn: (state: object) => void): () => void  // 返回取消订阅函数
+ * }}
+ */
+export function createStore(initial) {
+  let state = { ...initial };
+  const listeners = new Set();
+  return {
+    get() {
+      return state;
+    },
+    set(patch) {
+      state = { ...state, ...patch }; // 浅合并
+      for (const fn of [...listeners]) {
+        try {
+          fn(state);
+        } catch (e) {
+          console.error('store 订阅回调执行出错:', e);
+        }
+      }
+    },
+    subscribe(fn) {
+      listeners.add(fn);
+      return () => {
+        listeners.delete(fn);
+      };
+    },
+  };
+}
+
+// 全局单例：跨页面共享的 UI 状态。
+// - theme：当前主题（'dark' | 'light'），由 app.js 初始化；任何模块 store.set({ theme }) 即可切换，
+//   app.js 的订阅会同步 html[data-theme] 与 localStorage（设置页主题切换即走此通道）。
+// - prompts：提示词库页的列表缓存（页面模块自行读写）。
+// - filters：提示词库页的筛选状态（q / tag / collectionId）。
+export const store = createStore({
+  theme: null,
+  prompts: null,
+  filters: { q: '', tag: null, collectionId: null },
+});
+
+/**
+ * 读取持久化主题（localStorage 键 'plm-theme'），缺失/非法时回退默认 'dark'。
+ * 在函数内访问 localStorage，保证本模块可被 Node 做 import 链接检查。
+ * @returns {'dark' | 'light'}
+ */
+export function getSavedTheme() {
+  try {
+    const t = localStorage.getItem('plm-theme');
+    return t === 'light' || t === 'dark' ? t : 'light';
+  } catch (e) {
+    return 'light';
+  }
+}
+
+/**
+ * 应用并持久化主题：写入 html[data-theme] 与 localStorage（'plm-theme'）。
+ * @param {string} theme 'dark' | 'light'（其他值一律按 'dark' 处理）
+ * @returns {'dark' | 'light'} 规范化后实际应用的主题值
+ */
+export function applyTheme(theme) {
+  const t = theme === 'light' ? 'light' : 'dark';
+  try {
+    localStorage.setItem('plm-theme', t);
+  } catch (e) {
+    /* localStorage 不可用时仅本次会话生效，忽略持久化失败 */
+  }
+  document.documentElement.dataset.theme = t;
+  return t;
+}

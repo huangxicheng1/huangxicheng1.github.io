@@ -63,6 +63,46 @@
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
     })();
   </script>
+  <style>
+    /* ===== 提示词工坊首页区块（源石技艺部 · PROMPT ARTS） ===== */
+    .pl-hero { position: relative; border: 1px solid var(--ink); background: var(--panel); margin-top: 4px; }
+    body.light .pl-hero { border-color: var(--hair); }
+    .pl-hero::before, .pl-hero::after, .pl-hero .pl-corners::before, .pl-hero .pl-corners::after {
+      content: ""; position: absolute; width: 14px; height: 14px; border: 1.5px solid var(--ink);
+    }
+    body.light .pl-hero::before, body.light .pl-hero::after,
+    body.light .pl-hero .pl-corners::before, body.light .pl-hero .pl-corners::after { border-color: rgba(233,230,223,.5); }
+    .pl-hero::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+    .pl-hero::after { right: -1px; top: -1px; border-left: 0; border-bottom: 0; }
+    .pl-hero .pl-corners::before { left: -1px; bottom: -1px; border-right: 0; border-top: 0; }
+    .pl-hero .pl-corners::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+    .pl-grid { position: relative; display: grid; grid-template-columns: 1.5fr 1fr; }
+    .pl-main { padding: 38px 42px 40px; border-right: 1px solid var(--hair); }
+    .pl-side { padding: 30px 28px 28px; display: flex; flex-direction: column; background: var(--panel-2); }
+    .pl-main h2 { margin: 14px 0; font-family: var(--din); font-size: clamp(28px, 3.6vw, 42px); font-weight: 700; letter-spacing: .08em; line-height: 1.25; }
+    .pl-main h2 em { font-style: normal; color: var(--orange); }
+    .pl-main .lede { color: var(--ink-soft); font-size: 13.5px; line-height: 2.1; max-width: 520px; }
+    .pl-tags { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 22px; }
+    .pl-tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; border: 1px solid var(--hair); padding: 4px 10px; color: var(--ink-soft); background: var(--panel); }
+    .pl-tag i { color: var(--orange); font-style: normal; margin-right: 6px; }
+    .pl-stamp-row { display: flex; gap: 12px; margin-top: 22px; }
+    .pl-terminal { margin-top: 18px; border: 1px solid var(--ink); background: var(--code-bg); color: var(--code-ink); font-family: var(--mono); font-size: 10.5px; line-height: 2; letter-spacing: .06em; padding: 14px 16px; position: relative; }
+    .pl-terminal::before { content: "LAB FEED · 工坊终端"; position: absolute; right: 10px; top: -8px; background: var(--code-bg); padding: 0 8px; font-size: 8px; letter-spacing: .3em; color: var(--tok-comment); }
+    .pl-terminal .t-accent { color: var(--orange); }
+    .pl-terminal .t-dim { color: var(--tok-comment); }
+    .pl-terminal .t-ok { color: #6fd39b; }
+    .pl-cursor { display: inline-block; width: 7px; height: 12px; background: var(--orange); vertical-align: -1px; animation: pl-blink 1s steps(2, start) infinite; }
+    @keyframes pl-blink { to { visibility: hidden; } }
+    .pl-side .stat-line b { font-family: var(--din); }
+    .pl-side .rec { color: var(--ok); }
+    .pl-annot { margin-top: auto; padding-top: 18px; font-family: var(--mono); font-size: 8px; letter-spacing: .3em; color: var(--muted); }
+    .pl-enter-hint { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; color: var(--muted); margin-top: 10px; }
+    @media (max-width: 820px) {
+      .pl-grid { grid-template-columns: 1fr; }
+      .pl-main { border-right: 0; border-bottom: 1px solid var(--hair); padding: 28px 22px 30px; }
+      .pl-side { padding: 22px; }
+    }
+  </style>
 </head>
 <body data-page="home">
 
@@ -102,6 +142,7 @@
       <a class="dept" href="./games/index.html"><b>游戏库</b><span>GAME LIBRARY</span></a>
       <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
       <a class="dept" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+      <a class="dept" href="./promptlab/"><b>提示词工坊</b><span>PROMPT LAB</span></a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
   </div>
@@ -141,9 +182,59 @@
     <nav class="dept-strip" aria-label="部门检索">
       <a class="dept-tab" href="./notes.html"><b>全部档案</b><span>ARCHIVE · <em id="deptAll">0</em> FILES</span></a>
       <a class="dept-tab" href="./calendar.html"><b>生态科 · 生活记录</b><span>ECOLOGY · <em id="deptLife">0</em> FILES</span></a>
+      <a class="dept-tab" href="./promptlab/"><b>源石技艺部 · 提示词工坊</b><span>PROMPT ARTS · ENTER ↗</span></a>
       <!-- 笔记分类部门由脚本按真实数据注入 -->
       <span id="deptCats" class="dept-cats"></span>
     </nav>
+
+    <!-- ===== 新部门：提示词工坊 ===== -->
+    <div class="section-head" id="prompt-lab">
+      <h2>提示词工坊</h2><span class="en">PROMPT ARTS — PROMPT ENGINEERING DIVISION</span>
+      <span class="idx">DEPT <b>RL-04</b></span>
+    </div>
+    <section class="pl-hero" aria-label="提示词工坊入口">
+      <div class="pl-corners"></div>
+      <div class="pl-grid">
+        <div class="pl-main">
+          <p class="eyebrow">ORIGINIUM ARTS <b>APPLIED</b> — 源石技艺应用档案</p>
+          <h2>把提示词，<em>做成可归档的技艺。</em></h2>
+          <p class="lede">写好的提示词不该散落在聊天记录里。在工坊里建档、迭代版本、填变量试运行——每一次运行都有编号，随时调阅复核。档案室负责记录生活，工坊负责打磨手艺。</p>
+          <div class="pl-tags">
+            <span class="pl-tag"><i>V.</i>版本管理</span>
+            <span class="pl-tag"><i>X.</i>行级 DIFF</span>
+            <span class="pl-tag"><i>{{ }}</i>变量模板</span>
+            <span class="pl-tag"><i>▶</i>运行测试</span>
+            <span class="pl-tag"><i>⇅</i>导入导出</span>
+          </div>
+          <div class="hero-cta">
+            <a class="btn" href="./promptlab/">进入工坊 ↗</a>
+            <a class="btn ghost" href="./promptlab/#/runs">调阅运行档案 →</a>
+          </div>
+          <p class="pl-enter-hint">工坊数据保存在你自己的浏览器里，首次到访自动载入演示档案。</p>
+          <div class="pl-stamp-row">
+            <span class="stamp">源石技艺部 · PROMPT ARTS</span>
+            <span class="stamp dim">LAB VER 2.0</span>
+          </div>
+        </div>
+        <aside class="pl-side">
+          <div class="side-label">工坊能力 · LAB UNITS</div>
+          <div class="tiny-rule"></div>
+          <div class="stat-line"><span>提示词档案</span><b>52</b></div>
+          <div class="stat-line"><span>版本记录</span><b>96</b></div>
+          <div class="stat-line"><span>运行测试</span><b>64</b></div>
+          <div class="stat-line"><span>运行引擎</span><b class="rec">● MOCK / LIVE</b></div>
+          <div class="tiny-rule"></div>
+          <div class="side-label">工坊终端 · LAB FEED</div>
+          <div class="pl-terminal" aria-hidden="true">
+            <span class="t-dim">[03] 运行历史 · RUNS</span><br>
+            <span class="t-accent">#0064</span> 面试问题设计 <span class="t-dim">v3 · MOCK</span><br>
+            <span class="t-ok">✓ OK</span> <span class="t-dim">761ms · ≈275 tokens</span><br>
+            <span class="t-dim">READY</span> <span class="pl-cursor"></span>
+          </div>
+          <p class="pl-annot">MODEL RL-PL-01 · MAINTAINED BY THE ARCHIVIST</p>
+        </aside>
+      </div>
+    </section>
 
     <div class="section-head">
       <h2>档案检索</h2><span class="en">ARCHIVE INDEX — RECENT FILES</span>
