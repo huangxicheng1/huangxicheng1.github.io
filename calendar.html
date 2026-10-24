@@ -2,6 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <script>
+    /* 开屏动画握手：开屏就绪前先藏住页面本体，避免黑幕前闪出内容。 */
+    (function () {
+      document.documentElement.classList.add('boot-pending');
+      window.__MUSE_BOOT_AT__ = Date.now();
+      setTimeout(function () {
+        if (!window.__MUSE_BOOT_STARTED__) {
+          document.documentElement.classList.remove('boot-pending');
+        }
+      }, 3200);
+    })();
+  </script>
+  <style>html.boot-pending body > :not(#boot-root){visibility:hidden}html.boot-pending body{overflow:hidden}</style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#e9e6e0">
   <meta name="description" content="Isaac 的年度足迹和记录日历。">
@@ -9,8 +22,10 @@
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <title>日子的地图 · Isaac’s life</title>
   <link rel="stylesheet" href="./archive.css">
+  <link rel="stylesheet" href="./splash.css">
   <script defer src="./entries.js"></script>
   <script defer src="./app.js"></script>
+  <script defer src="./splash.js"></script>
 </head>
 <body data-page="calendar">
 
