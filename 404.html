@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="robots" content="noindex">
+  <title>档案不存在 · Isaac's life</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=3">
+  <link rel="stylesheet" href="./archive.css">
+  <script defer src="./entries.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body data-page="notfound">
+<script>
+  /* 主题记忆与切换（与 app.js 的存储键一致） */
+  (function () {
+    try { if (localStorage.getItem('muse-theme') === 'light') document.body.classList.add('light'); } catch (e) {}
+    var t = document.getElementById('themeToggle');
+    t.textContent = document.body.classList.contains('light') ? '☾' : '☼';
+    t.addEventListener('click', function () {
+      var light = document.body.classList.toggle('light');
+      t.textContent = light ? '☾' : '☼';
+      try { localStorage.setItem('muse-theme', light ? 'light' : 'dark'); } catch (e) {}
+    });
+  })();
+</script>
+
+<div class="utility">
+  <div class="wrap">
+    <span>ISAAC ARCHIVE ORGANIZATION <b>■</b> 以撒的手帖 · 研究记录部</span>
+    <span>RETRIEVAL ERROR <b>●</b> STATUS: 404</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark" aria-label="hxc"
+     style="background:none;box-shadow:none">
+  <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+    <path d="M7 19 H30 L37 27 H62 V62 H7 Z" fill="var(--logo-shadow, rgba(20,20,18,.9))"
+          transform="translate(2 2)"/>
+    <path d="M3 15 H26 L33 23 H58 V58 H3 Z" fill="var(--panel,#f1efe9)"
+          stroke="var(--ink,#141412)" stroke-width="2"/>
+    <rect x="47.5" y="27.5" width="6.5" height="6.5" fill="#ff7500"/>
+    <g transform="translate(6.5 30.9) scale(0.96)" fill="none"
+       stroke="var(--ink,#141412)" stroke-width="3.2" stroke-linecap="square">
+      <path d="M2 0 V20"/>
+      <path d="M2 9.5 H8 Q13.5 9.5 13.5 14.75 V20"/>
+      <path d="M20 9 L32 20"/>
+      <path d="M32 9 L20 20"/>
+      <path d="M46.89 10.61 A5.5 5.5 0 1 0 46.89 18.39"/>
+    </g>
+  </svg>
+</div>
+    <div class="logo-text">
+      <strong>Isaac’s life</strong>
+      <small>THE BINDING OF ORDINARY DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="./index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
+  </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <section class="hero nf-hero">
+      <div class="marks"><i></i><i></i></div>
+      <div class="nf-inner">
+        <div class="nf-code" aria-hidden="true">404</div>
+        <p class="eyebrow">FILE <b>NOT</b> FOUND — 检索失败</p>
+        <h1>档案不存在。</h1>
+        <p class="lede">你要调阅的这一页不在架上：可能已被移动、重命名，或者从未归档。检索路径如下，回档案室重新找，或者去别处逛逛。</p>
+        <p class="nf-path">QUERY <span id="missPath">/unknown</span></p>
+        <div class="nf-stamp-row">
+          <span class="stamp">未归档 NOT FILED</span>
+          <span class="stamp dim">STATUS 404</span>
+        </div>
+        <div class="hero-cta">
+          <a class="btn" href="./index.html">返回档案室 ↗</a>
+          <a class="btn ghost" href="./calendar.html">去日子的地图 →</a>
+          <a class="btn ghost" href="./notes.html">去笔记库 →</a>
+        </div>
+        <div class="nf-annot">MODEL RL-DIARY-01 · MISSING PAGE REPORTED TO THE ARCHIVIST</div>
+      </div>
+    </section>
+
+    <div class="bottom-navigation">
+      <a href="./index.html">← 返回档案室</a>
+      <a href="./calendar.html">去看全年日历 →</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>ISAAC ARCHIVE ORGANIZATION</b> — THE BINDING OF ORDINARY DAYS · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
+<style>
+/* 404 专属排版（复用 archive.css 变量与组件） */
+.nf-hero { position: relative; border: 1px solid var(--ink); background: var(--panel); margin-top: 4px; }
+body.light .nf-hero { border-color: var(--hair); }
+.nf-hero::before, .nf-hero::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1.5px solid var(--ink); }
+body.light .nf-hero::before, body.light .nf-hero::after { border-color: rgba(233,230,223,.5); }
+.nf-hero::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+.nf-hero::after { right: -1px; top: -1px; border-left: 0; border-bottom: 0; }
+.nf-inner { position: relative; padding: 40px 48px 44px; overflow: hidden; }
+.nf-code {
+  position: absolute; right: 18px; top: -30px;
+  font-family: var(--din); font-weight: 700; font-size: clamp(120px, 16vw, 210px); line-height: 1;
+  color: transparent; -webkit-text-stroke: 1.5px var(--hair);
+  pointer-events: none; user-select: none;
+}
+.nf-inner h1 { margin: 16px 0 14px; font-family: var(--din); font-size: clamp(32px, 4.4vw, 54px); font-weight: 700; letter-spacing: .1em; }
+.nf-inner .lede { color: var(--ink-soft); font-size: 13.5px; line-height: 2.1; max-width: 560px; }
+.nf-path { margin-top: 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; color: var(--muted); overflow-wrap: anywhere; }
+.nf-path span { color: var(--orange); }
+.nf-stamp-row { display: flex; gap: 14px; margin-top: 18px; }
+.nf-annot {
+  position: absolute; right: 14px; bottom: 12px;
+  font-family: var(--mono); font-size: 8px; letter-spacing: .34em; color: var(--muted);
+}
+@media (max-width: 760px) {
+  .nf-inner { padding: 30px 24px 36px; }
+  .nf-code { font-size: 110px; right: 6px; }
+  .nf-annot { display: none; }
+}
+</style>
+
+<script>
+(function () {
+  var el = document.getElementById('missPath');
+  if (el) el.textContent = decodeURIComponent(location.pathname + location.search) || '/';
+  var y = document.getElementById('footerYear');
+  if (y) y.textContent = new Date().getFullYear();
+})();
+</script>
+
+</body>
+</html>
