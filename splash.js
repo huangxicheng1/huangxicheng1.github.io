@@ -27,9 +27,9 @@
   var CFG = {
     mode: 'session',
     speed: 1,
-    readerName: '亲爱的读者',
-    no: '0087',
-    level: '3',
+    readerName: 'Jmp 7c:0x00',
+    no: '0017',
+    level: '1',
     password: 'root',
     requireConfirm: true,
     skippable: true,
