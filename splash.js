@@ -30,6 +30,7 @@
     readerName: '亲爱的读者',
     no: '0087',
     level: '3',
+    password: 'root',
     requireConfirm: true,
     skippable: true,
     sound: true
@@ -236,13 +237,18 @@
             '<img src="./dog.gif" alt="" loading="eager">' +
             '<span class="bt-dog-dashes">········</span>' +
           '</figure>' +
-          '<div class="boot-action" id="btAction">' +
-            '<button class="boot-btn" id="btBtn" type="button">' +
-              '<span id="btBtnZh">请求访问</span>' +
-              '<span id="btBtnEn">REQUEST ACCESS</span>' +
-            '</button>' +
-            '<span class="boot-hint">按 <kbd>Enter</kbd> / <kbd>Space</kbd>，或点击按钮继续</span>' +
+        '<div class="boot-action" id="btAction">' +
+          '<div class="boot-pass" id="btPass" hidden>' +
+            '<label class="boot-pass-label" for="btPassInput">ACCESS KEY · 访问密码</label>' +
+            '<input id="btPassInput" type="password" autocomplete="off" spellcheck="false" placeholder="········" aria-label="访问密码">' +
+            '<p class="boot-pass-error" id="btPassError" role="alert"></p>' +
           '</div>' +
+          '<button class="boot-btn" id="btBtn" type="button">' +
+            '<span id="btBtnZh">请求访问</span>' +
+            '<span id="btBtnEn">REQUEST ACCESS</span>' +
+          '</button>' +
+          '<span class="boot-hint" id="btHint"><span id="btHintText">点按按钮继续</span>，或按 <kbd>Enter</kbd> / <kbd>Space</kbd></span>' +
+        '</div>' +
         '</div>' +
         '<footer class="boot-foot">' +
           '<div class="boot-foot-l">' +
@@ -273,6 +279,8 @@
       stamp: '#btStamp', table: '#btTable', dog: '#btDog',
       hex: '#btHex', hexPre: '#btHexPre',
       action: '#btAction', btn: '#btBtn', btnZh: '#btBtnZh', btnEn: '#btBtnEn',
+      passField: '#btPass', passInput: '#btPassInput', passError: '#btPassError',
+      hint: '#btHintText',
       skip: '#btSkip', dashes: '#btDashes', clock: '#btClock',
       step: '#btStep', footZh: '#btFootZh', footEn: '#btFootEn',
       idLine: '#btIdLine', bar: '#btBar',
@@ -281,9 +289,11 @@
     Object.keys(idMap).forEach(function (k) { els[k] = root.querySelector(idMap[k]); });
   }
 
-  /* ---------------- 等待确认 ---------------- */
+  /* ---------------- 等待确认（第一步带密码门） ---------------- */
   var waiting = false;
   var waitResolve = null;
+  var passGate = false;
+  var attempts = 0;
   function waitConfirm(st) {
     return new Promise(function (res) {
       waiting = true;
@@ -291,12 +301,42 @@
       els.btnZh.textContent = st.confirm.zh;
       els.btnEn.textContent = st.confirm.en;
       els.action.classList.add('on');
-      els.btn.focus({ preventScroll: true });
+      passGate = !!(st.pass && CFG.password);
+      els.passField.hidden = !passGate;
+      els.passError.textContent = '';
+      els.passInput.value = '';
+      els.hint.textContent = passGate ? '输入访问密码' : '点按按钮继续';
+      if (passGate) {
+        setTimeout(function () { try { els.passInput.focus({ preventScroll: true }); } catch (e) {} }, 80);
+      } else {
+        els.btn.focus({ preventScroll: true });
+      }
     });
+  }
+  function attemptPass() {
+    if (!waiting || !passGate) return;
+    var val = (els.passInput.value || '').replace(/^\s+|\s+$/g, '');
+    if (val === CFG.password) {
+      attempts = 0;
+      els.passError.textContent = '';
+      resolveConfirm();
+      return;
+    }
+    attempts++;
+    els.passError.textContent = 'ACCESS DENIED · 密码不符，请重试（第 ' + attempts + ' 次）';
+    els.passField.classList.remove('deny');
+    void els.passField.offsetWidth;
+    els.passField.classList.add('deny');
+    els.passInput.value = '';
+    try { els.passInput.focus({ preventScroll: true }); } catch (e) {}
+    blip(196, 0.1, 0.05);
   }
   function resolveConfirm() {
     if (!waiting) return;
     waiting = false;
+    passGate = false;
+    els.passField.hidden = true;
+    els.passError.textContent = '';
     els.action.classList.remove('on');
     sndConfirm();
     var r = waitResolve;
@@ -307,7 +347,14 @@
   function onKey(e) {
     if (done) return;
     if (e.key === 'Escape' && CFG.skippable) { e.preventDefault(); release('skip'); return; }
-    if ((e.key === 'Enter' || e.key === ' ' || e.code === 'Space') && waiting) {
+    if (!waiting) return;
+    var typing = passGate && e.target === els.passInput;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (passGate) attemptPass(); else resolveConfirm();
+      return;
+    }
+    if ((e.key === ' ' || e.code === 'Space') && !typing) {
       e.preventDefault();
       resolveConfirm();
     }
@@ -342,7 +389,7 @@
     { zh: '需要访问许可', en: 'ACCESS PERMISSION REQUIRED',
       word: 'AUTHORIZATION',
       footZh: '等待用户授权...', footEn: 'AWAITING OPERATOR CONSENT',
-      confirm: { zh: '请求访问', en: 'REQUEST ACCESS' } },
+      confirm: { zh: '请求访问', en: 'REQUEST ACCESS' }, pass: true },
     { zh: '身份资料确认', en: 'IDENTITY VERIFICATION',
       word: 'IDENTITY',
       footZh: '核对身份资料...', footEn: 'MATCHING OPERATOR RECORD',
@@ -475,7 +522,7 @@
     build();
     document.addEventListener('keydown', onKey, true);
     els.skip.addEventListener('click', function () { release('skip'); });
-    els.btn.addEventListener('click', resolveConfirm);
+    els.btn.addEventListener('click', function () { if (passGate) attemptPass(); else resolveConfirm(); });
     window.addEventListener('pageshow', function (e) {
       if (e.persisted && !done) release('skip');
     });

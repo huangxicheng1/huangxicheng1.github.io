@@ -524,6 +524,35 @@ html.boot-pending body { overflow: hidden; }
   color: var(--bt-ink-soft);
 }
 
+/* ---------- 密码门（第一步） ---------- */
+.boot-pass { display: grid; gap: 10px; justify-items: center; }
+.boot-pass-label {
+  font-family: var(--bt-mono); font-size: 9px; letter-spacing: .32em;
+  color: var(--bt-muted);
+}
+.boot-pass input {
+  width: min(72vw, 300px); padding: 11px 16px;
+  background: rgba(242, 239, 233, .04);
+  border: 1px solid rgba(242, 239, 233, .4); color: var(--bt-ink);
+  font-family: var(--bt-mono); font-size: 15px; letter-spacing: .5em;
+  text-align: center; outline: none; caret-color: var(--bt-accent);
+  transition: border-color .18s ease, background .18s ease;
+}
+.boot-pass input:focus { border-color: var(--bt-accent); background: rgba(255, 117, 0, .05); }
+.boot-pass input::placeholder { color: rgba(242, 239, 233, .22); letter-spacing: .3em; }
+.boot-pass.deny input { border-color: var(--bt-glitch-a); animation: bt-deny 300ms steps(2); }
+.boot-pass-error {
+  min-height: 14px; font-family: var(--bt-mono); font-size: 9.5px;
+  letter-spacing: .2em; color: var(--bt-glitch-a); text-align: center;
+}
+@keyframes bt-deny {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(7px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
 /* 小狗（第四步读取时出场） */
 .boot-dog {
   display: none;
