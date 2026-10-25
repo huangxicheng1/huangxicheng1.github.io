@@ -669,3 +669,15 @@ html[data-theme='dark'] .td-page .btn:hover {
 .td-daypanel { position: sticky; top: 76px; }
 .td-daypanel-tasks { max-height: 52vh; overflow-y: auto; }
 .td-empty { padding: 18px 4px; font-size: 12.5px; color: var(--muted); line-height: 1.8; }
+
+/* —— 夜间修正：幽灵/危险/图标按钮不参与白色硬阴影 —— */
+/* 白色硬阴影只属于实心主按钮；ghost 等轻量按钮在夜间带阴影会成为文字旁的白色噪点。 */
+html[data-theme='dark'] .td-page .btn.ghost,
+html[data-theme='dark'] .td-page .btn-ghost,
+html[data-theme='dark'] .td-page .btn-danger,
+html[data-theme='dark'] .td-page .icon-btn { box-shadow: none; }
+
+html[data-theme='dark'] .td-page .btn.ghost:hover,
+html[data-theme='dark'] .td-page .btn-ghost:hover,
+html[data-theme='dark'] .td-page .btn-danger:hover,
+html[data-theme='dark'] .td-page .icon-btn:hover { box-shadow: none; }

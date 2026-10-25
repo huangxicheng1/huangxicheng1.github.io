@@ -553,3 +553,14 @@ html[data-theme='dark'] .pl-page .btn:hover {
   .pl-page .grid { grid-template-columns: 1fr; }
   .pl-content { padding: 0 4px 40px; }
 }
+
+/* —— 夜间修正：幽灵/危险/图标按钮不参与白色硬阴影 —— */
+html[data-theme='dark'] .pl-page .btn.ghost,
+html[data-theme='dark'] .pl-page .btn-ghost,
+html[data-theme='dark'] .pl-page .btn-danger,
+html[data-theme='dark'] .pl-page .icon-btn { box-shadow: none; }
+
+html[data-theme='dark'] .pl-page .btn.ghost:hover,
+html[data-theme='dark'] .pl-page .btn-ghost:hover,
+html[data-theme='dark'] .pl-page .btn-danger:hover,
+html[data-theme='dark'] .pl-page .icon-btn:hover { box-shadow: none; }
