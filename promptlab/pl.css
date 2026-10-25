@@ -46,7 +46,7 @@ html[data-theme='dark'] {
   --accent-soft: rgba(255, 117, 0, 0.16);
   --danger-soft: rgba(224, 82, 82, 0.14);
   --ok-soft: rgba(62, 207, 142, 0.12);
-  --shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+  --shadow: 6px 6px 0 rgba(233, 230, 223, 0.3);
 }
 
 /* 站点骨架令牌同步：archive.css 的骨架组件（utility 通告条 / masthead 页头 / 页脚等）
@@ -535,6 +535,17 @@ html[data-theme='dark'] {
 }
 
 .pl-page .icon-btn:hover { transform: none; box-shadow: none; }
+
+/* —— 夜间值班的白色硬阴影 —— */
+/* 深色背景上橙色硬阴影发黑不可见：夜间把按钮的 offset 硬阴影换为浅色（白色系），
+   与站点夜间模式的浅色发丝线语言一致。 */
+html[data-theme='dark'] .pl-page .btn {
+  box-shadow: 2px 2px 0 rgba(233, 230, 223, 0.42);
+}
+
+html[data-theme='dark'] .pl-page .btn:hover {
+  box-shadow: 3px 3px 0 rgba(233, 230, 223, 0.58);
+}
 
 /* —— 响应式 —— */
 
