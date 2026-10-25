@@ -1,5 +1,5 @@
 // store.js — 事务科本地数据层（localStorage 键 'todo-db-v1'，首次访问载入演示种子）
-import { buildSeed, GROUPS } from './seed-data.js';
+import { buildSeed, GROUPS } from './seed-data.js?v=3';
 
 const KEY = 'todo-db-v1';
 
