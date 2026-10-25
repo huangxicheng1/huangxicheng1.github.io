@@ -7,7 +7,9 @@
  * 色散故障揭幕。揭幕后移除开屏层，博客页面按编排进场。
  *
  * 零依赖、零素材：字体取系统自带，音效为 WebAudio 现场合成（无语音）。
- * 右上角「跳过」或 Esc 随时可略过；偏好减少动效时直接进页。
+ * 右上角「跳过」或 Esc：仅在访问密码核验通过后出现/生效（跳过只略过剩余动画，
+ * 不能绕过密码门）；未配置密码或无需确认时，跳过从一开始就可用。
+ * 偏好减少动效时直接进页。
  * ========================================================================== */
 (function () {
   'use strict';
@@ -294,6 +296,14 @@
   var waitResolve = null;
   var passGate = false;
   var attempts = 0;
+  var passVerified = false; // 密码核验通过前，「跳过」不出现也不生效
+
+  /** 「跳过」按钮/快捷键的可用性：配置了密码且尚未核验通过时隐藏。 */
+  function updateSkip() {
+    if (!els.skip) return;
+    var locked = !!(CFG.password && CFG.requireConfirm && !passVerified);
+    els.skip.hidden = locked || !CFG.skippable;
+  }
   function waitConfirm(st) {
     return new Promise(function (res) {
       waiting = true;
@@ -319,6 +329,8 @@
     if (val === CFG.password) {
       attempts = 0;
       els.passError.textContent = '';
+      passVerified = true;
+      updateSkip(); // 密码已核验：此后可以跳过剩余动画
       resolveConfirm();
       return;
     }
@@ -346,7 +358,7 @@
 
   function onKey(e) {
     if (done) return;
-    if (e.key === 'Escape' && CFG.skippable) { e.preventDefault(); release('skip'); return; }
+    if (e.key === 'Escape' && CFG.skippable && !els.skip.hidden) { e.preventDefault(); release('skip'); return; }
     if (!waiting) return;
     var typing = passGate && e.target === els.passInput;
     if (e.key === 'Enter') {
@@ -522,7 +534,8 @@
     }
     build();
     document.addEventListener('keydown', onKey, true);
-    els.skip.addEventListener('click', function () { release('skip'); });
+    updateSkip(); // 密码未核验前：隐藏「跳过」（Esc 同步失效）
+    els.skip.addEventListener('click', function () { if (!els.skip.hidden) release('skip'); });
     els.btn.addEventListener('click', function () { if (passGate) attemptPass(); else resolveConfirm(); });
     window.addEventListener('pageshow', function (e) {
       if (e.persisted && !done) release('skip');
