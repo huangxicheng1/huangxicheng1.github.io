@@ -3,7 +3,7 @@
 //   远端文件 todo-data/todo.json（不进部署白名单，不在公开页面上，但公开仓库可通过 API 读取）
 //   读：匿名即可（公开仓库）；写：需要细粒度 PAT（Contents: Read and write，仅限本仓库）
 //   策略：启动时拉取，远端较新则采纳远端；本地每次修改后防抖 4s 推送（单人使用，最后写入优先）
-import * as store from './store.js?v=5';
+import * as store from './store.js?v=6';
 
 const OWNER = 'huangxicheng1';
 const REPO = 'huangxicheng1.github.io';
@@ -13,6 +13,7 @@ const API_BASE = 'https://api.github.com';
 
 const TOKEN_KEY = 'td-gh-token';
 const LAST_SYNC_KEY = 'td-last-sync';
+const REMOTE_AT_KEY = 'td-remote-at';
 
 const PUSH_DEBOUNCE_MS = 4000;
 
@@ -129,43 +130,68 @@ export async function pullOnBoot() {
   }
 }
 
-/** 推送本地数据到远端（带 409 重试一次）。 */
+/** 记住最近一次见到的云端版本时间（推送前核对，防止旧标签页把过期数据写回云端）。 */
+function rememberRemoteAt(remote) {
+  if (remote && remote.meta && remote.meta.updatedAt) {
+    try { localStorage.setItem(REMOTE_AT_KEY, String(remote.meta.updatedAt)); } catch (e) { /* 忽略 */ }
+  }
+}
+function knownRemoteAt() {
+  try { return localStorage.getItem(REMOTE_AT_KEY) || ''; } catch (e) { return ''; }
+}
+
+/** 推送本地数据到远端（带 409 重试一次）。
+ *  防复活保护：推送前核对云端版本——若云端比我上次见到时更新（别的设备/标签页写过），
+ *  先采纳云端并放弃本次推送，避免残留旧数据的标签页把过期内容写回云端。 */
 export async function push() {
   if (!token || pushing) return;
   pushing = true;
   setStatus('syncing', '正在同步到 GitHub…');
   try {
-    const dbJson = JSON.stringify(store.getDb(), null, 2);
-    const { sha } = await fetchRemote();
+    const { remote, sha } = await fetchRemote();
+    const knownAt = knownRemoteAt();
+    if (remote) {
+      const remoteAt = String(remote.meta && remote.meta.updatedAt || '');
+      if (knownAt && remoteAt > knownAt) {
+        // 云端在我上次同步之后被更新过：本地基线已过期，采纳云端、跳过本次推送
+        replacing = true;
+        try { store.replaceDb(remote); } finally { replacing = false; }
+        rememberRemoteAt(remote);
+        markSynced('云端有更新，已拉取（本次未推送）');
+        return;
+      }
+    }
+    const db = store.getDb();
     const body = {
       message: 'todo-data: 网页端同步',
-      content: b64encode(dbJson),
+      content: b64encode(JSON.stringify(db, null, 2)),
       branch: BRANCH,
     };
-    let res = await gh(`/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+    if (sha) body.sha = sha;
+    const putUrl = '/repos/' + OWNER + '/' + REPO + '/contents/' + PATH;
+    let res = await gh(putUrl, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (res.status === 409 || res.status === 422) {
-      // sha 过期（期间有别的提交）：取最新 sha 重试一次
       const fresh = await fetchRemote();
-      body.sha = fresh.sha;
-      res = await gh(`/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+      if (fresh.sha) body.sha = fresh.sha;
+      res = await gh(putUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
     }
     if (res.status === 401 || res.status === 403) {
-      const hint = res.status === 401 ? '令牌无效或已过期' : '令牌权限不足（需要 Contents 读写）';
-      setStatus('error', hint);
+      setStatus('error', res.status === 401 ? '令牌无效或已过期' : '令牌权限不足（需要 Contents 读写）');
       return;
     }
     if (!res.ok) {
-      setStatus('error', `同步失败：GitHub 返回 ${res.status}`);
+      setStatus('error', '同步失败：GitHub 返回 ' + res.status);
       return;
     }
+    rememberRemoteAt({ meta: { updatedAt: db.meta.updatedAt } });
     markSynced('已同步到 GitHub');
   } catch (err) {
     setStatus('error', '网络请求失败：' + (err.message || '无法连接 api.github.com'));
@@ -202,4 +228,8 @@ export function schedulePush(delay = PUSH_DEBOUNCE_MS) {
 export function init() {
   store.onChange(() => schedulePush());
   if (token) pullOnBoot();
+  // 标签页重新获得焦点时自动核对云端（防止长时间开着的旧标签页推送过期数据）
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && token && !pushing) pullOnBoot();
+  });
 }

@@ -1,8 +1,8 @@
 // app.js — 事务科 · 今日待办（静态版，localStorage 数据 + 可选 GitHub 云同步）
 // 视图：#/today 今日待办 · #/calendar 月历；右侧常驻当日面板与收件箱。
-import * as store from './store.js?v=5';
-import * as sync from './github-sync.js?v=5';
-import { iso } from './seed-data.js?v=5';
+import * as store from './store.js?v=6';
+import * as sync from './github-sync.js?v=6';
+import { iso } from './seed-data.js?v=6';
 
 /* ---------------- 基础工具 ---------------- */
 
