@@ -80,5 +80,14 @@ export function applyTheme(theme) {
     /* localStorage 不可用时仅本次会话生效，忽略持久化失败 */
   }
   document.documentElement.dataset.theme = t;
+  // Chromium 改 dataset 触发属性选择器时，CSS 变量级联传播可能不完整（部分底色残留旧主题值），
+  // 强制一轮完整样式失效重算。
+  const html = document.documentElement;
+  html.classList.add('theme-kick');
+  void html.offsetHeight;
+  requestAnimationFrame(() => {
+    html.classList.remove('theme-kick');
+    void html.offsetHeight;
+  });
   return t;
 }

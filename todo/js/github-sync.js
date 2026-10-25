@@ -3,7 +3,7 @@
 //   远端文件 todo-data/todo.json（不进部署白名单，不在公开页面上，但公开仓库可通过 API 读取）
 //   读：匿名即可（公开仓库）；写：需要细粒度 PAT（Contents: Read and write，仅限本仓库）
 //   策略：启动时拉取，远端较新则采纳远端；本地每次修改后防抖 4s 推送（单人使用，最后写入优先）
-import * as store from './store.js?v=4';
+import * as store from './store.js?v=5';
 
 const OWNER = 'huangxicheng1';
 const REPO = 'huangxicheng1.github.io';

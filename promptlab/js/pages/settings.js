@@ -5,7 +5,7 @@
 // 依赖（[前端·框架与设计系统]模块按契约提供）：../api.js、../ui.js、../state.js
 import { api } from '../api.js?v=4';
 import { h, toast, confirmDialog, ICONS } from '../ui.js?v=4';
-import { store } from '../state.js?v=4';
+import { store } from '../state.js?v=5';
 
 // 页面私有样式（注入 root）
 const PAGE_CSS = `

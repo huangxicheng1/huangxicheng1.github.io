@@ -2,16 +2,16 @@
 // 页面模块契约与桌面版一致：export async function render(root, params)。
 import { parseHash, navigate } from './router.js?v=4';
 import { h, toast } from './ui.js?v=4';
-import { store, getSavedTheme, applyTheme } from './state.js?v=4';
+import { store, getSavedTheme, applyTheme } from './state.js?v=5';
 
 const routes = [
-  { pattern: '/library', title: '提示词库', en: 'PROMPT LIBRARY', nav: 'library', load: () => import('./pages/library.js?v=6') },
-  { pattern: '/prompt/:id', title: '提示词编辑器', en: 'FILE EDITOR', nav: 'library', load: () => import('./pages/editor.js?v=6') },
-  { pattern: '/playground/:id', title: '运行测试台', en: 'RUN TERMINAL', nav: 'library', load: () => import('./pages/playground.js?v=6') },
-  { pattern: '/runs', title: '运行历史', en: 'RUN HISTORY', nav: 'runs', load: () => import('./pages/runs.js?v=6') },
-  { pattern: '/collections', title: '集合管理', en: 'COLLECTION SETS', nav: 'collections', load: () => import('./pages/collections.js?v=6') },
-  { pattern: '/stats', title: '统计', en: 'LAB STATS', nav: 'stats', load: () => import('./pages/dashboard.js?v=6') },
-  { pattern: '/settings', title: '设置', en: 'CONFIG', nav: 'settings', load: () => import('./pages/settings.js?v=6') },
+  { pattern: '/library', title: '提示词库', en: 'PROMPT LIBRARY', nav: 'library', load: () => import('./pages/library.js?v=7') },
+  { pattern: '/prompt/:id', title: '提示词编辑器', en: 'FILE EDITOR', nav: 'library', load: () => import('./pages/editor.js?v=7') },
+  { pattern: '/playground/:id', title: '运行测试台', en: 'RUN TERMINAL', nav: 'library', load: () => import('./pages/playground.js?v=7') },
+  { pattern: '/runs', title: '运行历史', en: 'RUN HISTORY', nav: 'runs', load: () => import('./pages/runs.js?v=7') },
+  { pattern: '/collections', title: '集合管理', en: 'COLLECTION SETS', nav: 'collections', load: () => import('./pages/collections.js?v=7') },
+  { pattern: '/stats', title: '统计', en: 'LAB STATS', nav: 'stats', load: () => import('./pages/dashboard.js?v=7') },
+  { pattern: '/settings', title: '设置', en: 'CONFIG', nav: 'settings', load: () => import('./pages/settings.js?v=7') },
 ];
 
 /** 将路由模式（如 '/prompt/:id'）与 path 段数组匹配。 */
@@ -120,6 +120,7 @@ function initTheme() {
     if ((s.theme === 'light' || s.theme === 'dark') && document.documentElement.dataset.theme !== s.theme) {
       applyTheme(s.theme);
       syncToggleGlyph();
+      renderRoute(); // 重建 DOM：规避 IAB 内核对个别元素样式的失效缓存
     }
   });
   const btn = document.getElementById('themeToggle');

@@ -9,7 +9,7 @@
 import { api } from '../api.js?v=4';
 import { h, toast, openModal, confirmDialog, timeAgo, ICONS } from '../ui.js?v=4';
 import { navigate } from '../router.js?v=4';
-import { store } from '../state.js?v=4';
+import { store } from '../state.js?v=5';
 
 /** 搜索防抖时长（SPEC 8.6：输入即筛，防抖 300ms） */
 const SEARCH_DEBOUNCE_MS = 300;

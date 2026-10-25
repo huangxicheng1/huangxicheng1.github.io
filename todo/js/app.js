@@ -1,8 +1,8 @@
 // app.js — 事务科 · 今日待办（静态版，localStorage 数据 + 可选 GitHub 云同步）
 // 视图：#/today 今日待办 · #/calendar 月历；右侧常驻当日面板与收件箱。
-import * as store from './store.js?v=4';
-import * as sync from './github-sync.js?v=4';
-import { iso } from './seed-data.js?v=4';
+import * as store from './store.js?v=5';
+import * as sync from './github-sync.js?v=5';
+import { iso } from './seed-data.js?v=5';
 
 /* ---------------- 基础工具 ---------------- */
 
@@ -399,11 +399,27 @@ function initTheme() {
   document.documentElement.dataset.theme = readSite() === 'light' ? 'dark' : 'light';
   const btn = document.getElementById('themeToggle');
   const sync = () => { btn.textContent = document.documentElement.dataset.theme === 'dark' ? '☾' : '☼'; };
+
+  // Chromium 在「改 dataset 触发属性选择器」时，CSS 自定义属性的级联传播可能不完整：
+  // 直读 --bg 的 body 即时变色，但选中行等处 var(--panel-2) 会残留旧值（夜间留浅色块）。
+  // 切换后强制一轮完整样式失效重算，确保所有变量同步生效。
+  const kickRecalc = () => {
+    const html = document.documentElement;
+    html.classList.add('theme-kick');
+    void html.offsetHeight;
+    requestAnimationFrame(() => {
+      html.classList.remove('theme-kick');
+      void html.offsetHeight;
+    });
+  };
+
   btn.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem('muse-theme', next === 'dark' ? 'light' : 'dark'); } catch (e) { /* 忽略 */ }
+    kickRecalc();
     sync();
+    render(); // 重建 DOM：规避 IAB 内核对个别元素（如选中行底色）的样式失效缓存
   });
   sync();
 }
