@@ -56,7 +56,8 @@ body.light {
   --tok-function: #6ea8ff;
   --tok-property: #b79bff;
   --tok-tag: #ff8a6a;
-  --shadow-ink: #000;
+  /* 夜间值班的「墨色」硬阴影用浅色：纯黑阴影落在深色背景上不可见（选中导航项/Logo/卡片悬停都会失去层次） */
+  --shadow-ink: rgba(233, 230, 223, 0.55);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
