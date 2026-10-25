@@ -53,24 +53,29 @@ export const store = createStore({
  * 在函数内访问 localStorage，保证本模块可被 Node 做 import 链接检查。
  * @returns {'dark' | 'light'}
  */
+/**
+ * 读取持久化主题（全站统一键 'muse-theme'，与档案室/事务科共用一份记忆）。
+ * 主站约定：'light' = 夜间值班，'dark'/未设 = 纸色；工坊内部值为 'light'=纸色 / 'dark'=夜间，
+ * 读取边界做一次翻译。缺失/读取失败时回退默认纸色。
+ * @returns {'dark' | 'light'}
+ */
 export function getSavedTheme() {
   try {
-    const t = localStorage.getItem('plm-theme');
-    return t === 'light' || t === 'dark' ? t : 'light';
+    return localStorage.getItem('muse-theme') === 'light' ? 'dark' : 'light';
   } catch (e) {
     return 'light';
   }
 }
 
 /**
- * 应用并持久化主题：写入 html[data-theme] 与 localStorage（'plm-theme'）。
+ * 应用并持久化主题：写入 html[data-theme] 与全站统一键 'muse-theme'（翻译为主站约定值）。
  * @param {string} theme 'dark' | 'light'（其他值一律按 'dark' 处理）
  * @returns {'dark' | 'light'} 规范化后实际应用的主题值
  */
 export function applyTheme(theme) {
   const t = theme === 'light' ? 'light' : 'dark';
   try {
-    localStorage.setItem('plm-theme', t);
+    localStorage.setItem('muse-theme', t === 'dark' ? 'light' : 'dark');
   } catch (e) {
     /* localStorage 不可用时仅本次会话生效，忽略持久化失败 */
   }

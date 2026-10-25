@@ -6,10 +6,10 @@
 // 说明：本模块被 import 时不执行任何访问 window/document 的顶层代码（SPEC 第 0 节）。
 // ============================================================================
 
-import { api } from '../api.js';
-import { h, toast, openModal, confirmDialog, timeAgo, ICONS } from '../ui.js';
-import { navigate } from '../router.js';
-import { store } from '../state.js';
+import { api } from '../api.js?v=4';
+import { h, toast, openModal, confirmDialog, timeAgo, ICONS } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
+import { store } from '../state.js?v=4';
 
 /** 搜索防抖时长（SPEC 8.6：输入即筛，防抖 300ms） */
 const SEARCH_DEBOUNCE_MS = 300;

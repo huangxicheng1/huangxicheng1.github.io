@@ -3,9 +3,9 @@
 // 8.4（state.js 的 store：app.js 订阅 store.set({theme}) 同步主题）、8.5（主题：html[data-theme] +
 // localStorage 'plm-theme'，默认 dark）、8.6（settings：LLM 表单 / apiKey 掩码 / 主题切换 / 导入导出）。
 // 依赖（[前端·框架与设计系统]模块按契约提供）：../api.js、../ui.js、../state.js
-import { api } from '../api.js';
-import { h, toast, confirmDialog, ICONS } from '../ui.js';
-import { store } from '../state.js';
+import { api } from '../api.js?v=4';
+import { h, toast, confirmDialog, ICONS } from '../ui.js?v=4';
+import { store } from '../state.js?v=4';
 
 // 页面私有样式（注入 root）
 const PAGE_CSS = `
@@ -219,8 +219,9 @@ function buildThemeCard() {
     const st = store.get().theme;
     if (st === 'light' || st === 'dark') return st;
     let saved = null;
-    try { saved = localStorage.getItem('plm-theme'); } catch (_) { /* 隐私模式下 localStorage 可能不可用 */ }
-    if (saved === 'light' || saved === 'dark') return saved;
+    try { saved = localStorage.getItem('muse-theme'); } catch (_) { /* 隐私模式下 localStorage 可能不可用 */ }
+    if (saved === 'light') return 'dark'; // 全站统一键：主站 'light'=夜间
+    if (saved === 'dark') return 'light';
     return 'light';
   }
   function themeName(t) { return t === 'light' ? '档案室（纸色）' : '夜间值班'; }
@@ -237,7 +238,7 @@ function buildThemeCard() {
     const next = currentTheme() === 'light' ? 'dark' : 'light';
     store.set({ theme: next }); // 主通道：app.js 订阅会同步 html[data-theme] 与 localStorage
     document.documentElement.setAttribute('data-theme', next); // 兜底直写，幂等
-    try { localStorage.setItem('plm-theme', next); } catch (_) { /* 忽略持久化失败 */ }
+    try { localStorage.setItem('muse-theme', next === 'dark' ? 'light' : 'dark'); } catch (_) { /* 忽略持久化失败 */ }
     update();
     toast(`已切换到${themeName(next)}主题`, 'info');
   }

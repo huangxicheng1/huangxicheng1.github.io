@@ -3,9 +3,9 @@
 // 私有样式以 <style> 注入 root）、8.5（复用 base.css 公共类）、8.6（dashboard：指标卡 / 标签分布条形 /
 // 14 天迷你柱状图 / 最近活动）。
 // 依赖（[前端·框架与设计系统]模块按契约提供）：../api.js、../ui.js、../router.js
-import { api } from '../api.js';
-import { h, toast, timeAgo, ICONS } from '../ui.js';
-import { navigate } from '../router.js';
+import { api } from '../api.js?v=4';
+import { h, toast, timeAgo, ICONS } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
 
 // 页面私有样式（注入 root；颜色一律使用 base.css 的 CSS 变量）
 const PAGE_CSS = `

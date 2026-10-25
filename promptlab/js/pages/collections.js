@@ -3,9 +3,9 @@
 // 8.5（复用 base.css 公共类：.grid/.card/.btn/.badge/.empty/.toolbar/.form-row/.label/.input/.textarea）、
 // 8.6（collections：集合卡片、新建/编辑 openModal 表单（色板 8 色 + 原生 color input）、删除 confirmDialog）。
 // 依赖（[前端·框架与设计系统]模块按契约提供）：../api.js、../ui.js、../router.js
-import { api } from '../api.js';
-import { h, toast, openModal, confirmDialog, timeAgo, ICONS } from '../ui.js';
-import { navigate } from '../router.js';
+import { api } from '../api.js?v=4';
+import { h, toast, openModal, confirmDialog, timeAgo, ICONS } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
 
 // 页面私有样式（注入 root）
 const PAGE_CSS = `

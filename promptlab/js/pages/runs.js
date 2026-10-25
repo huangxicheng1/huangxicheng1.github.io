@@ -4,9 +4,9 @@
 //   耗时、tokens 估算合计）；行可展开显示变量与 response 前 200 字；顶部统计 chips（总运行、成功率、平均耗时））。
 // 依赖（由 [前端·框架与设计系统] 按契约提供）：../api.js、../ui.js、../router.js。
 // 注意：本模块顶层不访问 window/document（SPEC 第 0 节），DOM 操作全部在函数内完成。
-import { api } from '../api.js';
-import { h, toast, timeAgo } from '../ui.js';
-import { navigate } from '../router.js';
+import { api } from '../api.js?v=4';
+import { h, toast, timeAgo } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
 
 const RUNS_LIMIT = 200; // 一次拉取的运行条数（契约示例 limit=50，这里取更大值以支撑统计 chips）
 const RESPONSE_PREVIEW = 200; // 展开行中 response 预览字数（SPEC 8.6：前 200 字）

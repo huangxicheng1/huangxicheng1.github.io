@@ -1,8 +1,8 @@
 // app.js — 事务科 · 今日待办（静态版，localStorage 数据 + 可选 GitHub 云同步）
 // 视图：#/today 今日待办 · #/calendar 月历；右侧常驻当日面板与收件箱。
-import * as store from './store.js?v=3';
-import * as sync from './github-sync.js?v=3';
-import { iso } from './seed-data.js?v=3';
+import * as store from './store.js?v=4';
+import * as sync from './github-sync.js?v=4';
+import { iso } from './seed-data.js?v=4';
 
 /* ---------------- 基础工具 ---------------- */
 
@@ -391,16 +391,18 @@ function applyHash() {
 }
 
 function initTheme() {
-  try {
-    const saved = localStorage.getItem('td-theme');
-    document.documentElement.dataset.theme = saved === 'dark' ? 'dark' : 'light';
-  } catch (e) { /* 默认纸色 */ }
+  // 全站统一主题记忆（主站档案室的 'muse-theme'）：主站约定 'light'=夜间值班，'dark'/未设=纸色。
+  // 事务科内部用 html[data-theme]（'dark'=夜间），在边界做一次翻译，保证三个部门明暗始终一致。
+  const readSite = () => {
+    try { return localStorage.getItem('muse-theme'); } catch (e) { return null; }
+  };
+  document.documentElement.dataset.theme = readSite() === 'light' ? 'dark' : 'light';
   const btn = document.getElementById('themeToggle');
   const sync = () => { btn.textContent = document.documentElement.dataset.theme === 'dark' ? '☾' : '☼'; };
   btn.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
-    try { localStorage.setItem('td-theme', next); } catch (e) { /* 忽略 */ }
+    try { localStorage.setItem('muse-theme', next === 'dark' ? 'light' : 'dark'); } catch (e) { /* 忽略 */ }
     sync();
   });
   sync();

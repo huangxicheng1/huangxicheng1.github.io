@@ -1,8 +1,8 @@
 // app.js — 静态版入口（GitHub Pages）：hash 路由 + 部门导航高亮 + 主题（plm-theme）+ 值班时钟。
 // 页面模块契约与桌面版一致：export async function render(root, params)。
-import { parseHash, navigate } from './router.js';
-import { h, toast } from './ui.js';
-import { store, getSavedTheme, applyTheme } from './state.js';
+import { parseHash, navigate } from './router.js?v=4';
+import { h, toast } from './ui.js?v=4';
+import { store, getSavedTheme, applyTheme } from './state.js?v=4';
 
 const routes = [
   { pattern: '/library', title: '提示词库', en: 'PROMPT LIBRARY', nav: 'library', load: () => import('./pages/library.js?v=5') },

@@ -7,9 +7,9 @@
 //   本 prompt 运行历史（可展开看 finalPrompt 与 response）、运行中按钮禁用显示 loading）。
 // 依赖（由 [前端·框架与设计系统] 按契约提供）：../api.js、../ui.js、../router.js。
 // 注意：本模块顶层不访问 window/document（SPEC 第 0 节），DOM 操作全部在函数内完成。
-import { api } from '../api.js';
-import { h, toast, timeAgo, ICONS } from '../ui.js';
-import { navigate } from '../router.js';
+import { api } from '../api.js?v=4';
+import { h, toast, timeAgo, ICONS } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
 
 // 变量语法与后端 prompts.js 导出的 extractVariables 完全一致（SPEC 第 5 节）
 const VARIABLE_RE = /\{\{\s*([a-zA-Z_\u4e00-\u9fa5][\w\u4e00-\u9fa5]*)\s*\}\}/g;

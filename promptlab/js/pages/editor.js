@@ -5,9 +5,9 @@
 // 说明：本模块被 import 时不执行任何访问 window/document 的顶层代码（SPEC 第 0 节）。
 // ============================================================================
 
-import { api } from '../api.js';
-import { h, toast, confirmDialog, timeAgo, diffHtml, ICONS } from '../ui.js';
-import { navigate } from '../router.js';
+import { api } from '../api.js?v=4';
+import { h, toast, confirmDialog, timeAgo, diffHtml, ICONS } from '../ui.js?v=4';
+import { navigate } from '../router.js?v=4';
 
 /** 变量语法（与 SPEC 第 5 节 prompts.js 的正则逐字一致） */
 const VAR_PATTERN = /\{\{\s*([a-zA-Z_\u4e00-\u9fa5][\w\u4e00-\u9fa5]*)\s*\}\}/g;
