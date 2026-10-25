@@ -32,7 +32,7 @@ jobs:
       - name: Prepare public files only
         run: |
           mkdir -p dist
-          cp -r index.html calendar.html notes.html entry.html archive.css 404.html favicon.svg splash.css splash.js app.js entries.js dog.gif dog-still.png logo.png favicon.ico apple-touch-icon.png games portal.css portal.js promptlab dist/
+          cp -r index.html calendar.html notes.html entry.html archive.css 404.html favicon.svg splash.css splash.js app.js entries.js dog.gif dog-still.png logo.png favicon.ico apple-touch-icon.png games portal.css portal.js promptlab todo dist/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
