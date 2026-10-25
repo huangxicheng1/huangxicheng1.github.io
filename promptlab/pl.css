@@ -538,13 +538,13 @@ html[data-theme='dark'] {
 
 /* —— 夜间值班的白色硬阴影 —— */
 /* 深色背景上橙色硬阴影发黑不可见：夜间把按钮的 offset 硬阴影换为浅色（白色系），
-   与站点夜间模式的浅色发丝线语言一致。 */
+   与站点夜间模式的浅色发丝线语言一致；偏移与透明度给足以保证一眼可见。 */
 html[data-theme='dark'] .pl-page .btn {
-  box-shadow: 2px 2px 0 rgba(233, 230, 223, 0.42);
+  box-shadow: 3px 3px 0 rgba(233, 230, 223, 0.55);
 }
 
 html[data-theme='dark'] .pl-page .btn:hover {
-  box-shadow: 3px 3px 0 rgba(233, 230, 223, 0.58);
+  box-shadow: 4px 4px 0 rgba(233, 230, 223, 0.72);
 }
 
 /* —— 响应式 —— */

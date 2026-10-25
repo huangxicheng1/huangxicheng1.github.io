@@ -5,13 +5,13 @@ import { h, toast } from './ui.js';
 import { store, getSavedTheme, applyTheme } from './state.js';
 
 const routes = [
-  { pattern: '/library', title: '提示词库', en: 'PROMPT LIBRARY', nav: 'library', load: () => import('./pages/library.js?v=4') },
-  { pattern: '/prompt/:id', title: '提示词编辑器', en: 'FILE EDITOR', nav: 'library', load: () => import('./pages/editor.js?v=4') },
-  { pattern: '/playground/:id', title: '运行测试台', en: 'RUN TERMINAL', nav: 'library', load: () => import('./pages/playground.js?v=4') },
-  { pattern: '/runs', title: '运行历史', en: 'RUN HISTORY', nav: 'runs', load: () => import('./pages/runs.js?v=4') },
-  { pattern: '/collections', title: '集合管理', en: 'COLLECTION SETS', nav: 'collections', load: () => import('./pages/collections.js?v=4') },
-  { pattern: '/stats', title: '统计', en: 'LAB STATS', nav: 'stats', load: () => import('./pages/dashboard.js?v=4') },
-  { pattern: '/settings', title: '设置', en: 'CONFIG', nav: 'settings', load: () => import('./pages/settings.js?v=4') },
+  { pattern: '/library', title: '提示词库', en: 'PROMPT LIBRARY', nav: 'library', load: () => import('./pages/library.js?v=5') },
+  { pattern: '/prompt/:id', title: '提示词编辑器', en: 'FILE EDITOR', nav: 'library', load: () => import('./pages/editor.js?v=5') },
+  { pattern: '/playground/:id', title: '运行测试台', en: 'RUN TERMINAL', nav: 'library', load: () => import('./pages/playground.js?v=5') },
+  { pattern: '/runs', title: '运行历史', en: 'RUN HISTORY', nav: 'runs', load: () => import('./pages/runs.js?v=5') },
+  { pattern: '/collections', title: '集合管理', en: 'COLLECTION SETS', nav: 'collections', load: () => import('./pages/collections.js?v=5') },
+  { pattern: '/stats', title: '统计', en: 'LAB STATS', nav: 'stats', load: () => import('./pages/dashboard.js?v=5') },
+  { pattern: '/settings', title: '设置', en: 'CONFIG', nav: 'settings', load: () => import('./pages/settings.js?v=5') },
 ];
 
 /** 将路由模式（如 '/prompt/:id'）与 path 段数组匹配。 */
