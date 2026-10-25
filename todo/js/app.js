@@ -1,6 +1,7 @@
-// app.js — 事务科 · 今日待办（静态版，localStorage 数据）
+// app.js — 事务科 · 今日待办（静态版，localStorage 数据 + 可选 GitHub 云同步）
 // 视图：#/today 今日待办 · #/calendar 月历；右侧常驻当日面板与收件箱。
 import * as store from './store.js';
+import * as sync from './github-sync.js';
 import { iso } from './seed-data.js';
 
 /* ---------------- 基础工具 ---------------- */
@@ -135,6 +136,86 @@ function quickAdd(defaultDate) {
   return h('div', { class: 'td-quickadd' }, title, group, date, btn);
 }
 
+/* ---------------- 渲染：云同步面板 ---------------- */
+
+function syncStatusContent() {
+  const s = sync.getStatus();
+  const map = {
+    local: { icon: '○', color: 'var(--muted)', text: '本地模式 · 数据只存本机' },
+    ok: { icon: '●', color: 'var(--ok)', text: sync.lastSyncText() },
+    syncing: { icon: '⟳', color: 'var(--accent)', text: '正在同步到 GitHub…' },
+    error: { icon: '⚠', color: 'var(--danger)', text: s.message || '同步失败' },
+  };
+  const m = map[s.kind] || map.local;
+  return [
+    h('span', { style: { color: m.color, marginRight: '6px' } }, m.icon),
+    h('span', { style: { fontSize: '11px', color: s.kind === 'error' ? 'var(--danger)' : 'var(--muted)', lineHeight: '1.5', wordBreak: 'break-all' } }, m.text),
+  ];
+}
+
+function patchSyncBadge() {
+  const el = document.getElementById('td-sync-status');
+  if (el) el.replaceChildren(...syncStatusContent());
+}
+
+function renderSyncPanel() {
+  const tokenInput = h('input', {
+    class: 'input', type: 'password', placeholder: 'github_pat_…（粘贴细粒度令牌）',
+    'aria-label': 'GitHub 访问令牌', style: { fontSize: '12px' },
+  });
+  return h('div', { class: 'td-side-block' },
+    h('div', { class: 'side-label', style: { marginBottom: '8px' } }, '云同步 · CLOUD SYNC'),
+    h('div', { id: 'td-sync-status', style: { display: 'flex', alignItems: 'flex-start' } }, syncStatusContent()),
+    h('div', { style: { display: 'flex', gap: '6px', marginTop: '10px' } },
+      h('button', {
+        class: 'btn', style: { fontSize: '11px', padding: '3px 10px' },
+        onclick: () => { if (sync.hasToken()) sync.push(); else { toast('请先在下方设置令牌'); } },
+      }, '⟳ 立即同步'),
+      h('button', {
+        class: 'btn ghost', style: { fontSize: '11px', padding: '3px 10px' },
+        onclick: () => { const d = document.getElementById('td-token-panel'); if (d) d.open = !d.open; },
+      }, '令牌设置')),
+    h('details', { id: 'td-token-panel', style: { marginTop: '10px' } },
+      h('summary', {
+        style: {
+          fontFamily: 'var(--mono)', fontSize: '9.5px', letterSpacing: '.16em',
+          color: 'var(--muted)', cursor: 'pointer', marginBottom: '8px',
+        },
+      }, 'TOKEN SETUP · 生成步骤'),
+      h('div', { style: { fontSize: '11.5px', lineHeight: '1.9', color: 'var(--muted)' } },
+        '① 打开 GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token；',
+        h('br'),
+        '② Repository access 选 “Only select repositories” → ',
+        h('b', { style: { color: 'var(--text)' } }, 'huangxicheng1.github.io'),
+        '；',
+        h('br'),
+        '③ Permissions → Repository permissions → Contents 设为 ',
+        h('b', { style: { color: 'var(--text)' } }, 'Read and write'),
+        '；',
+        h('br'),
+        '④ 生成后复制令牌粘贴到下面。令牌只保存在你本机浏览器，不会进代码或仓库。'),
+      tokenInput,
+      h('div', { style: { display: 'flex', gap: '6px', marginTop: '8px' } },
+        h('button', {
+          class: 'btn', style: { fontSize: '11px', padding: '3px 10px' },
+          onclick: () => {
+            if (!tokenInput.value.trim()) { tokenInput.focus(); return; }
+            sync.setToken(tokenInput.value);
+            tokenInput.value = '';
+            toast('令牌已保存，开始连接 GitHub');
+            render();
+          },
+        }, '保存并连接'),
+        h('button', {
+          class: 'btn ghost', style: { fontSize: '11px', padding: '3px 10px' },
+          onclick: () => {
+            sync.setToken('');
+            toast('已清除令牌，回到本地模式');
+            render();
+          },
+        }, sync.hasToken() ? '清除令牌' : '暂不使用'))));
+}
+
 /* ---------------- 渲染：侧栏 ---------------- */
 
 function renderSidebar() {
@@ -166,7 +247,8 @@ function renderSidebar() {
       groupRow('transparent', '全部', open, null),
       store.getGroups().map((g) => groupRow(g.color, g.name, counts.groups.get(g.id) || 0, g.id)),
       h('div', { class: 'tiny-rule' }),
-      groupRow('var(--muted)', '收件箱 · 未排期', counts.inbox, '__inbox')));
+      groupRow('var(--muted)', '收件箱 · 未排期', counts.inbox, '__inbox')),
+    renderSyncPanel());
 }
 
 /* ---------------- 渲染：今日视图 ---------------- */
@@ -342,6 +424,10 @@ function boot() {
   const y = document.getElementById('footerYear');
   if (y) y.textContent = new Date().getFullYear();
   window.addEventListener('hashchange', applyHash);
+  // 云同步：数据变更会触发 onChange 重渲染（含采纳远端数据的场景）；状态变化只更新徽章
+  store.onChange(() => render());
+  sync.onStatus(() => patchSyncBadge());
+  sync.init();
   applyHash();
 }
 

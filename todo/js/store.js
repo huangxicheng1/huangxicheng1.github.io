@@ -15,9 +15,28 @@ function readDb() {
   }
 }
 
-function saveDb(db) {
-  db.meta.updatedAt = new Date().toISOString();
-  localStorage.setItem(KEY, JSON.stringify(db));
+const listeners = new Set();
+
+function saveDb(d, { touch = true } = {}) {
+  if (touch) d.meta.updatedAt = new Date().toISOString();
+  localStorage.setItem(KEY, JSON.stringify(d));
+  for (const fn of [...listeners]) {
+    try { fn(); } catch (e) { /* 监听器异常不影响存储 */ }
+  }
+}
+
+/** 订阅数据变更（云同步用）：任何写入（增删改/采纳远端）后触发。 */
+export function onChange(cb) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+/** 用远端数据整体替换本地（保留远端的 meta.updatedAt，作为下次比较的基准）。 */
+export function replaceDb(newDb) {
+  if (!newDb || !Array.isArray(newDb.tasks) || !Array.isArray(newDb.groups)) return false;
+  db = structuredClone(newDb);
+  saveDb(db, { touch: false });
+  return true;
 }
 
 let db = readDb();
