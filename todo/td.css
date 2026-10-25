@@ -677,3 +677,10 @@ html[data-theme='dark'] .td-page .btn:hover {
 html[data-theme='dark'] .td-group-row:hover,
 html[data-theme='dark'] .td-group-row.active { background: #1a1e24; }
 html[data-theme='dark'] .td-task:hover { background: #15181d; }
+
+/* —— 卡片/面板硬阴影（与主站档案块同语言：昼墨夜白） —— */
+html[data-theme='dark'] { --shadow-ink: rgba(233, 230, 223, 0.55); }
+
+.td-page .card { box-shadow: 3px 3px 0 var(--shadow-ink); }
+.td-page .card:hover { box-shadow: 4px 4px 0 var(--shadow-ink); }
+.td-side-block { box-shadow: 3px 3px 0 var(--shadow-ink); }

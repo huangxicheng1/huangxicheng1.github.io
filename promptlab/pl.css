@@ -553,3 +553,11 @@ html[data-theme='dark'] .pl-page .btn:hover {
   .pl-page .grid { grid-template-columns: 1fr; }
   .pl-content { padding: 0 4px 40px; }
 }
+
+/* —— 卡片硬阴影（与主站档案块同语言：昼墨夜白） —— */
+/* 工坊夜间挂在 html[data-theme]，站点 --shadow-ink 的夜间值只在 body.light 生效，
+   这里在工坊自己的夜间令牌块补上，并给全部卡片/面板挂 3px 硬阴影（悬停加深）。 */
+html[data-theme='dark'] { --shadow-ink: rgba(233, 230, 223, 0.55); }
+
+.pl-page .card { box-shadow: 3px 3px 0 var(--shadow-ink); }
+.pl-page .card:hover { box-shadow: 4px 4px 0 var(--shadow-ink); }
