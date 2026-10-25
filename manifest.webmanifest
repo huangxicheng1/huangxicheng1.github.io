@@ -1,0 +1,16 @@
+{
+  "name": "Isaac's life — 档案室",
+  "short_name": "Isaac's life",
+  "description": "把工作与生活安排在同一处：日记、笔记、游戏库、提示词工坊与今日待办。",
+  "lang": "zh-CN",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#e9e6e0",
+  "theme_color": "#e9e6e0",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
