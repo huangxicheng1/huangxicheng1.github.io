@@ -1,8 +1,8 @@
 {
   "meta": {
     "version": 1,
-    "createdAt": "2026-10-25T06:37:17.457Z",
-    "updatedAt": "2026-10-26T04:53:52.507Z"
+    "createdAt": "2026-10-25T04:59:25.613Z",
+    "updatedAt": "2026-10-26T04:51:51.227Z"
   },
   "groups": [
     {
@@ -33,12 +33,471 @@
   ],
   "tasks": [
     {
-      "id": "t-mvos7jzv-ynsz2",
-      "title": "下午3:00 B416 研讨AAAI审稿意见",
+      "id": "t-001",
+      "title": "写下本月三个重点",
+      "groupId": "g-key",
+      "date": "2026-10-19",
+      "done": true,
+      "createdAt": "2026-10-19",
+      "completedAt": "2026-10-19"
+    },
+    {
+      "id": "t-002",
+      "title": "整理书桌与收纳",
+      "groupId": "g-life",
+      "date": "2026-10-19",
+      "done": true,
+      "createdAt": "2026-10-19",
+      "completedAt": "2026-10-19"
+    },
+    {
+      "id": "t-003",
+      "title": "产品方案讨论",
+      "groupId": "g-work",
+      "date": "2026-10-20",
+      "done": true,
+      "createdAt": "2026-10-20",
+      "completedAt": "2026-10-20"
+    },
+    {
+      "id": "t-004",
+      "title": "阅读 · 设计心理学",
+      "groupId": "g-learn",
+      "date": "2026-10-20",
+      "done": true,
+      "createdAt": "2026-10-20",
+      "completedAt": "2026-10-20"
+    },
+    {
+      "id": "t-005",
+      "title": "去游泳 45 分钟",
+      "groupId": "g-health",
+      "date": "2026-10-20",
+      "done": true,
+      "createdAt": "2026-10-20",
+      "completedAt": "2026-10-20"
+    },
+    {
+      "id": "t-006",
+      "title": "确认周末聚餐",
+      "groupId": "g-life",
+      "date": "2026-10-20",
+      "done": true,
+      "createdAt": "2026-10-20",
+      "completedAt": "2026-10-20"
+    },
+    {
+      "id": "t-007",
+      "title": "整理用户访谈笔记",
+      "groupId": "g-work",
+      "date": "2026-10-21",
+      "done": true,
+      "createdAt": "2026-10-21",
+      "completedAt": "2026-10-21"
+    },
+    {
+      "id": "t-008",
+      "title": "课程 · 色彩与构图",
+      "groupId": "g-learn",
+      "date": "2026-10-21",
+      "done": true,
+      "createdAt": "2026-10-21",
+      "completedAt": "2026-10-21"
+    },
+    {
+      "id": "t-009",
+      "title": "新版本评审",
+      "groupId": "g-work",
+      "date": "2026-10-21",
+      "done": true,
+      "createdAt": "2026-10-21",
+      "completedAt": "2026-10-26T04:51:49.142Z"
+    },
+    {
+      "id": "t-010",
+      "title": "补充水果与鲜花",
+      "groupId": "g-life",
+      "date": "2026-10-21",
+      "done": true,
+      "createdAt": "2026-10-21",
+      "completedAt": "2026-10-21"
+    },
+    {
+      "id": "t-011",
+      "title": "公园散步",
+      "groupId": "g-health",
+      "date": "2026-10-22",
+      "done": true,
+      "createdAt": "2026-10-22",
+      "completedAt": "2026-10-22"
+    },
+    {
+      "id": "t-012",
+      "title": "读书笔记 · 第一期",
+      "groupId": "g-learn",
+      "date": "2026-10-22",
+      "done": true,
+      "createdAt": "2026-10-22",
+      "completedAt": "2026-10-22"
+    },
+    {
+      "id": "t-013",
+      "title": "给朋友挑生日礼物",
+      "groupId": "g-life",
+      "date": "2026-10-22",
+      "done": true,
+      "createdAt": "2026-10-22",
+      "completedAt": "2026-10-22"
+    },
+    {
+      "id": "t-014",
+      "title": "周计划与团队同步",
+      "groupId": "g-work",
+      "date": "2026-10-23",
+      "done": true,
+      "createdAt": "2026-10-23",
+      "completedAt": "2026-10-23"
+    },
+    {
+      "id": "t-015",
+      "title": "晚间拉伸",
+      "groupId": "g-health",
+      "date": "2026-10-23",
+      "done": true,
+      "createdAt": "2026-10-23",
+      "completedAt": "2026-10-23"
+    },
+    {
+      "id": "t-016",
+      "title": "打磨首页交互",
+      "groupId": "g-work",
+      "date": "2026-10-24",
+      "done": true,
+      "createdAt": "2026-10-24",
+      "completedAt": "2026-10-24"
+    },
+    {
+      "id": "t-017",
+      "title": "整理旅行愿望清单",
+      "groupId": "g-life",
+      "date": "2026-10-24",
+      "done": true,
+      "createdAt": "2026-10-24",
+      "completedAt": "2026-10-24"
+    },
+    {
+      "id": "t-018",
+      "title": "练习英语听力 20 分钟",
+      "groupId": "g-learn",
+      "date": "2026-10-24",
+      "done": true,
+      "createdAt": "2026-10-24",
+      "completedAt": "2026-10-24"
+    },
+    {
+      "id": "t-019",
+      "title": "把这周的报销单交掉",
+      "groupId": "g-work",
+      "date": "2026-10-25",
+      "done": true,
+      "createdAt": "2026-10-25",
+      "completedAt": "2026-10-26T04:51:49.804Z"
+    },
+    {
+      "id": "t-020",
+      "title": "给妈妈回电话",
+      "groupId": "g-life",
+      "date": "2026-10-25",
+      "done": true,
+      "createdAt": "2026-10-25",
+      "completedAt": "2026-10-26T04:51:50.169Z"
+    },
+    {
+      "id": "t-021",
+      "title": "月度分享会",
+      "groupId": "g-key",
+      "date": "2026-10-25",
+      "done": true,
+      "createdAt": "2026-10-25",
+      "completedAt": "2026-10-26T04:51:51.227Z"
+    },
+    {
+      "id": "t-022",
+      "title": "预约周末展览",
+      "groupId": "g-life",
+      "date": "2026-10-25",
+      "done": false,
+      "createdAt": "2026-10-25",
+      "completedAt": null
+    },
+    {
+      "id": "t-023",
+      "title": "阅读 · 留白的力量",
+      "groupId": "g-learn",
+      "date": "2026-10-25",
+      "done": true,
+      "createdAt": "2026-10-25",
+      "completedAt": "2026-10-25"
+    },
+    {
+      "id": "t-024",
+      "title": "慢跑 3 公里",
+      "groupId": "g-health",
+      "date": "2026-10-25",
+      "done": false,
+      "createdAt": "2026-10-25",
+      "completedAt": null
+    },
+    {
+      "id": "t-025",
+      "title": "设计系统颜色整理",
       "groupId": "g-work",
       "date": "2026-10-26",
-      "done": false,
+      "done": true,
       "createdAt": "2026-10-26",
+      "completedAt": "2026-10-26T04:51:45.022Z"
+    },
+    {
+      "id": "t-026",
+      "title": "写一页学习笔记",
+      "groupId": "g-learn",
+      "date": "2026-10-26",
+      "done": true,
+      "createdAt": "2026-10-26",
+      "completedAt": "2026-10-26T04:51:45.562Z"
+    },
+    {
+      "id": "t-027",
+      "title": "阳台植物浇水",
+      "groupId": "g-life",
+      "date": "2026-10-26",
+      "done": true,
+      "createdAt": "2026-10-26",
+      "completedAt": "2026-10-26T04:51:46.286Z"
+    },
+    {
+      "id": "t-028",
+      "title": "晚间瑜伽",
+      "groupId": "g-health",
+      "date": "2026-10-26",
+      "done": true,
+      "createdAt": "2026-10-26",
+      "completedAt": "2026-10-26T04:51:46.650Z"
+    },
+    {
+      "id": "t-029",
+      "title": "朋友的生日",
+      "groupId": "g-key",
+      "date": "2026-10-27",
+      "done": false,
+      "createdAt": "2026-10-27",
+      "completedAt": null
+    },
+    {
+      "id": "t-030",
+      "title": "可用性测试复盘",
+      "groupId": "g-work",
+      "date": "2026-10-27",
+      "done": false,
+      "createdAt": "2026-10-27",
+      "completedAt": null
+    },
+    {
+      "id": "t-031",
+      "title": "整理订阅与账单",
+      "groupId": "g-life",
+      "date": "2026-10-27",
+      "done": false,
+      "createdAt": "2026-10-27",
+      "completedAt": null
+    },
+    {
+      "id": "t-032",
+      "title": "读完《设计中的设计》第三章",
+      "groupId": "g-learn",
+      "date": "2026-10-27",
+      "done": false,
+      "createdAt": "2026-10-27",
+      "completedAt": null
+    },
+    {
+      "id": "t-033",
+      "title": "项目阶段交付",
+      "groupId": "g-work",
+      "date": "2026-10-28",
+      "done": false,
+      "createdAt": "2026-10-28",
+      "completedAt": null
+    },
+    {
+      "id": "t-034",
+      "title": "骑行 · 河边路线",
+      "groupId": "g-health",
+      "date": "2026-10-28",
+      "done": false,
+      "createdAt": "2026-10-28",
+      "completedAt": null
+    },
+    {
+      "id": "t-035",
+      "title": "备份资料与文件",
+      "groupId": "g-life",
+      "date": "2026-10-28",
+      "done": false,
+      "createdAt": "2026-10-28",
+      "completedAt": null
+    },
+    {
+      "id": "t-036",
+      "title": "周进度回顾",
+      "groupId": "g-work",
+      "date": "2026-10-29",
+      "done": false,
+      "createdAt": "2026-10-29",
+      "completedAt": null
+    },
+    {
+      "id": "t-037",
+      "title": "和朋友看电影",
+      "groupId": "g-life",
+      "date": "2026-10-29",
+      "done": false,
+      "createdAt": "2026-10-29",
+      "completedAt": null
+    },
+    {
+      "id": "t-038",
+      "title": "练习英语听力 30 分钟",
+      "groupId": "g-learn",
+      "date": "2026-10-29",
+      "done": false,
+      "createdAt": "2026-10-29",
+      "completedAt": null
+    },
+    {
+      "id": "t-039",
+      "title": "周末徒步",
+      "groupId": "g-health",
+      "date": "2026-10-30",
+      "done": false,
+      "createdAt": "2026-10-30",
+      "completedAt": null
+    },
+    {
+      "id": "t-040",
+      "title": "逛周末市集",
+      "groupId": "g-life",
+      "date": "2026-10-30",
+      "done": false,
+      "createdAt": "2026-10-30",
+      "completedAt": null
+    },
+    {
+      "id": "t-041",
+      "title": "整理本周灵感",
+      "groupId": "g-work",
+      "date": "2026-10-31",
+      "done": false,
+      "createdAt": "2026-10-31",
+      "completedAt": null
+    },
+    {
+      "id": "t-042",
+      "title": "阅读 · 做好一件事",
+      "groupId": "g-learn",
+      "date": "2026-10-31",
+      "done": false,
+      "createdAt": "2026-10-31",
+      "completedAt": null
+    },
+    {
+      "id": "t-043",
+      "title": "确认交付细节",
+      "groupId": "g-work",
+      "date": "2026-11-01",
+      "done": false,
+      "createdAt": "2026-11-01",
+      "completedAt": null
+    },
+    {
+      "id": "t-044",
+      "title": "预约牙齿检查",
+      "groupId": "g-health",
+      "date": "2026-11-02",
+      "done": false,
+      "createdAt": "2026-11-02",
+      "completedAt": null
+    },
+    {
+      "id": "t-045",
+      "title": "交周报",
+      "groupId": "g-work",
+      "date": "2026-11-03",
+      "done": false,
+      "createdAt": "2026-11-03",
+      "completedAt": null
+    },
+    {
+      "id": "t-046",
+      "title": "作品集内容更新",
+      "groupId": "g-learn",
+      "date": "2026-11-03",
+      "done": false,
+      "createdAt": "2026-11-03",
+      "completedAt": null
+    },
+    {
+      "id": "t-047",
+      "title": "月末复盘",
+      "groupId": "g-key",
+      "date": "2026-11-04",
+      "done": false,
+      "createdAt": "2026-11-04",
+      "completedAt": null
+    },
+    {
+      "id": "t-048",
+      "title": "整理桌面文件",
+      "groupId": "g-life",
+      "date": "2026-11-04",
+      "done": false,
+      "createdAt": "2026-11-04",
+      "completedAt": null
+    },
+    {
+      "id": "t-049",
+      "title": "为下个月做准备",
+      "groupId": "g-work",
+      "date": "2026-11-05",
+      "done": false,
+      "createdAt": "2026-11-05",
+      "completedAt": null
+    },
+    {
+      "id": "t-050",
+      "title": "想买一台便携显示器",
+      "groupId": "g-life",
+      "date": null,
+      "done": false,
+      "createdAt": "2026-10-22",
+      "completedAt": null
+    },
+    {
+      "id": "t-051",
+      "title": "收藏的论文还没读",
+      "groupId": "g-learn",
+      "date": null,
+      "done": false,
+      "createdAt": "2026-10-22",
+      "completedAt": null
+    },
+    {
+      "id": "t-052",
+      "title": "给工位添一盏小灯",
+      "groupId": "g-life",
+      "date": null,
+      "done": false,
+      "createdAt": "2026-10-22",
       "completedAt": null
     }
   ]
