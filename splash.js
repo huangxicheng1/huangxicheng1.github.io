@@ -32,7 +32,7 @@
     readerName: 'Jmp 7c:0x00',
     no: '0017',
     level: '1',
-    password: 'root',
+    password: 'huang',
     requireConfirm: true,
     skippable: true,
     sound: true
