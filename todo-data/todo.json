@@ -1,8 +1,8 @@
 {
   "meta": {
     "version": 1,
-    "createdAt": "2026-10-25T04:59:42.854Z",
-    "updatedAt": "2026-10-25T04:59:42.854Z"
+    "createdAt": "2026-10-25T06:37:17.457Z",
+    "updatedAt": "2026-10-26T04:53:52.507Z"
   },
   "groups": [
     {
@@ -31,5 +31,15 @@
       "color": "#8a4fb0"
     }
   ],
-  "tasks": []
+  "tasks": [
+    {
+      "id": "t-mvos7jzv-ynsz2",
+      "title": "下午3:00 B416 研讨AAAI审稿意见",
+      "groupId": "g-work",
+      "date": "2026-10-26",
+      "done": false,
+      "createdAt": "2026-10-26",
+      "completedAt": null
+    }
+  ]
 }
