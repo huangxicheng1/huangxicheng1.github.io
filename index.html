@@ -309,7 +309,7 @@
 </footer>
 
 <!-- 模型档案首屏水合：读 gallery/works.js 的数据，取最新一件做封面、其余做列表；没有数据则保留上面的静态内容。 -->
-<script src="./gallery/works.js?v=6"></script>
+<script src="./gallery/works.js?v=8"></script>
 <script>
   (function () {
     var esc = function (s) {
@@ -318,7 +318,7 @@
     var data = window.GEN_WORKS;
     if (!data || !data.works || !data.works.length) return;
     var works = data.works.filter(function (w) { return w && w.cover; })
-      .sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')) || String(a.index || '').localeCompare(String(b.index || '')); });
+      .sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')) || String(b.index || '').localeCompare(String(a.index || '')); });
     if (!works.length) return;
     var top = works[0];
     var feature = document.querySelector('.ge-feature');

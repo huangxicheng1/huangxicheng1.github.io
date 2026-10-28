@@ -133,20 +133,20 @@ body.light .ge-terminal { border-color: var(--hair); }
 .ge-chip b { font-weight: 400; margin-left: 5px; color: var(--muted); }
 
 /* ============ 作品墙 ============ */
-.ge-wall { margin-top: 26px; columns: 3; column-gap: 22px; }
-@media (max-width: 1000px) { .ge-wall { columns: 2; } }
-@media (max-width: 640px) { .ge-wall { columns: 1; } }
+.ge-wall { margin-top: 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 1000px) { .ge-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .ge-wall { grid-template-columns: 1fr; } }
 
 .ge-card {
-  break-inside: avoid; margin: 0 0 22px; display: block;
+  display: flex; flex-direction: column; margin: 0;
   border: 1px solid var(--hair); background: var(--panel);
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 .ge-card:hover { border-color: var(--ink); transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--shadow-ink); }
 .ge-card:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
 
-.ge-media { position: relative; overflow: hidden; background: #10151c; }
-.ge-media img { display: block; width: 100%; height: auto; transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
+.ge-media { position: relative; overflow: hidden; background: #10151c; aspect-ratio: 16 / 10; }
+.ge-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
 .ge-card:hover .ge-media img { transform: scale(1.035); }
 .ge-media::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -201,7 +201,7 @@ body.light .ge-terminal { border-color: var(--hair); }
 .ge-hover .ge-hover-open { color: var(--orange); }
 .ge-card:hover .ge-hover, .ge-card:focus-visible .ge-hover { opacity: 1; transform: none; }
 
-.ge-body { padding: 13px 14px 15px; border-top: 1px solid var(--hair-soft); }
+.ge-body { flex: 1; display: flex; flex-direction: column; padding: 13px 14px 15px; border-top: 1px solid var(--hair-soft); }
 .ge-title {
   display: flex; align-items: baseline; gap: 8px;
   font-family: var(--din); font-size: 16px; font-weight: 700; letter-spacing: .14em;
@@ -215,7 +215,7 @@ body.light .ge-terminal { border-color: var(--hair); }
 }
 .ge-meta {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
-  margin-top: 11px; font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em; color: var(--muted);
+  margin-top: auto; padding-top: 11px; font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em; color: var(--muted);
 }
 .ge-meta span { display: inline-flex; align-items: center; gap: 5px; }
 .ge-meta b { color: var(--ink-soft); font-weight: 400; }
