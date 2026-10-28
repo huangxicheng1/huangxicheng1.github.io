@@ -1,0 +1,66 @@
+/* 生成档案数据源 —— 用 <script> 加载而不是 fetch，这样本地双击 index.html 也能看到内容。 */
+window.GEN_WORKS = {
+  "site": "生成档案 · GENERATIVE ARCHIVE",
+  "updated": "2026-10-28",
+  "_howto": "一条作品 = 一次生成。scene 是「同题」分组键：同一个题材用不同模型各生成一版时，把它们填成同一个 scene，页面就会在「同题对比」里并排摆出来。pick:true 表示这一版是我最终采用的那版，同题有两版以上时会盖 ADOPTED 章。engine 填模型名（留空显示「未标注」，也不进引擎筛选）。href 留空则不显示「进入场景」。改完把 index.html 里的 ?v= 版本号 +1 破缓存。",
+  "works": [
+    {
+      "id": "dragon-garden",
+      "index": "001",
+      "scene": "dragon-garden",
+      "sceneName": "彩域龙踪 · 中国龙体素花园",
+      "title": "龙游绮园",
+      "subtitle": "THE DRAGON'S BLOSSOM GARDEN",
+      "cover": "covers/dragon-garden.jpg",
+      "href": "works/dragon-garden.html",
+      "theme": "园林 · 神话",
+      "medium": "体素 · VOXEL",
+      "engine": "GPT 6.1 Terrad Ultra",
+      "source": "https://chatgpt.com/s/cx_6ae1b46b11688191a3046b480faef32a",
+      "date": "2026-10-28",
+      "pick": true,
+      "prompt": "设计并制作一个极具创意、精巧复杂且细节丰富的体素（voxel）艺术场景：一条中国龙盘旋在一座美丽的花园中，园内有多棵树木，其中包括盛开的樱花。整体画面要令人惊艳、元素丰富多样，并使用色彩鲜艳的体素来构建。可以自由使用 Three.js 等库（通过 CDN 引入）。最终交付一个完整、自包含且可交互/可玩的 HTML 文件，能够直接在浏览器中打开运行，具有清晰的锐利体素边缘、漂亮的光影效果，并支持相机旋转控制。",
+      "desc": "一座可以走进去的体素园林：云腰轻放庭院，樱雪落进砚水，池心卧着一条青蓝色的龙。拱桥、亭台、锦鲤都齐了，五颗藏在花圃里的金鳞灵珠要点开才能凑齐，还能切昼夜、让镜头自己巡游。",
+      "tags": ["体素", "樱花", "中国龙", "昼夜切换", "可旋转", "寻物"],
+      "interactive": true
+    },
+    {
+      "id": "rainy-konbini",
+      "index": "002",
+      "scene": "rainy-konbini",
+      "sceneName": "雨夜便利店街角",
+      "title": "雨夜便利店街角",
+      "subtitle": "RAINY NIGHT · KONBINI CORNER",
+      "cover": "covers/rainy-konbini.jpg",
+      "href": "works/rainy-konbini/",
+      "theme": "街景 · 夜色",
+      "medium": "体素 · VOXEL",
+      "engine": "OpenAI Sites",
+      "date": "2026-10-28",
+      "pick": true,
+      "prompt": "制作雨夜便利店街角场景",
+      "desc": "雨线是斜的，灯箱是暖的。自动贩卖机还亮着，店里的货架整整齐齐——像凌晨两点路过、又没敢推门进去的那种街角。",
+      "tags": ["体素", "雨夜", "街景", "可旋转"],
+      "interactive": true
+    },
+    {
+      "id": "sunshower-harbor",
+      "index": "003",
+      "scene": "sunshower-harbor",
+      "sceneName": "太阳雨中的小渔港",
+      "title": "太阳雨中的小渔港",
+      "subtitle": "SUNSHOWER HARBOR",
+      "cover": "covers/sunshower-harbor.jpg",
+      "href": "works/sunshower-harbor/",
+      "theme": "海港 · 白昼",
+      "medium": "低多边形 · LOW-POLY",
+      "engine": "OpenAI Sites",
+      "date": "2026-10-28",
+      "pick": true,
+      "prompt": "",
+      "desc": "晴着又下着的一场雨。浮桥轻轻地晃，小船一条挨着一条，海面被雨点敲出细密的圆——整个港口像刚被洗过一遍。",
+      "tags": ["低多边形", "海港", "晴天", "可旋转"],
+      "interactive": true
+    }
+  ]
+};

@@ -1,7 +1,7 @@
 {
   "name": "Isaac's life — 档案室",
   "short_name": "Isaac's life",
-  "description": "把工作与生活安排在同一处：日记、笔记、游戏库、提示词工坊与今日待办。",
+  "description": "把工作与生活安排在同一处：日记、笔记、游戏库、生成档案与今日待办。",
   "lang": "zh-CN",
   "start_url": "/index.html",
   "scope": "/",

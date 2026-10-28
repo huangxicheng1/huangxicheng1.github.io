@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="description" content="生成档案 · GENERATIVE ARCHIVE — 用不同模型生成的体素与低多边形场景，可旋转、可进入的公开作品档案。">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=3">
+  <title>生成档案 · GENERATIVE ARCHIVE — Isaac’s life</title>
+  <link rel="stylesheet" href="../archive.css?v=3">
+  <link rel="stylesheet" href="./gallery.css?v=5">
+</head>
+<body data-page="gallery">
+
+<div class="utility">
+  <div class="wrap">
+    <span>ISAAC ARCHIVE ORGANIZATION <b>■</b> 影像合成科 · 生成档案</span>
+    <span>GEN ARCHIVE v1.0 <b>●</b> ACCESS: PUBLIC</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark" aria-label="hxc" style="background:none;box-shadow:none">
+      <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+        <path d="M7 19 H30 L37 27 H62 V62 H7 Z" fill="var(--logo-shadow, rgba(20,20,18,.9))"
+              transform="translate(2 2)"/>
+        <path d="M3 15 H26 L33 23 H58 V58 H3 Z" fill="var(--panel,#f1efe9)"
+              stroke="var(--ink,#141412)" stroke-width="2"/>
+        <rect x="47.5" y="27.5" width="6.5" height="6.5" fill="#ff7500"/>
+        <g transform="translate(6.5 30.9) scale(0.96)" fill="none"
+           stroke="var(--ink,#141412)" stroke-width="3.2" stroke-linecap="square">
+          <path d="M2 0 V20"/>
+          <path d="M2 9.5 H8 Q13.5 9.5 13.5 14.75 V20"/>
+          <path d="M20 9 L32 20"/>
+          <path d="M32 9 L20 20"/>
+          <path d="M46.89 10.61 A5.5 5.5 0 1 0 46.89 18.39"/>
+        </g>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <strong>Isaac’s life</strong>
+      <small>THE BINDING OF ORDINARY DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="../index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="../games/index.html"><b>游戏库</b><span>GAME LIBRARY</span></a>
+      <a class="dept" href="../calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="../notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+      <a class="dept active" aria-current="page" href="./index.html"><b>生成档案</b><span>GEN ARCHIVE</span></a>
+      <a class="dept" href="../todo/"><b>事务科</b><span>TODO LIST</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
+  </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <nav class="ge-crumb" aria-label="位置">
+      <a href="../index.html">档案室</a><i>/</i>
+      <span>源石技艺部 · 影像合成科</span><i>/</i>
+      <span class="ge-crumb-end">生成档案 GENERATIVE ARCHIVE</span>
+    </nav>
+
+    <section class="ge-hero" aria-label="生成档案简介">
+      <div class="ge-corners"></div>
+      <div class="ge-hero-grid">
+        <div class="ge-hero-main">
+          <p class="eyebrow">MODEL SYNTHESIS <b>ARCHIVE</b> — 模型生成作品公开档案</p>
+          <h1>模型生成的，<br><em>也进档案。</em></h1>
+          <p class="ge-lede">这里收的是我用不同模型生成、再一路调到能用的作品：体素园林、雨夜街角、太阳雨里的渔港。每一件都能点进去，转动、缩放，自己走一圈——不是截图，是能进得去的场景。</p>
+          <div class="ge-tags">
+            <span class="ge-tag"><i>■</i>体素 / 低多边形</span>
+            <span class="ge-tag"><i>◉</i>交互 3D</span>
+            <span class="ge-tag"><i>⤢</i>可旋转浏览</span>
+            <span class="ge-tag"><i>⌗</i>多模型收录</span>
+          </div>
+          <div class="ge-cta">
+            <a class="btn" href="#wall">开始翻阅 ↓</a>
+            <button class="btn ghost" id="geRandom" type="button">随便看一件 ⤮</button>
+          </div>
+        </div>
+        <aside class="ge-hero-side">
+          <div class="side-label">收藏概况 · COLLECTION</div>
+          <div class="ge-side-stats">
+            <div class="stat-line"><span>收录作品</span><b id="geStatWorks">—</b></div>
+            <div class="stat-line"><span>生成引擎</span><b id="geStatEngines">—</b></div>
+            <div class="stat-line"><span>可交互场景</span><b id="geStatInteractive">—</b></div>
+            <div class="stat-line"><span>最近入库</span><b id="geStatUpdated">—</b></div>
+          </div>
+          <div class="ge-terminal" aria-hidden="true" id="geTerminal">
+            <span class="t-dim">INTAKE QUEUE · 入库队列</span><br>
+            <span class="t-dim">载入中…</span> <span class="ge-cursor"></span>
+          </div>
+          <p class="ge-annot">DEPT RL-04 · SYNTHESIS LOG MAINTAINED BY ISAAC</p>
+        </aside>
+      </div>
+    </section>
+
+    <div class="section-head" id="wall">
+      <h2>作品墙</h2><span class="en">WORKS — CLICK TO ENTER</span>
+      <span class="idx">SHOWING <b id="geShown">00</b> / <b id="geTotal">00</b></span>
+    </div>
+
+    <div class="ge-toolbar">
+      <label class="ge-search">
+        <span class="sr-only">检索作品</span>
+        <input id="geSearch" type="search" placeholder="检索标题、题材、引擎…" autocomplete="off">
+      </label>
+      <div class="ge-filters" id="geFilters" role="group" aria-label="筛选"></div>
+      <div class="ge-views" role="group" aria-label="视图切换">
+        <button type="button" data-view="wall" aria-pressed="true">档案墙</button>
+        <button type="button" data-view="compare" aria-pressed="false">同题对比</button>
+      </div>
+    </div>
+
+    <div class="ge-wall" id="geWall"></div>
+    <div class="ge-compare" id="geCompare" hidden></div>
+    <div class="ge-empty" id="geEmpty" hidden>没有匹配的作品 — 换个关键词，或者点「全部」。</div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>ISAAC ARCHIVE — GEN ARCHIVE</b> · 影像合成科 · 作品由不同模型生成，人负责挑和改 · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
+<div class="ge-lb" id="geLightbox" hidden role="dialog" aria-modal="true" aria-labelledby="geLbTitle">
+  <div class="ge-lb-panel">
+    <button class="ge-lb-close" id="geLbClose" type="button" aria-label="关闭">✕</button>
+    <div class="ge-lb-stage">
+      <img id="geLbImg" alt="">
+      <div class="ge-lb-nav">
+        <button id="geLbPrev" type="button" aria-label="上一件">‹</button>
+        <button id="geLbNext" type="button" aria-label="下一件">›</button>
+      </div>
+    </div>
+    <div class="ge-lb-info">
+      <div class="ge-lb-kicker" id="geLbKicker">ARCHIVE NO. —</div>
+      <h2 id="geLbTitle">—</h2>
+      <div class="ge-lb-sub" id="geLbSub">—</div>
+      <p class="ge-lb-desc" id="geLbDesc"></p>
+      <div class="ge-lb-specs" id="geLbSpecs"></div>
+      <div class="ge-lb-prompt" id="geLbPromptBox">
+        <div class="ge-lb-label">ORIGINAL PROMPT · 原始指令</div>
+        <pre id="geLbPrompt"></pre>
+      </div>
+      <div class="ge-lb-tags" id="geLbTags"></div>
+      <div class="ge-lb-variants" id="geLbVariants" hidden></div>
+      <div class="ge-lb-actions">
+        <a class="btn" id="geLbOpen" href="#" target="_blank" rel="noopener">进入场景 ↗</a>
+        <button class="btn ghost" id="geLbCopy" type="button">复制链接</button>
+        <a class="btn ghost" id="geLbSource" href="#" target="_blank" rel="noopener" hidden>原始会话 ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* 主题引导：与全站共用 muse-theme 记忆（'light' = 夜间值班），首屏前落地，避免闪白。 */
+  try {
+    if (localStorage.getItem('muse-theme') === 'light') document.body.classList.add('light');
+  } catch (e) { /* 无痕模式下忽略 */ }
+</script>
+<script src="./works.js?v=5"></script>
+<script src="./gallery.js?v=5"></script>
+</body>
+</html>
