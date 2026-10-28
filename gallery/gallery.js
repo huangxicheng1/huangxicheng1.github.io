@@ -272,8 +272,8 @@
       text.append(el('h3', '', scene.name));
       if (scene.prompt) text.append(el('p', 'ge-cmp-prompt', `「${scene.prompt}」`));
       head.append(text);
-      const models = [...new Set(scene.items.map(modelName))];
-      head.append(el('span', 'ge-cmp-count', `${pad2(models.length)} MODEL${models.length > 1 ? 'S' : ''}`));
+      const versions = scene.items.length;
+      head.append(el('span', 'ge-cmp-count', `${pad2(versions)} VERSION${versions > 1 ? 'S' : ''}`));
       row.append(head);
 
       const track = el('div', 'ge-cmp-track');
@@ -363,7 +363,7 @@
     varBox.replaceChildren();
     if (sibs.length) {
       varBox.hidden = false;
-      varBox.append(el('div', 'ge-lb-label', '同题其他模型 · SAME BRIEF'));
+      varBox.append(el('div', 'ge-lb-label', '同题其他版本 · SAME BRIEF'));
       const strip = el('div', 'ge-lb-vars');
       sibs.forEach(s => {
         const btn = el('button', 'ge-lb-var');
