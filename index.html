@@ -65,7 +65,7 @@
     })();
   </script>
   <style>
-    /* ===== 生成档案首页区块（源石技艺部 · 影像合成科）===== */
+    /* ===== 模型档案首页区块（源石技艺部 · 影像合成科）===== */
     .ge-home { position: relative; border: 1px solid var(--ink); background: var(--panel); margin-top: 4px; }
     body.light .ge-home { border-color: var(--hair); }
     .ge-home::before, .ge-home::after, .ge-home .ge-corners::before, .ge-home .ge-corners::after {
@@ -150,7 +150,7 @@
       <a class="dept" href="./games/index.html"><b>游戏库</b><span>GAME LIBRARY</span></a>
       <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
       <a class="dept" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
-      <a class="dept" href="./gallery/"><b>生成档案</b><span>GEN ARCHIVE</span></a>
+      <a class="dept" href="./gallery/"><b>模型档案</b><span>MODEL ARCHIVE</span></a>
       <a class="dept" href="./todo/"><b>事务科</b><span>TODO LIST</span></a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
@@ -191,17 +191,17 @@
     <nav class="dept-strip" aria-label="部门检索">
       <a class="dept-tab" href="./notes.html"><b>全部档案</b><span>ARCHIVE · <em id="deptAll">0</em> FILES</span></a>
       <a class="dept-tab" href="./calendar.html"><b>生态科 · 生活记录</b><span>ECOLOGY · <em id="deptLife">0</em> FILES</span></a>
-      <a class="dept-tab" href="./gallery/"><b>影像合成科 · 生成档案</b><span>GEN ARCHIVE · <em id="deptWorks">03</em> WORKS</span></a>
+      <a class="dept-tab" href="./gallery/"><b>影像合成科 · 模型档案</b><span>MODEL ARCHIVE · <em id="deptWorks">03</em> WORKS</span></a>
       <!-- 笔记分类部门由脚本按真实数据注入 -->
       <span id="deptCats" class="dept-cats"></span>
     </nav>
 
-    <!-- ===== 新部门：生成档案 ===== -->
+    <!-- ===== 新部门：模型档案 ===== -->
     <div class="section-head" id="gallery">
-      <h2>生成档案</h2><span class="en">GENERATIVE ARCHIVE — MODEL SYNTHESIS DIVISION</span>
+      <h2>模型档案</h2><span class="en">MODEL ARCHIVE — MODEL SYNTHESIS DIVISION</span>
       <span class="idx">DEPT <b>RL-04</b></span>
     </div>
-    <section class="ge-home" aria-label="生成档案入口">
+    <section class="ge-home" aria-label="模型档案入口">
       <div class="ge-corners"></div>
       <div class="ge-home-grid">
         <a class="ge-feature" href="./gallery/#dragon-garden" aria-label="进入作品：龙游绮园">
@@ -230,7 +230,7 @@
             </a>
           </div>
           <div class="ge-home-foot">
-            <a class="btn" href="./gallery/">进入生成档案 ↗</a>
+            <a class="btn" href="./gallery/">进入模型档案 ↗</a>
             <span class="ge-home-hint" id="geHomeHint">03 WORKS · 持续收录</span>
           </div>
         </div>
@@ -308,8 +308,8 @@
   </div>
 </footer>
 
-<!-- 生成档案首屏水合：读 gallery/works.js 的数据，取最新一件做封面、其余做列表；没有数据则保留上面的静态内容。 -->
-<script src="./gallery/works.js?v=5"></script>
+<!-- 模型档案首屏水合：读 gallery/works.js 的数据，取最新一件做封面、其余做列表；没有数据则保留上面的静态内容。 -->
+<script src="./gallery/works.js?v=6"></script>
 <script>
   (function () {
     var esc = function (s) {

@@ -1,5 +1,5 @@
 /* ============================================================================
- * 生成档案 · gallery.js
+ * 模型档案 · gallery.js
  * 读取 works.json → 渲染作品墙 / 筛选 / 详情抽屉。零依赖，全部原生。
  * 新增作品只需要往 works.json 里加一条，并把封面放进 covers/。
  * ========================================================================== */
@@ -379,14 +379,6 @@
     open.href = w.href || '#';
     open.textContent = w.interactive ? '进入场景 ↗' : '查看大图 ↗';
     open.style.display = w.href ? '' : 'none';
-
-    const source = $('#geLbSource');
-    if ((w.source || '').trim()) {
-      source.href = w.source;
-      source.hidden = false;
-    } else {
-      source.hidden = true;
-    }
 
     // 首尾循环
     $('#geLbPrev').disabled = list.length < 2;
