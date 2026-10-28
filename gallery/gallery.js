@@ -38,11 +38,21 @@
   const MODEL_PALETTE = ['#ff7500', '#2f8f7f', '#7b5cc4', '#2f6fb5', '#a8761c', '#c2452f'];
   const modelName = w => (w.engine || '').trim() || '未标注';
   const sceneOf = w => w.scene || w.id;
+  // 配色表：按档案编号顺序，给每个模型依次分配一个颜色。
+  // 同一模型永远同色；新增模型只会往后取一格，不会改动已有模型的颜色。
+  let MODEL_COLORS = new Map();
+  function buildModelColors(works) {
+    MODEL_COLORS = new Map();
+    const ordered = works.slice().sort((a, b) => String(a.index || '').localeCompare(String(b.index || '')));
+    for (const w of ordered) {
+      const name = modelName(w);
+      if (!name || name === '未标注' || MODEL_COLORS.has(name)) continue;
+      MODEL_COLORS.set(name, MODEL_PALETTE[MODEL_COLORS.size % MODEL_PALETTE.length]);
+    }
+  }
   function modelColor(name) {
     if (!name || name === '未标注') return null;
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-    return MODEL_PALETTE[h % MODEL_PALETTE.length];
+    return MODEL_COLORS.get(name) || null;
   }
   function modelTag(w, cls) {
     const name = modelName(w);
@@ -476,6 +486,7 @@
       const data = window.GEN_WORKS;
       if (!data || !Array.isArray(data.works) || !data.works.length) throw new Error('no data');
       state.works = data.works.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || (a.index || '').localeCompare(b.index || ''));
+      buildModelColors(state.works);
       buildFilters();
       renderStats();
       state.list = state.works.slice();
