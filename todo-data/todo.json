@@ -2,7 +2,7 @@
   "meta": {
     "version": 1,
     "createdAt": "2026-10-25T06:37:17.457Z",
-    "updatedAt": "2026-10-26T08:33:16.491Z"
+    "updatedAt": "2026-10-28T12:09:33.105Z"
   },
   "groups": [
     {
@@ -46,9 +46,9 @@
       "title": "6.30 出门南湖吃破破烂烂",
       "groupId": "g-life",
       "date": "2026-10-26",
-      "done": false,
+      "done": true,
       "createdAt": "2026-10-26",
-      "completedAt": null
+      "completedAt": "2026-10-28T12:09:33.105Z"
     }
   ]
 }
