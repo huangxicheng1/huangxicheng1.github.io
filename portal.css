@@ -2,15 +2,15 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #060a12;
-  --panel: #0b1018;
-  --line: #1a2436;
+  --bg: #070D14;
+  --panel: #0C1219;
+  --line: #2A3440;
   --cyan: #D5E5EC;
-  --cyan-dim: #7fd6e8;
+  --cyan-dim: #8FA4B0;
   --purple: #3D526E;
   --orange: #AF7032;
-  --text: #cfe8ef;
-  --muted: #8fa8b8;
+  --text: #D5E5EC;
+  --muted: #6E8292;
 }
 
 html { scroll-behavior: smooth; }
