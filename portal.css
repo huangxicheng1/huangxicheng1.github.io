@@ -2,9 +2,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #070D14;
-  --panel: #0C1219;
-  --line: #2A3440;
+  --bg: #323840;
+  --panel: #2A3038;
+  --line: rgba(213,229,236,0.25);
   --cyan: #D5E5EC;
   --cyan-dim: #8FA4B0;
   --purple: #3D526E;
@@ -28,9 +28,9 @@ body {
   position: absolute; inset: 0;
   /* 丝网印刷网点纹理：极细密点阵 + 轻微斜纹 */
   background-image:
-    radial-gradient(circle, rgba(213, 229, 236, 0.025) 1px, transparent 1px),
-    radial-gradient(circle, rgba(213, 229, 236, 0.015) 1px, transparent 1px),
-    repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(213, 229, 236, 0.012) 2px, rgba(213, 229, 236, 0.012) 3px);
+    radial-gradient(circle, rgba(213, 229, 236, 0.035) 1px, transparent 1px),
+    radial-gradient(circle, rgba(213, 229, 236, 0.022) 1px, transparent 1px),
+    repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(213, 229, 236, 0.018) 2px, rgba(213, 229, 236, 0.018) 3px);
   background-size: 20px 20px, 40px 40px, 6px 6px;
   /* 顶部与底部的丝网印刷渐变（暗角） */
   mask-image: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, #000 15%, #000 85%, rgba(0,0,0,0.6) 100%);
