@@ -1,18 +1,6 @@
 {
   "version": 1,
   "entry": "notes/java-log-tracing-guide",
-  "updated": "2026-11-03T05:24:35.297Z",
-  "annotations": [
-    {
-      "id": "an_1w2m5sv8g",
-      "quote": "把 traceId 写进 HTTP 请求头时用的标准格式",
-      "prefix": "个 spanId 组成的一棵树。traceparent：",
-      "suffix": "（W3C 定的）：● ● ●TEXT00-8f3c1a2",
-      "start": 2259,
-      "body": "线上自检：这条是从 huangxicheng1.github.io 页面直接写进仓库的，验证完会删掉。",
-      "author": "",
-      "created": "2026-11-03T05:24:35.296Z",
-      "updated": "2026-11-03T05:24:35.296Z"
-    }
-  ]
+  "updated": "2026-11-03T05:28:09.677Z",
+  "annotations": []
 }
