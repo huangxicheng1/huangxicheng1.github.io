@@ -301,7 +301,7 @@
 
   function layout() {
     const hasMarks = state.annotations.some(ann => state.marks.has(ann.id));
-    const wide = window.innerWidth >= RAIL_MIN && hasMarks;
+    const wide = window.innerWidth >= RAIL_MIN && (hasMarks || Boolean(state.draft));
     document.body.classList.toggle('an-wide', wide);
     rail.classList.toggle('is-on', wide);
     if (!wide) {
@@ -619,16 +619,20 @@
     foot.append(save, cancel, tip);
     card.append(head, quote, area, foot);
 
-    const mode = insideRail(card);
+    state.draft = { selection, card, mode: '' };
+    if (window.innerWidth >= RAIL_MIN) {
+      document.body.classList.add('an-wide');
+      layout();
+    }
+    state.draft.mode = insideRail(card);
     placeDraft(card, selection);
     setTimeout(() => area.focus(), 30);
-
-    state.draft = { selection, card, mode };
 
     const finish = () => {
       state.draft = null;
       card.remove();
       closePopover();
+      scheduleLayout();
     };
     cancel.addEventListener('click', finish);
     area.addEventListener('keydown', event => {
