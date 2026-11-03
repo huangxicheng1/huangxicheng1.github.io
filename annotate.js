@@ -919,9 +919,22 @@
     }
   }
 
+  async function hydrateUser() {
+    try {
+      const res = await fetch(`${CONFIG.api}/user`, {
+        headers: { Authorization: `Bearer ${state.token}`, Accept: 'application/vnd.github+json' }
+      });
+      if (!res.ok) return;
+      const user = await res.json();
+      state.user = { login: user.login, avatar: user.avatar_url };
+      writeLocal(KEY_USER, JSON.stringify(state.user));
+    } catch { /* 没有就算了，写的时候还会再问一次 */ }
+  }
+
   async function loadAnnotations() {
     state.loading = true;
     renderStatus();
+    if (state.token && !state.user) await hydrateUser();
     let data = null;
     if (state.token) {
       try {
