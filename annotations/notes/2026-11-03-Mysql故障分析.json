@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "entry": "notes/2026-11-03-Mysql故障分析",
+  "updated": "2026-11-03T05:45:33.654Z",
+  "annotations": [
+    {
+      "id": "an_399jr7u6t",
+      "quote": "心跳表",
+      "prefix": "之前，该等待与复制延迟在监控上会混为同一指标。③ 判据：",
+      "suffix": "（percona.heartbeat）在从库的 TS 差",
+      "start": 2427,
+      "body": "test",
+      "author": "huangxicheng1",
+      "created": "2026-11-03T05:45:33.653Z",
+      "updated": "2026-11-03T05:45:33.653Z"
+    }
+  ]
+}
