@@ -1,0 +1,644 @@
+/* ============================================================================
+ * 划词批注 · 阅读室注释层（annotate.css）
+ * ----------------------------------------------------------------------------
+ * 依赖 archive.css 里的变量与主题约定：默认 = 档案室（暖白），body.light = 夜间值班。
+ * 本文件只负责三件事：
+ *   1. 正文里被批注的原文（.an-mark）怎么长
+ *   2. 右侧空白处的批注卡片（.an-card + 连接线）怎么排
+ *   3. 划词浮标 / 抽屉 / 登录弹层这几个小部件
+ * ========================================================================== */
+
+:root {
+  --an-card: #f7f5ef;
+  --an-card-lift: #fffdf6;
+  --an-line: rgba(20, 20, 18, .18);
+  --an-shadow: rgba(20, 20, 18, .10);
+  --an-mark: rgba(255, 117, 0, .13);
+  --an-mark-on: rgba(255, 117, 0, .26);
+  --an-mark-edge: rgba(255, 117, 0, .55);
+}
+
+body.light {
+  --an-card: #171b21;
+  --an-card-lift: #1e242c;
+  --an-line: rgba(233, 230, 223, .2);
+  --an-shadow: rgba(0, 0, 0, .45);
+  --an-mark: rgba(255, 117, 0, .16);
+  --an-mark-on: rgba(255, 117, 0, .3);
+  --an-mark-edge: rgba(255, 117, 0, .6);
+}
+
+/* 宽屏时给正文让出右侧一条批注走廊，卡片才有地方站 */
+@media (min-width: 1280px) {
+  body.an-wide .inner-page .wrap {
+    max-width: 1320px;
+    padding-right: 300px;
+  }
+}
+
+/* ---------------------------------------------------------------- 1. 高亮 */
+
+.an-mark {
+  background: var(--an-mark);
+  box-shadow: inset 0 -1px 0 var(--an-mark-edge);
+  color: inherit;
+  padding: .06em 0;
+  cursor: pointer;
+  transition: background .18s ease, box-shadow .18s ease;
+  border-radius: 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.an-mark:hover,
+.an-mark.is-active {
+  background: var(--an-mark-on);
+  box-shadow: inset 0 -2px 0 var(--orange);
+}
+
+.an-mark.is-flash {
+  animation: an-flash 1.1s ease-out;
+}
+
+@keyframes an-flash {
+  0%, 100% { background: var(--an-mark); }
+  30% { background: rgba(255, 117, 0, .42); }
+}
+
+/* 正文可以划，但别把侧栏拖进来 */
+body.an-selecting { cursor: text; }
+
+/* ---------------------------------------------------------------- 2. 右侧走廊 */
+
+.an-rail {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  display: none;
+}
+
+.an-rail.is-on { display: block; }
+
+/* 抽屉打开时，把右栏压暗，避免两套卡片互相打架 */
+body.an-drawer-open .an-rail { opacity: .14; pointer-events: none; }
+.an-rail { transition: opacity .18s ease; }
+
+.an-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 262px;
+  padding: 12px 14px 11px;
+  border: 1px solid var(--an-line);
+  border-radius: 13px;
+  background: var(--an-card);
+  box-shadow: 0 12px 30px var(--an-shadow);
+  font-family: var(--zh);
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  pointer-events: auto;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+  will-change: transform;
+}
+
+.an-card:hover,
+.an-card.is-active {
+  background: var(--an-card-lift);
+  border-color: rgba(255, 117, 0, .45);
+  box-shadow: 0 16px 36px var(--an-shadow), 0 0 0 1px rgba(255, 117, 0, .12);
+}
+
+.an-card.is-hidden { opacity: 0; pointer-events: none; }
+
+.an-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.an-card-top b {
+  font-weight: 700;
+  color: var(--orange);
+}
+
+.an-card-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 12.5px;
+}
+
+.an-card-quote {
+  margin: 0 0 7px;
+  padding-left: 8px;
+  border-left: 2px solid var(--an-line);
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.7;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.an-card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  opacity: 0;
+  transition: opacity .16s ease;
+}
+
+.an-card:hover .an-card-actions,
+.an-card.is-active .an-card-actions,
+.an-card.is-editing .an-card-actions {
+  opacity: 1;
+}
+
+.an-card-actions button,
+.an-card-actions a {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.an-card-actions button:hover { color: var(--orange); }
+.an-card-actions button.is-danger:hover { color: #c2410c; }
+
+.an-card textarea {
+  width: 100%;
+  min-height: 82px;
+  margin: 2px 0 0;
+  padding: 8px 9px;
+  border: 1px solid var(--an-line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--zh);
+  font-size: 12.5px;
+  line-height: 1.8;
+  resize: vertical;
+}
+
+.an-card textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--an-orange-soft, rgba(255, 117, 0, .12));
+}
+
+.an-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.an-btn {
+  border: 1px solid var(--an-line);
+  border-radius: 7px;
+  background: transparent;
+  padding: 5px 11px;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  cursor: pointer;
+}
+
+.an-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+.an-btn.is-primary {
+  border-color: transparent;
+  background: var(--orange);
+  color: #fff;
+}
+
+.an-btn.is-primary:hover { background: #ff8a26; color: #fff; }
+
+.an-hintkey {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+/* 卡片到原文的那根线：一根细横线 + 一个点 */
+.an-link {
+  position: fixed;
+  height: 1px;
+  background: linear-gradient(90deg, var(--an-line), rgba(255, 117, 0, .5));
+  transform-origin: 0 50%;
+  pointer-events: none;
+  opacity: .85;
+}
+
+.an-dot {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 3px var(--an-mark);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* ---------------------------------------------------------------- 3. 划词浮标 */
+
+.an-hint {
+  position: fixed;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--an-line);
+  border-radius: 50%;
+  background: var(--an-card);
+  color: var(--orange);
+  box-shadow: 0 8px 22px var(--an-shadow);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  animation: an-pop .16s ease-out;
+}
+
+.an-hint.is-on { display: flex; }
+.an-hint:hover { border-color: var(--orange); background: var(--an-card-lift); }
+
+@keyframes an-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.82); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* 窄屏没有走廊时，批注卡片改成浮在原文旁边的浮层 */
+.an-pop {
+  position: fixed;
+  z-index: 61;
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  display: none;
+}
+
+.an-pop.is-on { display: block; }
+
+.an-pop .an-card {
+  position: relative;
+  width: 100%;
+  left: 0;
+  top: 0;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------- 4. 抽屉 + 按钮 */
+
+.an-dock {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid var(--an-line);
+  border-radius: 100px;
+  background: var(--an-card);
+  color: var(--ink-soft);
+  box-shadow: 0 10px 26px var(--an-shadow);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  cursor: pointer;
+}
+
+.an-dock:hover { border-color: var(--orange); color: var(--orange); }
+
+.an-dock .an-count {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 100px;
+  background: var(--orange);
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+
+.an-dock .an-dot-live {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.an-dock.is-live .an-dot-live { background: var(--ok); box-shadow: 0 0 0 3px rgba(46, 158, 99, .16); }
+
+.an-drawer {
+  position: fixed;
+  right: 20px;
+  bottom: 66px;
+  z-index: 70;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  max-height: min(62vh, 560px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--an-line);
+  border-radius: 14px;
+  background: var(--an-card);
+  box-shadow: 0 24px 60px var(--an-shadow);
+  overflow: hidden;
+}
+
+.an-drawer[hidden] { display: none; }
+
+.an-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 15px 11px;
+  border-bottom: 1px solid var(--an-line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .18em;
+  color: var(--muted);
+}
+
+.an-drawer-head b { color: var(--ink); font-weight: 700; }
+
+.an-drawer-head .an-close {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.an-drawer-head .an-close:hover { color: var(--orange); }
+
+.an-drawer-body {
+  overflow: auto;
+  padding: 6px 15px 15px;
+}
+
+.an-item {
+  display: block;
+  width: 100%;
+  padding: 11px 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--hair-soft);
+  background: none;
+  text-align: left;
+  color: var(--ink-soft);
+  font-family: var(--zh);
+  font-size: 12px;
+  line-height: 1.8;
+  cursor: pointer;
+}
+
+.an-item:last-child { border-bottom: 0; }
+.an-item:hover .an-item-body { color: var(--orange); }
+
+.an-item-top {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.an-item-quote {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.an-item-body { color: var(--ink); transition: color .16s ease; }
+
+.an-item.is-orphan .an-item-top { color: #c2410c; }
+
+.an-empty {
+  padding: 18px 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+/* 登录状态条 */
+.an-acct {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 15px;
+  border-top: 1px solid var(--an-line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+.an-acct img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--an-line);
+}
+
+.an-acct b { color: var(--ink); font-weight: 700; letter-spacing: .06em; }
+
+.an-acct button {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.an-acct button:hover { color: var(--orange); }
+
+/* ---------------------------------------------------------------- 5. 登录弹层 */
+
+.an-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(14, 16, 19, .55);
+  backdrop-filter: blur(4px);
+}
+
+.an-modal[hidden] { display: none; }
+
+.an-modal-card {
+  width: min(470px, 100%);
+  max-height: 86vh;
+  overflow: auto;
+  padding: 24px 26px 22px;
+  border: 1px solid var(--an-line);
+  border-radius: 16px;
+  background: var(--an-card);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+}
+
+.an-modal-card h2 {
+  margin: 0 0 6px;
+  font-family: var(--zh);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+.an-modal-card .an-kicker {
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .2em;
+  color: var(--orange);
+}
+
+.an-modal-card ol {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  line-height: 2;
+}
+
+.an-modal-card ol li::marker { color: var(--orange); font-family: var(--mono); }
+.an-modal-card code {
+  padding: 1px 5px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 4px;
+  background: var(--orange-soft);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.an-modal-card input[type="password"],
+.an-modal-card input[type="text"] {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--an-line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+}
+
+.an-modal-card input:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255, 117, 0, .12);
+}
+
+.an-modal-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.an-modal-foot .an-note {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+.an-modal-card p.an-hintline {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.85;
+}
+
+.an-modal-card a { color: var(--orange); border-bottom: 1px solid currentColor; }
+
+.an-err {
+  margin: 10px 0 0;
+  color: #c2410c;
+  font-size: 11.5px;
+  line-height: 1.8;
+}
+
+/* ---------------------------------------------------------------- 6. 提示条 */
+
+.an-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  z-index: 95;
+  transform: translate(-50%, 12px);
+  padding: 10px 16px;
+  border: 1px solid var(--an-line);
+  border-radius: 100px;
+  background: var(--an-card);
+  color: var(--ink);
+  box-shadow: 0 14px 40px var(--an-shadow);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.an-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------------------------------------------------------------- 7. 窄屏 */
+
+@media (max-width: 1279px) {
+  .an-dock { right: 14px; bottom: 14px; }
+  .an-drawer { right: 14px; bottom: 60px; }
+}
+
+@media (max-width: 540px) {
+  .an-card { width: 100%; }
+  .an-pop .an-card { width: 100%; }
+  .an-drawer { width: calc(100vw - 28px); }
+}
+
+@media print {
+  .an-rail, .an-dock, .an-drawer, .an-hint, .an-pop, .an-modal, .an-toast { display: none !important; }
+  .an-mark { background: none; box-shadow: inset 0 -1px 0 #999; }
+}
