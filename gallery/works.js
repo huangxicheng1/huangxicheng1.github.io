@@ -1,7 +1,7 @@
 /* 模型档案数据源 —— 用 <script> 加载而不是 fetch，这样本地双击 index.html 也能看到内容。 */
 window.GEN_WORKS = {
   "site": "模型档案 · MODEL ARCHIVE",
-  "updated": "2026-10-28",
+  "updated": "2026-11-04",
   "_howto": "一条作品 = 一次生成。scene 是「同题」分组键：同一个题材用不同模型各生成一版时，把它们填成同一个 scene，页面就会在「同题对比」里并排摆出来。pick:true 表示这一版是我最终采用的那版，同题有两版以上时会盖 ADOPTED 章。engine 填模型名（留空显示「未标注」，也不进引擎筛选）。href 留空则不显示「进入场景」。改完把 index.html 里的 ?v= 版本号 +1 破缓存。",
   "works": [
     {
@@ -129,6 +129,63 @@ window.GEN_WORKS = {
         "白昼",
         "可旋转"
       ],
+      "interactive": true
+    },
+    {
+      "id": "sakura-biyori",
+      "index": "007",
+      "scene": "sakura-biyori",
+      "sceneName": "桜日和 · 樱花水岸小屋",
+      "title": "桜日和",
+      "subtitle": "SAKURA BIYORI · WATERSIDE TEA HOUSE",
+      "cover": "covers/sakura-biyori.jpg",
+      "href": "works/sakura-biyori.html",
+      "theme": "庭院 · 春日",
+      "medium": "三渲二 · TOON",
+      "engine": "",
+      "date": "2026-11-04",
+      "pick": true,
+      "prompt": "",
+      "desc": "方形底座上的一座日式水岸茶寮：五株樱树围着一间和室，曲溪从庭院里穿过，木桥搭在溪上，水下有锦鲤，檐下挂着风铃。清晨、黄昏、夜晚三段光线随点随换，障子门、风铃、水波都能点，花瓣、绸带、鱼和茶蒸汽一直在动，还有纯享模式把界面收干净。",
+      "tags": ["三渲二", "樱花", "日式庭院", "昼夜切换", "可旋转", "纯享模式"],
+      "interactive": true
+    },
+    {
+      "id": "jacaranda",
+      "index": "008",
+      "scene": "jacaranda",
+      "sceneName": "春城花信 · 昆明蓝花楹车站",
+      "title": "春城花信",
+      "subtitle": "A QUIET AFTERNOON BENEATH THE JACARANDAS",
+      "cover": "covers/jacaranda.jpg",
+      "href": "works/jacaranda.html",
+      "theme": "车站 · 花季",
+      "medium": "低多边形 · LOW-POLY",
+      "engine": "",
+      "date": "2026-11-04",
+      "pick": true,
+      "prompt": "",
+      "desc": "昆明蓝花楹季的一个午后站台：一排盛开的蓝花楹罩着人行道，紫色花巴士停在站前，车顶载着花盆，站台上有长椅和一张花信海报。花瓣一直在落，晴日、晚霞、花夜三种时段随点随换，还能领一张花票、读一封写给这座城的花信。",
+      "tags": ["低多边形", "蓝花楹", "车站", "花季", "可旋转", "花信"],
+      "interactive": true
+    },
+    {
+      "id": "quidditch",
+      "index": "009",
+      "scene": "quidditch",
+      "sceneName": "魁地奇 · 霍格沃茨立体模型",
+      "title": "霍格沃茨魁地奇",
+      "subtitle": "QUIDDITCH AT HOGWARTS",
+      "cover": "covers/quidditch.png",
+      "href": "works/quidditch.html",
+      "theme": "球场 · 白昼",
+      "medium": "像素3D · PIXEL",
+      "engine": "",
+      "date": "2026-11-04",
+      "pick": true,
+      "prompt": "",
+      "desc": "一件会动的魁地奇收藏品：霍格沃茨城堡踞在山坡上，球场环着六座金色球门，看台人头攒动，学院旗帜迎风。格兰芬多对斯莱特林各七人满员登场，哈利追着金色飞贼压弯俯冲，披风围巾跟着风动。固定等距镜头、低分辨率像素渲染——镜头不转，比赛一直在跑。",
+      "tags": ["像素3D", "魁地奇", "霍格沃茨", "立体模型", "固定镜头", "动画"],
       "interactive": true
     }
   ]
