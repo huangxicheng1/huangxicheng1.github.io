@@ -1901,73 +1901,94 @@
     addBox(model, 0.16, 0.05, 0.16, -0.2, -0.04, -0.18, leatherMat);
     addBox(model, 0.16, 0.05, 0.16, 0.2, -0.04, -0.18, leatherMat);
 
-    // legs, torso, head
+    // Pose data: every joint defaults to the neutral riding stance.
+    const P = cfg.pose || {};
+    const hip = P.hip || [0, 0.09, -0.1];
+    const shoulder = P.shoulder || [0, 0.37, 0.39];
+    const chestPos = P.chest || [0, 0.33, 0.42];
+    const headPos = P.head || [0, 0.5, 0.56];
+    const headTilt = P.headTilt || [0, 0, 0];
+    const neckPos = P.neck || [0, 0.43, 0.49];
+    const collarPos = P.collar || [0, 0.41, 0.49];
+    const crestPos = P.crest || [-0.06, 0.27, 0.55];
+    const hipL = P.hipL || [-0.1, 0.15, -0.12];
+    const hipR = P.hipR || [0.1, 0.15, -0.12];
+    const kneeL = P.kneeL || [-0.15, 0.03, -0.61];
+    const kneeR = P.kneeR || [0.15, 0.03, -0.61];
+    const footL = P.footL || [-0.18, -0.005, -0.94];
+    const footR = P.footR || [0.18, -0.005, -0.94];
+    const shoulderL = P.shoulderL || [-0.13, 0.34, 0.4];
+    const shoulderR = P.shoulderR || [0.13, 0.34, 0.4];
+    const handL = P.handL || [-0.17, 0.13, 0.84];
+    const handR = P.handR || [0.17, 0.12, 0.84];
+    const scarfPos = P.scarf || [0, 0.43, 0.5];
+    const quafflePos = P.quaffle || [0.3, 0.22, 0.7];
+
+    // legs
     const skin = skinMats[cfg.skin % skinMats.length];
     const hair = hairMats[cfg.hair % hairMats.length];
-    limbBetween(model, [-0.1, 0.15, -0.12], [-0.15, 0.03, -0.61], 0.063, trouserMat, 5);
-    limbBetween(model, [0.1, 0.15, -0.12], [0.15, 0.03, -0.61], 0.063, trouserMat, 5);
-    limbBetween(model, [-0.15, 0.03, -0.61], [-0.18, -0.005, -0.94], 0.06, bootMat, 5);
-    limbBetween(model, [0.15, 0.03, -0.61], [0.18, -0.005, -0.94], 0.06, bootMat, 5);
-    addSphere(model, 0.07, -0.19, -0.02, -0.95, bootMat, 0);
-    addSphere(model, 0.07, 0.19, -0.02, -0.95, bootMat, 0);
+    limbBetween(model, hipL, kneeL, 0.063, trouserMat, 5);
+    limbBetween(model, hipR, kneeR, 0.063, trouserMat, 5);
+    limbBetween(model, kneeL, footL, 0.06, bootMat, 5);
+    limbBetween(model, kneeR, footR, 0.06, bootMat, 5);
+    addSphere(model, 0.07, footL[0], footL[1], footL[2], bootMat, 0);
+    addSphere(model, 0.07, footR[0], footR[1], footR[2], bootMat, 0);
 
-    limbBetween(model, [0, 0.09, -0.1], [0, 0.37, 0.39], 0.145,
+    // torso
+    limbBetween(model, hip, shoulder, P.torsoRadius || 0.145,
       std(style.robe, { flatShading: true, roughness: 0.94 }), 6);
-    const chest = addSphere(model, 0.16, 0, 0.33, 0.42, std(style.robeDark, { flatShading: true }), 1);
+    const chest = addSphere(model, 0.16, chestPos[0], chestPos[1], chestPos[2],
+      std(style.robeDark, { flatShading: true }), 1);
     chest.scale.set(1.05, 0.78, 0.82);
 
     // arms
-    const handZ = cfg.role === 'keeper' ? 0.76 : 0.84;
-    limbBetween(model, [-0.13, 0.34, 0.4], [-0.17, 0.13, handZ], 0.048,
-      std(style.robe, { flatShading: true }), 5);
-    addSphere(model, 0.064, -0.17, 0.13, handZ + 0.04, gloveMat, 0);
-    if (cfg.reach) {
-      limbBetween(model, [0.13, 0.34, 0.4], [0.24, 0.42, 1.24], 0.048,
-        std(style.robe, { flatShading: true }), 5);
-      addSphere(model, 0.062, 0.24, 0.42, 1.28, gloveMat, 0);
-      // a little reaching glove highlight
-      addSphere(model, 0.045, 0.26, 0.44, 1.35, skin, 0);
-    } else {
-      limbBetween(model, [0.13, 0.34, 0.4], [0.17, 0.12, handZ], 0.048,
-        std(style.robe, { flatShading: true }), 5);
-      addSphere(model, 0.064, 0.17, 0.12, handZ + 0.04, gloveMat, 0);
-    }
+    const robeArmMat = std(style.robe, { flatShading: true });
+    limbBetween(model, shoulderL, handL, 0.048, robeArmMat, 5);
+    addSphere(model, 0.064, handL[0], handL[1], handL[2] + 0.04, gloveMat, 0);
+    limbBetween(model, shoulderR, handR, 0.048, robeArmMat, 5);
+    addSphere(model, 0.064, handR[0], handR[1], handR[2] + 0.04, gloveMat, 0);
 
-    // neck / head
-    const headZ = 0.56;
-    const headY = 0.5;
-    addCylinder(model, 0.06, 0.075, 0.16, 6, 0, 0.43, 0.49, skin);
-    addSphere(model, 0.158, 0, headY, headZ, skin, 1);
-    const hairCap = addSphere(model, 0.162, 0, headY + 0.04, headZ - 0.015, hair, 1);
+    // neck
+    addCylinder(model, 0.06, 0.075, 0.16, 6, neckPos[0], neckPos[1], neckPos[2], skin);
+
+    // head — isolated so it can tilt and turn independently
+    const headGroup = new THREE.Group();
+    headGroup.position.set(headPos[0], headPos[1], headPos[2]);
+    headGroup.rotation.set(headTilt[0], headTilt[1], headTilt[2]);
+    model.add(headGroup);
+    addSphere(headGroup, 0.158, 0, 0, 0, skin, 1);
+    const hairCap = addSphere(headGroup, 0.162, 0, 0.04, -0.015, hair, 1);
     hairCap.scale.set(1.02, 0.82, 1.02);
-    // tiny nose
-    addSphere(model, 0.04, 0, headY - 0.01, headZ + 0.15, skin, 0);
-    // house trim at the collar
-    addBox(model, 0.22, 0.055, 0.22, 0, 0.41, 0.49, std(style.trim, { flatShading: true }), 0, false);
-    // chest crest
-    addBox(model, 0.075, 0.095, 0.02, -0.06, 0.27, 0.55, goldTrimMat, 0, false);
-
+    addSphere(headGroup, 0.04, 0, -0.01, 0.15, skin, 0);
     if (cfg.team === 'gryf' && cfg.role === 'seeker') {
-      // Harry's round glasses
-      const gl = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 4, 10), std(0xb08a4f, { metalness: 0.2, roughness: 0.5 }));
-      gl.position.set(-0.068, headY + 0.02, headZ + 0.148);
-      model.add(gl);
+      const gl = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 4, 10),
+        std(0xb08a4f, { metalness: 0.2, roughness: 0.5 }));
+      gl.position.set(-0.068, 0.02, 0.148);
+      headGroup.add(gl);
       const gr = gl.clone();
       gr.position.x = 0.068;
-      model.add(gr);
-      addBox(model, 0.055, 0.01, 0.01, 0, headY + 0.02, headZ + 0.15, std(C.goldDeep, { flatShading: true }), 0, false);
+      headGroup.add(gr);
+      addBox(headGroup, 0.055, 0.01, 0.01, 0, 0.02, 0.15,
+        std(C.goldDeep, { flatShading: true }), 0, false);
     }
     if (cfg.team === 'slyth' && cfg.role === 'seeker') {
-      // Draco: a pale sweep of hair
       hairCap.scale.set(1.08, 0.9, 1.08);
     }
+
+    // house trim at the collar and chest crest
+    addBox(model, 0.22, 0.055, 0.22, collarPos[0], collarPos[1], collarPos[2],
+      std(style.trim, { flatShading: true }), 0, false);
+    addBox(model, 0.075, 0.095, 0.02, crestPos[0], crestPos[1], crestPos[2], goldTrimMat, 0, false);
+
     if (cfg.role === 'keeper') {
-      addBox(model, 0.1, 0.16, 0.1, -0.18, 0.13, handZ, std(style.trim, { flatShading: true }), 0, false);
-      addBox(model, 0.1, 0.16, 0.1, 0.18, 0.13, handZ, std(style.trim, { flatShading: true }), 0, false);
+      addBox(model, 0.12, 0.17, 0.11, handL[0], handL[1], handL[2],
+        std(style.trim, { flatShading: true }), 0, false);
+      addBox(model, 0.12, 0.17, 0.11, handR[0], handR[1], handR[2],
+        std(style.trim, { flatShading: true }), 0, false);
     }
     if (cfg.role === 'beater') {
       const bat = new THREE.Group();
-      bat.position.set(0.25, 0.24, 0.52);
+      bat.position.set(handR[0], handR[1], handR[2]);
       bat.rotation.z = -0.55;
       bat.rotation.x = 0.4;
       model.add(bat);
@@ -1975,10 +1996,10 @@
       addCylinder(bat, 0.085, 0.055, 0.2, 6, 0, 0.57, 0.02, batMat).rotation.x = 0.2;
     }
     if (cfg.quaffle) {
-      const q = addSphere(model, 0.17, 0.3, 0.22, 0.7, quaffleMat, 1);
+      addSphere(model, 0.17, quafflePos[0], quafflePos[1], quafflePos[2], quaffleMat, 1);
       const band = new THREE.Mesh(new THREE.TorusGeometry(0.172, 0.016, 4, 12), quaffleBand);
       band.rotation.x = Math.PI / 2;
-      band.position.set(0.3, 0.22, 0.7);
+      band.position.set(quafflePos[0], quafflePos[1], quafflePos[2]);
       model.add(band);
       const band2 = band.clone();
       band2.rotation.set(0, Math.PI / 2, 0);
@@ -1988,7 +2009,12 @@
     mergeStaticMeshes(model);
 
     const cape = makeCape(model, style, cfg.phase);
+    if (P.capeY !== undefined || P.capeZ !== undefined) {
+      cape.mesh.position.y = (P.capeY === undefined ? 0.45 : P.capeY) - 0.45;
+      cape.mesh.position.z = (P.capeZ === undefined ? 0.12 : P.capeZ) - 0.12;
+    }
     const scarf = makeScarf(model, style, cfg.phase + 1.2);
+    if (P.scarf) scarf.root.position.set(scarfPos[0], scarfPos[1], scarfPos[2]);
 
     return {
       root: root, bank: bank, model: model, cape: cape, scarf: scarf,
@@ -2007,13 +2033,83 @@
     return out;
   }
 
+  const POSES = {
+    harry: {
+      hip: [0, 0.06, 0.01], shoulder: [0, 0.27, 0.52], chest: [0, 0.23, 0.57],
+      head: [0, 0.36, 0.72], headTilt: [0.05, 0.05, 0.02], neck: [0, 0.3, 0.62],
+      collar: [0, 0.25, 0.57], crest: [-0.05, 0.15, 0.63],
+      hipL: [-0.1, 0.1, -0.01], hipR: [0.1, 0.1, -0.01],
+      shoulderL: [-0.14, 0.26, 0.5], shoulderR: [0.14, 0.26, 0.5],
+      handL: [-0.18, 0.09, 0.88], handR: [0.3, 0.44, 1.28],
+      kneeL: [-0.22, 0.16, -0.5], footL: [-0.28, 0.21, -0.92],
+      kneeR: [0.16, 0.01, -0.67], footR: [0.21, -0.03, -1.05],
+      scarf: [0, 0.34, 0.66], capeY: 0.36, capeZ: 0.3
+    },
+    katie: {
+      hip: [0, 0.1, -0.1], shoulder: [0, 0.41, 0.3], chest: [0, 0.37, 0.34],
+      head: [0, 0.56, 0.46], headTilt: [-0.02, 0.4, 0.02], neck: [0, 0.47, 0.37],
+      collar: [0, 0.43, 0.35], crest: [-0.05, 0.29, 0.42],
+      hipL: [-0.1, 0.14, -0.12], hipR: [0.1, 0.14, -0.12],
+      shoulderL: [-0.13, 0.39, 0.28], shoulderR: [0.2, 0.4, 0.32],
+      handL: [-0.17, 0.13, 0.85], handR: [0.7, 0.34, 0.55],
+      kneeL: [-0.18, 0.06, -0.58], footL: [-0.2, 0.01, -0.93],
+      kneeR: [0.17, 0.28, -0.48], footR: [0.3, 0.38, -0.66],
+      scarf: [0, 0.48, 0.39], capeY: 0.5, capeZ: 0.12,
+      quaffle: [0.9, 0.5, 0.45]
+    },
+    wood: {
+      hip: [0, 0.12, -0.1], shoulder: [0, 0.38, 0.42], chest: [0, 0.33, 0.46],
+      head: [0, 0.48, 0.54], headTilt: [-0.05, -0.08, 0], neck: [0, 0.4, 0.48],
+      collar: [0, 0.37, 0.47], crest: [-0.05, 0.27, 0.52],
+      hipL: [-0.11, 0.16, -0.08], hipR: [0.11, 0.16, -0.08],
+      shoulderL: [-0.22, 0.36, 0.4], shoulderR: [0.22, 0.36, 0.4],
+      handL: [-0.28, 0.18, 0.82], handR: [0.28, 0.18, 0.82],
+      kneeL: [-0.4, 0.27, -0.2], footL: [-0.55, 0.34, -0.48],
+      kneeR: [0.4, 0.27, -0.2], footR: [0.55, 0.34, -0.48],
+      scarf: [0, 0.43, 0.51], capeY: 0.44, capeZ: 0.18
+    },
+    draco: {
+      hip: [0, 0.08, -0.1], shoulder: [0, 0.5, 0.08], chest: [0, 0.44, 0.1],
+      head: [0, 0.67, 0.1], headTilt: [-0.12, -0.3, -0.05], neck: [0, 0.57, 0.09],
+      collar: [0, 0.53, 0.08], crest: [-0.05, 0.37, 0.16],
+      hipL: [-0.1, 0.12, -0.12], hipR: [0.1, 0.12, -0.12],
+      shoulderL: [-0.13, 0.48, 0.06], shoulderR: [0.13, 0.48, 0.06],
+      handL: [-0.17, 0.12, 0.83], handR: [0.64, 0.5, -0.12],
+      kneeL: [-0.16, 0.08, -0.6], footL: [-0.2, 0.02, -0.96],
+      kneeR: [0.16, 0.3, -0.4], footR: [0.28, 0.4, -0.55],
+      scarf: [0, 0.58, 0.13], capeY: 0.56, capeZ: 0.0
+    },
+    bletchley: {
+      hip: [0.03, 0.1, -0.1], shoulder: [-0.12, 0.38, 0.28], chest: [-0.08, 0.34, 0.32],
+      head: [-0.2, 0.52, 0.43], headTilt: [0.02, 0.28, 0.06], neck: [-0.16, 0.44, 0.36],
+      collar: [-0.12, 0.4, 0.35], crest: [-0.17, 0.25, 0.42],
+      hipL: [-0.08, 0.14, -0.12], hipR: [0.12, 0.14, -0.12],
+      shoulderL: [-0.24, 0.36, 0.26], shoulderR: [0.03, 0.36, 0.3],
+      handL: [-0.3, 0.12, 0.82], handR: [0.5, 0.45, 0.05],
+      kneeL: [-0.4, 0.12, -0.47], footL: [-0.56, 0.08, -0.7],
+      kneeR: [0.02, 0.24, -0.45], footR: [0.08, 0.34, -0.7],
+      scarf: [-0.13, 0.45, 0.4], capeY: 0.45, capeZ: 0.1
+    },
+    flint: {
+      hip: [0, 0.08, -0.18], shoulder: [0, 0.21, 0.52], chest: [0, 0.16, 0.57],
+      head: [0, 0.3, 0.7], headTilt: [0.05, 0, 0], neck: [0, 0.24, 0.62],
+      collar: [0, 0.21, 0.6], crest: [-0.05, 0.1, 0.66],
+      hipL: [-0.13, 0.12, -0.16], hipR: [0.13, 0.12, -0.16],
+      shoulderL: [-0.2, 0.19, 0.5], shoulderR: [0.2, 0.19, 0.5],
+      handL: [-0.22, 0.08, 0.86], handR: [0.22, 0.08, 0.86],
+      kneeL: [-0.28, 0.1, -0.35], footL: [-0.33, 0.18, -0.64],
+      kneeR: [0.28, 0.1, -0.35], footR: [0.33, 0.18, -0.64],
+      scarf: [0, 0.26, 0.65], capeY: 0.26, capeZ: 0.27
+    }
+  };
+
   const playerDefs = [
-    { name: 'Harry', team: 'gryf', role: 'seeker', special: 'harry', skin: 0, hair: 1, phase: 0.3, reach: true },
-    { name: 'Wood', team: 'gryf', role: 'keeper', cx: 7.9, cz: 0.05, rx: 0.86, rz: 2.25, baseY: 7.1, amp: 0.26, speed: 0.55, dir: 1, phase: 0.4, wob: 0.1, skin: 1, hair: 3 },
-    { name: 'Katie', team: 'gryf', role: 'chaser', cx: -0.1, cz: 0.25, rx: 6.8, rz: 3.32, baseY: 6.35, amp: 0.52, speed: 0.51, dir: 1, phase: 0.75, wob: 0.25, skin: 1, hair: 2, quaffle: true },
-    { name: 'Draco', team: 'slyth', role: 'seeker', cx: 1.8, cz: 0.2, rx: 4.8, rz: 2.6, baseY: 9.8, amp: 0.58, speed: 0.72, dir: -1, phase: 3.1, wob: 0.24, skin: 1, hair: 4 },
-    { name: 'Bletchley', team: 'slyth', role: 'keeper', cx: -7.9, cz: 0.05, rx: 0.86, rz: 2.15, baseY: 7.05, amp: 0.3, speed: 0.49, dir: -1, phase: 2.2, wob: 0.1, skin: 0, hair: 0 },
-    { name: 'Flint', team: 'slyth', role: 'chaser', cx: 0.6, cz: 0.1, rx: 6.5, rz: 3.1, baseY: 6.75, amp: 0.42, speed: 0.52, dir: -1, phase: 1.45, wob: 0.22, skin: 2, hair: 0 }
+    { name: 'Harry', team: 'gryf', role: 'seeker', special: 'harry', skin: 0, hair: 1, phase: 0.3, pose: POSES.harry },
+    { name: 'Wood', team: 'gryf', role: 'keeper', cx: 7.9, cz: 0.05, rx: 0.86, rz: 2.25, baseY: 7.1, amp: 0.26, speed: 0.55, dir: 1, phase: 0.4, wob: 0.1, skin: 1, hair: 3, pose: POSES.wood },
+    { name: 'Katie', team: 'gryf', role: 'chaser', cx: -0.1, cz: 0.25, rx: 6.8, rz: 3.32, baseY: 6.35, amp: 0.52, speed: 0.51, dir: 1, phase: 0.75, wob: 0.25, skin: 1, hair: 2, quaffle: true, pose: POSES.katie },
+    { name: 'Draco', team: 'slyth', role: 'seeker', cx: 1.8, cz: 0.2, rx: 4.8, rz: 2.6, baseY: 9.8, amp: 0.58, speed: 0.72, dir: -1, phase: 3.1, wob: 0.24, skin: 1, hair: 4, pose: POSES.draco },
+    { name: 'Bletchley', team: 'slyth', role: 'keeper', cx: -7.9, cz: 0.05, rx: 0.86, rz: 2.15, baseY: 7.05, amp: 0.3, speed: 0.49, dir: -1, phase: 2.2, wob: 0.1, skin: 0, hair: 0, pose: POSES.bletchley },
+    { name: 'Flint', team: 'slyth', role: 'chaser', cx: 0.6, cz: 0.1, rx: 6.5, rz: 3.1, baseY: 6.75, amp: 0.42, speed: 0.52, dir: -1, phase: 1.45, wob: 0.22, skin: 2, hair: 0, pose: POSES.flint }
   ];
 
   const players = playerDefs.map(function (d) { return createPlayer(d); });
