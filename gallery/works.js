@@ -206,6 +206,25 @@ window.GEN_WORKS = {
       "desc": "同一道题的第二个答案：另一座会动的霍格沃茨魁地奇。城堡踞在满是针叶林的山丘上，远山一重重压着天际；环形看台坐满穿学院色的小人，金色球门环立在场边，球员追着游走球和金色飞贼满场飞。640×360 低分辨率渲染整体放大，像素颗粒是故意留着的。固定等距镜头、没有任何控件——就是一件摆在桌上、一直在动的立体模型。",
       "tags": ["像素3D", "魁地奇", "霍格沃茨", "立体模型", "固定镜头", "动画"],
       "interactive": true
+    },
+    {
+      "id": "quidditch-pixel-diorama",
+      "index": "011",
+      "scene": "quidditch",
+      "sceneName": "魁地奇 · 霍格沃茨立体模型",
+      "title": "魁地奇球场 · 格兰芬多对斯莱特林",
+      "subtitle": "GRYFFINDOR VS SLYTHERIN",
+      "cover": "covers/quidditch-pixel-diorama.png",
+      "href": "works/quidditch-pixel-diorama.html",
+      "theme": "球场 · 白昼",
+      "medium": "像素3D · PIXEL",
+      "engine": "MiMo V2.6 Pro",
+      "date": "2026-11-04",
+      "pick": false,
+      "prompt": "",
+      "desc": "同一道题的第三个答案：MiMo V2.6 Pro 做的霍格沃茨球场。格兰芬多对斯莱特林的比赛正打到一半，红衫绿衫在场上交错，两队各三只金色球门环立在场边；看台坐得满满当当，雨棚一红一绿挑着学院色。坡下有池塘、云杉和圆滚滚的大树，球员的影子长长地落在草皮上，天上还有鸟飞过。480×333 低分辨率渲染放大，像素颗粒清晰，固定正交等距镜头、旋转缩放全部锁定。",
+      "tags": ["像素3D", "魁地奇", "霍格沃茨", "立体模型", "固定镜头", "对战"],
+      "interactive": true
     }
   ]
 };
