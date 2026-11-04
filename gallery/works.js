@@ -187,6 +187,25 @@ window.GEN_WORKS = {
       "desc": "一件会动的魁地奇收藏品：霍格沃茨城堡踞在山坡上，球场环着六座金色球门，看台人头攒动，学院旗帜迎风。格兰芬多对斯莱特林各七人满员登场，哈利追着金色飞贼压弯俯冲，披风围巾跟着风动。固定等距镜头、低分辨率像素渲染——镜头不转，比赛一直在跑。",
       "tags": ["像素3D", "魁地奇", "霍格沃茨", "立体模型", "固定镜头", "动画"],
       "interactive": true
+    },
+    {
+      "id": "quidditch-diorama",
+      "index": "010",
+      "scene": "quidditch",
+      "sceneName": "魁地奇 · 霍格沃茨立体模型",
+      "title": "像素立体版 · 霍格沃茨魁地奇",
+      "subtitle": "PIXEL DIORAMA",
+      "cover": "covers/quidditch-diorama.png",
+      "href": "works/quidditch-diorama.html",
+      "theme": "球场 · 白昼",
+      "medium": "像素3D · PIXEL",
+      "engine": "DeepSeek V4.1 Flash",
+      "date": "2026-11-04",
+      "pick": false,
+      "prompt": "",
+      "desc": "同一道题的第二个答案：另一座会动的霍格沃茨魁地奇。城堡踞在满是针叶林的山丘上，远山一重重压着天际；环形看台坐满穿学院色的小人，金色球门环立在场边，球员追着游走球和金色飞贼满场飞。640×360 低分辨率渲染整体放大，像素颗粒是故意留着的。固定等距镜头、没有任何控件——就是一件摆在桌上、一直在动的立体模型。",
+      "tags": ["像素3D", "魁地奇", "霍格沃茨", "立体模型", "固定镜头", "动画"],
+      "interactive": true
     }
   ]
 };
