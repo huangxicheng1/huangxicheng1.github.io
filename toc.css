@@ -1,0 +1,256 @@
+/* ============================================================================
+ * 阅读页目录（toc.css）
+ * ----------------------------------------------------------------------------
+ * 目录由 toc.js 依照 #articleBody 中已渲染的标题自动生成，Markdown 源文件
+ * 不需要任何标注或手工维护。
+ *
+ * 布局策略（尽量不改动既有版式）：
+ *   ≥1700px  正文两侧留白足够，用左侧空档做固定索引栏 —— 正文宽度不变，
+ *            标题与页头仍然对齐；批注走廊（annotate.css）打开时索引栏整体左移。
+ *   < 1700px 没有空档可用，退回正文顶部的可折叠目录，不挤压正文。
+ *
+ * 主题：只使用 archive.css 的 CSS 变量，夜间值班（body.light）自动跟随。
+ * ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. 索引栏 */
+
+.toc-rail {
+  /* 1180 的正文 + 两侧各 236 的留白 = 1652，再留出滚动条与余量取 1700；
+     左侧空档起点正好是 50% - 826（590 正文半宽 + 236 空档） */
+  position: fixed;
+  left: calc(50% - 826px);
+  /* 真正的起笔位置由 toc.js 对齐文章标题后写入；这里的 top 只是首帧兜底，
+     滚动到一定程度后索引栏会贴到视口顶部（留 30px）不再上移 */
+  top: 130px;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  width: 208px;
+  max-height: calc(100vh - 168px);
+  padding-left: 13px;
+  border-left: 1px solid var(--hair-soft);
+  font-family: var(--zh);
+  /* 开屏动画结束后再淡入，避免和 splash 抢注意力 */
+  opacity: 0;
+  transition: opacity .45s ease .1s;
+}
+
+@media (min-width: 1700px) {
+  .toc-rail { display: flex; }
+  .toc-rail.is-ready { opacity: 1; }
+}
+
+/* 批注走廊打开时正文容器变宽到 1320，索引栏跟着左移，否则会压住正文 */
+body.an-wide .toc-rail { left: calc(50% - 896px); }
+
+/* 1700–1839 之间批注走廊要吃满右侧，确实没地方站了，先收起来 */
+@media (max-width: 1839px) {
+  body.an-wide .toc-rail { display: none; }
+}
+
+/* ---------------------------------------------------------------- 2. 栏头 */
+
+.toc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .26em;
+  color: var(--ink);
+}
+
+.toc-head em {
+  font-style: normal;
+  color: var(--muted);
+  letter-spacing: .18em;
+}
+
+.toc-progress {
+  position: relative;
+  height: 3px;
+  margin: 10px 0 0;
+  background: var(--hair-soft);
+}
+
+.toc-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--orange);
+  transition: width .12s linear;
+}
+
+.toc-meta {
+  display: flex;
+  justify-content: space-between;
+  margin: 7px 0 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+
+.toc-pct { color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- 3. 列表 */
+
+.toc-body {
+  margin-top: 6px;
+  padding-right: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hair) transparent;
+}
+
+.toc-body::-webkit-scrollbar { width: 4px; }
+.toc-body::-webkit-scrollbar-thumb { background: var(--hair); }
+
+.toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-link {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 2px 4px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border: 0;
+  transition: color .18s ease;
+}
+
+.toc-link:hover { color: var(--orange); }
+
+.toc-dot {
+  flex: none;
+  width: 4px;
+  height: 4px;
+  margin-top: .62em;
+  background: var(--hair);
+  transition: background .18s ease, transform .18s ease;
+}
+
+.toc-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 三级标题降一级：缩进 + 更小的字 + 去掉色块，避免长目录太吵 */
+.toc-item.is-sub .toc-link {
+  padding-left: 12px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.toc-item.is-sub .toc-dot {
+  width: 3px;
+  height: 3px;
+  background: var(--hair);
+}
+
+/* 当前所在章节 */
+.toc-link.is-active { color: var(--orange); }
+
+.toc-link.is-active .toc-dot {
+  background: var(--orange);
+  transform: scale(1.15);
+}
+
+.toc-item.is-sub .toc-link.is-active .toc-dot { background: var(--orange); }
+
+/* ---------------------------------------------------------------- 4. 窄屏折叠目录 */
+
+.toc-inline {
+  display: none;
+  margin: 20px 0 0;
+  border: 1px solid var(--hair);
+  background: var(--panel-2);
+}
+
+@media (max-width: 1699px) {
+  .toc-inline { display: block; }
+}
+
+.toc-inline > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .24em;
+  color: var(--ink);
+}
+
+.toc-inline > summary::-webkit-details-marker { display: none; }
+
+.toc-inline > summary::after {
+  content: "＋";
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform .2s ease, color .2s ease;
+}
+
+.toc-inline[open] > summary::after {
+  content: "－";
+  color: var(--orange);
+}
+
+.toc-inline > summary em {
+  font-style: normal;
+  color: var(--muted);
+  letter-spacing: .16em;
+}
+
+.toc-inline[open] > summary { border-bottom: 1px solid var(--hair); }
+
+.toc-inline .toc-body {
+  margin: 0;
+  padding: 10px 14px 12px;
+  max-height: 46vh;
+}
+
+.toc-inline .toc-link { font-size: 13px; }
+
+/* ---------------------------------------------------------------- 5. 细节 */
+
+/* 从目录跳转过来时，标题别贴死在视口顶端 */
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  scroll-margin-top: 26px;
+}
+
+/* 键盘用户聚焦目录项时给个清楚的回执 */
+.toc-link:focus-visible {
+  outline: 1px solid var(--orange);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-rail,
+  .toc-bar,
+  .toc-dot,
+  .toc-link { transition: none; }
+}
+
+@media print {
+  .toc-rail,
+  .toc-inline { display: none !important; }
+}
