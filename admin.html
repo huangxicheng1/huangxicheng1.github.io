@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="站内编辑室：写与改笔记、日记。">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=3">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <title>编辑室 · Isaac’s life</title>
+  <link rel="stylesheet" href="./archive.css?v=4">
+  <link rel="stylesheet" href="./edit.css?v=1">
+  <script defer src="./entries.js"></script>
+  <script defer src="./app.js?v=2"></script>
+  <script defer src="./edit.js?v=1"></script>
+</head>
+<body data-page="admin">
+
+<div class="utility">
+  <div class="wrap">
+    <span>RHINE DIARY ORGANIZATION <b>■</b> 研究记录部</span>
+    <span>EDITORIAL ROOM <b>●</b> ACCESS: AUTHORIZED</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark" aria-label="hxc"
+     style="background:none;box-shadow:none">
+  <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+    <path d="M7 19 H30 L37 27 H62 V62 H7 Z" fill="var(--logo-shadow, rgba(20,20,18,.9))"
+          transform="translate(2 2)"/>
+    <path d="M3 15 H26 L33 23 H58 V58 H3 Z" fill="var(--panel,#f1efe9)"
+          stroke="var(--ink,#141412)" stroke-width="2"/>
+    <rect x="47.5" y="27.5" width="6.5" height="6.5" fill="#ff7500"/>
+    <g transform="translate(6.5 30.9) scale(0.96)" fill="none"
+       stroke="var(--ink,#141412)" stroke-width="3.2" stroke-linecap="square">
+      <path d="M2 0 V20"/>
+      <path d="M2 9.5 H8 Q13.5 9.5 13.5 14.75 V20"/>
+      <path d="M20 9 L32 20"/>
+      <path d="M32 9 L20 20"/>
+      <path d="M46.89 10.61 A5.5 5.5 0 1 0 46.89 18.39"/>
+    </g>
+  </svg>
+</div>
+    <div class="logo-text">
+      <strong>Isaac’s life</strong>
+      <small>THE BINDING OF ORDINARY DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="./index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="./games/index.html"><b>游戏库</b><span>GAME LIBRARY</span></a>
+      <a class="dept" href="./calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="./notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+      <a class="dept" href="./gallery/"><b>模型档案</b><span>MODEL ARCHIVE</span></a>
+      <a class="dept" href="./todo/"><b>事务科</b><span>TODO LIST</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
+  </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <div class="page-intro">
+      <p class="eyebrow">EDITORIAL ROOM · 写和改都在这儿</p>
+      <h1>写点<em>什么。</em></h1>
+      <p>不用开插件、不用回本地改文件：在这里写完保存，就提交进仓库，约一分钟后线上可见。这个页面不放进导航，也不让搜索引擎收录。</p>
+      <p><span class="ed-who" id="edWho"></span></p>
+    </div>
+
+    <section class="ed-gate" id="edGate" hidden aria-label="GitHub 授权">
+      <h2>先授一次权</h2>
+      <p>编辑器通过 GitHub 接口把文件直接提交到仓库，所以需要一枚 token——只对本仓库的 Contents 有读写权限、只存在这台浏览器的 localStorage 里，不进仓库，也不会发给 api.github.com 以外的任何地方。</p>
+      <ol class="steps">
+        <li>打开 <a id="edTokenLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub · Fine-grained personal access tokens</a></li>
+        <li>Repository access 只选 <code>huangxicheng1.github.io</code></li>
+        <li>Permissions → Contents 选 <code>Read and write</code>（其余全都不需要）</li>
+        <li>生成后粘到下面，只输一次；换浏览器要重输</li>
+      </ol>
+      <div class="ed-gate-row">
+        <input class="ed-input" id="edAuthInput" type="password" placeholder="github_pat_……" autocomplete="off" spellcheck="false">
+        <button class="ed-btn is-primary" id="edAuthGo" type="button">验证并保存</button>
+      </div>
+      <p class="ed-hintline">和站内批注用的是同一枚 token，授权一次两边都能用。</p>
+    </section>
+
+    <section id="edListView" hidden>
+      <div class="section-head">
+        <h2>全部条目</h2>
+        <span class="en">ALL ENTRIES</span>
+        <span class="idx"><b id="edCount">—</b></span>
+      </div>
+
+      <div class="ed-tools">
+        <button class="ed-btn" type="button" data-new="note">＋ 学习笔记</button>
+        <button class="ed-btn" type="button" data-new="diary">＋ 日记</button>
+        <span class="spacer"></span>
+        <button class="ed-btn is-danger" type="button" id="edLogout" hidden>退出授权</button>
+        <label class="ed-search">
+          <span aria-hidden="true">⌕</span>
+          <span class="sr-only">搜索条目</span>
+          <input id="edSearch" type="search" placeholder="搜索标题 / 分类 / 标签…" autocomplete="off">
+        </label>
+      </div>
+
+      <ul class="ed-items" id="edItems"></ul>
+    </section>
+
+    <section id="edEditor" hidden aria-label="编辑器">
+      <div class="ed-bar">
+        <button class="ed-btn" type="button" id="edBack">← 条目列表</button>
+        <span class="ed-path" id="edPath"></span>
+        <span class="ed-state" id="edState">✓ 已同步</span>
+        <button class="ed-btn is-primary" type="button" id="edSave">保存并发布</button>
+      </div>
+
+      <div class="ed-fields">
+        <div class="ed-field">
+          <label for="fType">类型</label>
+          <select id="fType">
+            <option value="note">学习笔记</option>
+            <option value="diary">日记</option>
+          </select>
+        </div>
+        <div class="ed-field">
+          <label for="fDate">日期</label>
+          <input id="fDate" type="date">
+        </div>
+        <div class="ed-field" id="wrapCategory">
+          <label for="fCategory">分类</label>
+          <input id="fCategory" list="catOptions" placeholder="Java / Mysql / 网络…" autocomplete="off">
+          <datalist id="catOptions">
+            <option>Java</option><option>Mysql</option><option>Redis</option><option>Spring</option>
+            <option>网络</option><option>算法</option><option>系统</option><option>工具</option>
+          </datalist>
+        </div>
+        <div class="ed-field is-wide">
+          <label for="fTitle">标题</label>
+          <input id="fTitle" placeholder="这篇叫什么" autocomplete="off">
+        </div>
+        <div class="ed-field is-wide">
+          <label for="fSummary">摘要（必填）</label>
+          <input id="fSummary" placeholder="一句话说清这篇在讲什么" autocomplete="off">
+        </div>
+        <div class="ed-field">
+          <label for="fTags">标签</label>
+          <input id="fTags" placeholder="Java, 并发" autocomplete="off">
+        </div>
+        <div class="ed-field" id="wrapReview">
+          <label for="fReview">复习日期（可空）</label>
+          <input id="fReview" type="date">
+        </div>
+        <div class="ed-field">
+          <label for="fDraft">状态</label>
+          <label class="ed-check"><input id="fDraft" type="checkbox"> 草稿（先不发布）</label>
+        </div>
+      </div>
+
+      <div class="ed-split">
+        <div class="ed-pane">
+          <div class="ed-pane-head">
+            <span>MARKDOWN</span>
+            <span class="spacer"></span>
+            <span>Ctrl / ⌘ + S 保存</span>
+          </div>
+          <div class="ed-toolbar" role="toolbar" aria-label="插入">
+            <button type="button" class="ed-tool" data-tool="h2" title="二级标题">H2</button>
+            <button type="button" class="ed-tool" data-tool="h3" title="三级标题">H3</button>
+            <button type="button" class="ed-tool" data-tool="bold" title="加粗">B</button>
+            <button type="button" class="ed-tool" data-tool="code" title="行内代码">code</button>
+            <button type="button" class="ed-tool" data-tool="list" title="列表">· 列表</button>
+            <button type="button" class="ed-tool" data-tool="quote" title="引用">引用</button>
+            <button type="button" class="ed-tool" data-tool="table" title="表格">表格</button>
+            <button type="button" class="ed-tool" data-tool="link" title="链接">链接</button>
+            <button type="button" class="ed-tool" data-tool="hr" title="分隔线">分隔</button>
+            <button type="button" class="ed-tool" data-tool="image" title="插图（也可以直接粘贴）">图片</button>
+          </div>
+          <textarea id="fBody" spellcheck="false" placeholder="## 小标题&#10;&#10;正文用 Markdown 写。图片可以直接粘贴进来。"></textarea>
+        </div>
+
+        <div class="ed-pane">
+          <div class="ed-pane-head">
+            <span>预览</span>
+            <span class="spacer"></span>
+            <span>与线上同一套渲染</span>
+          </div>
+          <div class="ed-preview-body">
+            <article class="markdown-body" id="edPreview"></article>
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-foot">
+        <button class="ed-btn is-danger" type="button" id="edArchive">归档（下架）</button>
+        <button class="ed-btn" type="button" id="edPickImage" hidden>插入图片</button>
+        <input type="file" id="edImageFile" accept="image/*" hidden>
+        <span class="spacer"></span>
+        <span class="hint">保存即提交到 GitHub，Actions 会重新生成索引，约 1 分钟后线上可见。归档不会删文件，只是把它从站上摘下来，随时可以恢复。</span>
+      </div>
+    </section>
+
+    <div class="ed-toast" id="edToast" role="status" aria-live="polite"></div>
+
+    <div class="bottom-navigation">
+      <a href="./index.html">← 返回档案室</a>
+      <a href="./notes.html">去看笔记库 →</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>ISAAC ARCHIVE</b> — THE BINDING OF ORDINARY DAYS · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
+</body>
+</html>

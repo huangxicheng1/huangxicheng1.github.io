@@ -311,6 +311,9 @@
     html = html.replace(/==([^=\n]+)==/g, '<mark class="md-highlight">$1</mark>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    /* 图片要先于链接处理，否则 ![...](...) 会被链接规则啃掉一半 */
+    html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s<>)"']+|\.{0,2}\/[\w\-./%]+)\)/g,
+      '<img src="$2" alt="$1" loading="lazy" decoding="async">');
     html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s<>)"']+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     html = html.replace(/\[([^\]]+)\]\(#([\p{L}\p{N}_-]+)\)/gu, '<a href="#$2">$1</a>');
     return html.replace(/\uE000(\d+)\uE001/g, (_match, index) => codeSlots[Number(index)] || '');
@@ -414,6 +417,8 @@
     if (fenced) output.push(codeBlock(code, codeLanguage));
     return output.join('');
   }
+  /* 编辑页（admin.html）复用同一个 Markdown 渲染器，保证"预览"和"线上"是同一套代码 */
+  window.SITE_MD = markdown;
   function initReader() {
     if (page !== 'entry') return;
     const id = new URLSearchParams(location.search).get('id');
@@ -436,6 +441,8 @@
     const link = el('a','',entry.type === 'note' ? '← 返回分类笔记' : '← 返回日历');
     link.href = entry.type === 'note' ? `./notes.html?category=${encodeURIComponent(entry.category || '未分类')}` : `./calendar.html?date=${entry.date}#month-view`;
     back.append(link);
+    const editor = $('#readerEdit');
+    if (editor) editor.href = `./admin.html?edit=${encodeURIComponent(entry.id)}`;
     document.title = `${entry.title} · Isaac’s life`;
   }
 

@@ -419,6 +419,7 @@ body.light .category-card.active { border-color: var(--orange); }
   background: var(--panel-2); border: 1px solid var(--hair-soft);
 }
 .markdown-body hr { border: 0; height: 1px; background: var(--hair); margin: 28px 0; }
+.markdown-body img { display: block; max-width: 100%; height: auto; margin: 18px 0; border: 1px solid var(--hair); }
 .md-highlight { background: linear-gradient(transparent 55%, rgba(255, 117, 0, .35) 55%); color: var(--ink); }
 .md-code { margin: 20px 0; border: 1px solid var(--hair); background: var(--code-bg); }
 .md-code-head {
@@ -464,6 +465,16 @@ footer .up:hover { color: var(--orange); }
   font-family: var(--zh); font-size: 12.5px; font-weight: 700; letter-spacing: .18em;
 }
 .bottom-navigation a:hover { background: var(--ink); color: var(--bg); }
+
+/* 编辑室入口（笔记库 / 阅读页 / 编辑页共用） */
+.edit-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border: 1px solid var(--hair);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; color: var(--ink-soft);
+  white-space: nowrap; transition: color .16s ease, border-color .16s ease;
+}
+.edit-cta:hover { color: var(--orange); border-color: var(--orange); }
+.reader-back-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
 /* 页面引导语 */
 .page-intro { margin-top: 36px; }
