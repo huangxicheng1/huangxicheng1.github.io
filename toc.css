@@ -4,10 +4,14 @@
  * 目录由 toc.js 依照 #articleBody 中已渲染的标题自动生成，Markdown 源文件
  * 不需要任何标注或手工维护。
  *
- * 布局策略（尽量不改动既有版式）：
- *   ≥1700px  正文两侧留白足够，用左侧空档做固定索引栏 —— 正文宽度不变，
- *            标题与页头仍然对齐；批注走廊（annotate.css）打开时索引栏整体左移。
- *   < 1700px 没有空档可用，退回正文顶部的可折叠目录，不挤压正文。
+ * 布局策略：
+ *   · 正文左侧空档放得下索引栏 → 用固定索引栏，正文宽度不变；
+ *   · 空档不够（窄屏，或批注走廊把正文顶到中间）→ 退回正文顶部的折叠目录，
+ *     不挤压正文。
+ *   到底走哪一套由 toc.js 拿正文左边距实测后写在 body[data-toc] 上，
+ *   不用宽度断点：批注走廊打开时 .wrap 会从 1180 变宽到 1320，正文左右
+ *   各挪多少完全不固定，1700/1839 这种写死的断点中间会漏出「两边都不显示」
+ *   的空档（DSH 内置预览那种 1778px 的窗宽正好掉在里面）。
  *
  * 主题：只使用 archive.css 的 CSS 变量，夜间值班（body.light）自动跟随。
  * ========================================================================== */
@@ -15,10 +19,9 @@
 /* ---------------------------------------------------------------- 1. 索引栏 */
 
 .toc-rail {
-  /* 1180 的正文 + 两侧各 236 的留白 = 1652，再留出滚动条与余量取 1700；
-     左侧空档起点正好是 50% - 826（590 正文半宽 + 236 空档） */
   position: fixed;
-  left: calc(50% - 826px);
+  /* 由 toc.js 按正文实测的左边距 + 索引栏宽度写入 */
+  left: 0;
   /* 真正的起笔位置由 toc.js 对齐文章标题后写入；这里的 top 只是首帧兜底，
      滚动到一定程度后索引栏会贴到视口顶部（留 30px）不再上移 */
   top: 130px;
@@ -35,18 +38,9 @@
   transition: opacity .45s ease .1s;
 }
 
-@media (min-width: 1700px) {
-  .toc-rail { display: flex; }
-  .toc-rail.is-ready { opacity: 1; }
-}
-
-/* 批注走廊打开时正文容器变宽到 1320，索引栏跟着左移，否则会压住正文 */
-body.an-wide .toc-rail { left: calc(50% - 896px); }
-
-/* 1700–1839 之间批注走廊要吃满右侧，确实没地方站了，先收起来 */
-@media (max-width: 1839px) {
-  body.an-wide .toc-rail { display: none; }
-}
+/* 显示哪一套目录由 toc.js 写在 body[data-toc] 上 */
+body[data-toc="rail"] .toc-rail { display: flex; }
+body[data-toc="rail"] .toc-rail.is-ready { opacity: 1; }
 
 /* ---------------------------------------------------------------- 2. 栏头 */
 
@@ -178,9 +172,8 @@ body.an-wide .toc-rail { left: calc(50% - 896px); }
   background: var(--panel-2);
 }
 
-@media (max-width: 1699px) {
-  .toc-inline { display: block; }
-}
+/* 与索引栏互斥，同样由 body[data-toc] 决定 */
+body[data-toc="inline"] .toc-inline { display: block; }
 
 .toc-inline > summary {
   display: flex;
