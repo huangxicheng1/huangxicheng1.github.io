@@ -2,120 +2,158 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <script>
+    /* 开屏动画握手：开屏就绪前先藏住页面本体，避免黑幕前闪出内容。 */
+    (function () {
+      document.documentElement.classList.add('boot-pending');
+      window.__MUSE_BOOT_AT__ = Date.now();
+      setTimeout(function () {
+        if (!window.__MUSE_BOOT_STARTED__) {
+          document.documentElement.classList.remove('boot-pending');
+        }
+      }, 3200);
+    })();
+  </script>
+  <style>html.boot-pending body > :not(#boot-root){visibility:hidden}html.boot-pending body{overflow:hidden}</style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#323840">
-  <meta name="description" content="缄钟游戏库 — 用原生 Canvas 打造的网页小游戏合集。首款：《缄钟：墨光上行》。">
-  <title>游戏库 · 缄钟 GAME LIBRARY</title>
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="description" content="游戏库 · 游玩档案：按累计时长登记的个人游戏记录。">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=3">
-  <link rel="stylesheet" href="../portal.css">
-  <style>
-    /* 游戏库专属样式 */
-    .lib-hero { padding: 64px 0 34px; }
-    .lib-hero h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 900; color: #D5E5EC; letter-spacing: 3px; text-shadow: none; }
-    .lib-hero h1 em { font-style: normal; color: var(--orange); }
-    .lib-hero p { margin-top: 14px; color: var(--muted); line-height: 2; max-width: 560px; }
-    .lib-grid { display: grid; grid-template-columns: 1fr; gap: 26px; padding-bottom: 40px; }
-    .gcard {
-      display: grid; grid-template-columns: 380px 1fr; gap: 0;
-      background: var(--panel); border: 1px solid var(--line);
-      text-decoration: none; color: var(--text); overflow: hidden;
-      transition: border-color .15s, box-shadow .15s, transform .15s;
-    }
-    .gcard:hover { transform: translateY(-4px); border-color: rgba(175, 112, 50,.55); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
-    .gcard-art { position: relative; background: #2A3038; border-right: 1px solid var(--line); display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .gcard-art canvas { image-rendering: pixelated; width: 336px; height: 189px; border: 1px solid #1c2836; }
-    .gcard-art .badge {
-      position: absolute; top: 12px; left: 12px; font-size: 11px; letter-spacing: 2px;
-      color: #2a1506; background: var(--orange); padding: 3px 10px; font-weight: bold;
-    }
-    .gcard-body { padding: 26px 30px; display: flex; flex-direction: column; }
-    .gcard-body h2 { font-size: 24px; letter-spacing: 2px; color: var(--orange); text-shadow: none; }
-    .gcard-body .sub { font-size: 11px; letter-spacing: 3px; color: var(--muted); margin: 6px 0 14px; }
-    .gcard-body p { font-size: 14px; color: var(--muted); line-height: 2; }
-    .gcard-body .tags { margin: 14px 0 18px; }
-    .gcard-cta { margin-top: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .gcard-cta .btn.big { font-size: 16px; padding: 12px 30px; }
-    .gcard-cta .hint { font-size: 12px; color: #57708a; letter-spacing: 1px; line-height: 1.8; }
-    .soon {
-      border: 1px dashed #22303e; background: rgba(13, 21, 32, .5);
-      padding: 26px 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    }
-    .soon .t { font-size: 15px; letter-spacing: 2px; color: #57708a; }
-    .soon .t b { color: var(--muted); }
-    .soon .en { font-size: 11px; letter-spacing: 4px; color: #3a5064; }
-    @media (max-width: 860px) {
-      .gcard { grid-template-columns: 1fr; }
-      .gcard-art { border-right: none; border-bottom: 1px solid var(--line); }
-      .gcard-art canvas { width: 100%; height: auto; }
-    }
-  </style>
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>游玩档案 · 游戏库 · Isaac’s life</title>
+  <link rel="stylesheet" href="../archive.css?v=3">
+  <link rel="stylesheet" href="../splash.css">
+  <link rel="stylesheet" href="./games.css">
+  <script defer src="./games.js"></script>
+  <script defer src="../splash.js?v=3"></script>
 </head>
 <body data-page="games">
 
-<div class="bg" aria-hidden="true">
-  <div class="bg-paper"></div>
+<div class="utility">
+  <div class="wrap">
+    <span>RHINE DIARY ORGANIZATION <b>■</b> 研究记录部</span>
+    <span>GAME LIBRARY <b>●</b> ACCESS: PUBLIC</span>
+  </div>
 </div>
 
-
-<header class="nav">
-  <div class="nav-inner">
-    <a class="brand" href="../index.html">
-      <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
-        <path d="M20 6 C14 6 11 10 11 15 L11 22 L8 26 L32 26 L29 22 L29 15 C29 10 26 6 20 6 Z"
-              fill="none" stroke="#8FA4B0" stroke-width="2"/>
-        <line x1="20" y1="26" x2="20" y2="32" stroke="#8FA4B0" stroke-width="2"/>
-        <circle cx="20" cy="33" r="2" fill="#AF7032"/>
-      </svg>
-      <b>缄钟<i>INKBELL&nbsp;ASCENT</i></b>
-    </a>
-    <nav class="links" aria-label="主导航">
-      <a href="../index.html">档案室</a>
-      <a href="./index.html" class="lib on">游戏库</a>
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark" aria-label="hxc"
+     style="background:none;box-shadow:none">
+  <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+    <path d="M7 19 H30 L37 27 H62 V62 H7 Z" fill="var(--logo-shadow, rgba(20,20,18,.9))"
+          transform="translate(2 2)"/>
+    <path d="M3 15 H26 L33 23 H58 V58 H3 Z" fill="var(--panel,#f1efe9)"
+          stroke="var(--ink,#141412)" stroke-width="2"/>
+    <rect x="47.5" y="27.5" width="6.5" height="6.5" fill="#ff7500"/>
+    <g transform="translate(6.5 30.9) scale(0.96)" fill="none"
+       stroke="var(--ink,#141412)" stroke-width="3.2" stroke-linecap="square">
+      <path d="M2 0 V20"/>
+      <path d="M2 9.5 H8 Q13.5 9.5 13.5 14.75 V20"/>
+      <path d="M20 9 L32 20"/>
+      <path d="M32 9 L20 20"/>
+      <path d="M46.89 10.61 A5.5 5.5 0 1 0 46.89 18.39"/>
+    </g>
+  </svg>
+</div>
+    <div class="logo-text">
+      <strong>Isaac’s life</strong>
+      <small>THE BINDING OF ORDINARY DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="../index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept active" aria-current="page" href="./index.html"><b>游戏库</b><span>GAME LIBRARY</span></a>
+      <a class="dept" href="../calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="../notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+      <a class="dept" href="../gallery/"><b>模型档案</b><span>MODEL ARCHIVE</span></a>
+      <a class="dept" href="../todo/"><b>事务科</b><span>TODO LIST</span></a>
     </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
   </div>
 </header>
 
-<main>
-  <section class="lib-hero">
-    <p class="eyebrow">GAME&nbsp;LIBRARY&nbsp;·&nbsp;<b>可玩合集</b></p>
-    <h1>游戏<em>库</em></h1>
-    <p>无需安装、无需联网，浏览器直接开玩。第一款已经就位——在冷灰蓝的丝网印刷世界里，唤醒缄钟、攀上天塔。</p>
-  </section>
+<main id="main" class="inner-page">
+  <div class="wrap">
 
-  <div class="lib-grid">
-        <!-- 缄钟：墨光上行 -->
-    <a class="gcard" href="./inkbell-ascent/index.html">
-      <div class="gcard-art">
-        <img class="shot" src="./inkbell-ascent/preview.png" alt="缄钟：墨光上行 游戏截图" style="width:100%;height:auto;object-fit:cover;border:1px solid #1c2836;">
-        <span class="badge">▶ 可玩 · 三章</span>
-      </div>
-      <div class="gcard-body">
-        <h2>缄钟：墨光上行</h2>
-        <div class="sub">INKBELL&nbsp;ASCENT&nbsp;·&nbsp;冷灰蓝双色丝网印刷动作冒险</div>
-        <p>一款冷灰蓝双色丝网印刷漫画风格的轻动作冒险。第一章「晨露中庭」唤醒三座缄钟挑战凝霜守卫；第二章「锈潮泵站」突破压力阀与三层盾门；第三章「悬灯天塔」纵向攀升，校准风锚登上云中灯门。斩击、投丝、束缚治疗，三章十二区域完整体验。</p>
-        <div class="tags"><i>Three.js 渲染</i><i>三章冒险</i><i>BOSS 战</i><i>背包制作</i><i>触屏适配</i></div>
-        <div class="gcard-cta">
-          <span class="btn big" onclick="window.location.href=this.closest('a').href">开 始 游 戏 ▶</span>
-          <span class="hint">A/D 移动 · Space 跳跃 · J 攻击 · Shift 冲刺<br>三章十二区域 · 支持触屏 · 进度自动保存</span>
-        </div>
-      </div>
-    </a>
-
-    <!-- 占位：未来游戏（静态展示，不可点击） -->
-    <div class="soon" aria-label="更多游戏筹备中">
-      <span class="t"><b>下一款游戏</b> · 正在像素堆里施工中……</span>
-      <span class="en">MORE&nbsp;GAMES&nbsp;INCOMING</span>
+    <div class="page-intro">
+      <p class="eyebrow">ARCHIVE OF HOURS PLAYED</p>
+      <h1>玩过的，<em>都在这儿。</em></h1>
+      <p>按累计时长登记的游玩档案。没有排名的心思，只是把时间花在哪儿这件事，老实记一笔。</p>
     </div>
+
+    <section class="panel play-stats" aria-label="游玩档案总览">
+      <div>
+        <p class="label">收录 / TITLES</p>
+        <p class="value" id="statCount">—</p>
+      </div>
+      <div>
+        <p class="label">累计时长 / TOTAL</p>
+        <p class="value is-orange"><span id="statHours">—</span><small>H</small></p>
+      </div>
+      <div>
+        <p class="label">最近启动 / LAST PLAYED</p>
+        <p class="value" id="statLatest">—</p>
+      </div>
+      <div>
+        <p class="label">榜首 / LONGEST</p>
+        <p class="value"><span id="statTop">—</span><small>H</small></p>
+        <p class="who" id="statTopName"></p>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>游玩档案</h2>
+      <span class="en" id="playSortLabel">SORTED BY HOURS PLAYED</span>
+      <span class="idx"><b id="playCount">—</b></span>
+    </div>
+
+    <div class="play-tools">
+      <div class="tool-group" role="group" aria-label="排序方式">
+        <span class="cap">排序</span>
+        <button type="button" class="tool-btn" data-sort="hours" aria-pressed="true">时长</button>
+        <button type="button" class="tool-btn" data-sort="last" aria-pressed="false">最近</button>
+        <button type="button" class="tool-btn" data-sort="name" aria-pressed="false">名称</button>
+      </div>
+      <div class="tool-group" role="group" aria-label="筛选">
+        <span class="cap">筛选</span>
+        <button type="button" class="tool-btn" data-filter="all" aria-pressed="true">全部</button>
+        <button type="button" class="tool-btn" data-filter="heavy" aria-pressed="false">50H+</button>
+        <button type="button" class="tool-btn" data-filter="mid" aria-pressed="false">10–50H</button>
+        <button type="button" class="tool-btn" data-filter="cold" aria-pressed="false">冷宫 &lt;1H</button>
+      </div>
+      <label class="play-search">
+        <span aria-hidden="true">⌕</span>
+        <span class="sr-only">搜索游戏</span>
+        <input id="playSearch" type="search" placeholder="搜索游戏名或 appid…" autocomplete="off">
+      </label>
+    </div>
+
+    <ul class="play-list" id="playList" aria-label="游玩时长列表"></ul>
+
+    <p class="play-note">
+      <b>数据说明</b> · 取自本机 Steam 客户端记录，只收录启动过的作品，换设备玩的、尚未同步的时长不在这里；
+      橙色标记是累计时长前三。最近一次刷新 <b id="playUpdated">—</b>。
+    </p>
+
+    <div class="bottom-navigation">
+      <a href="../index.html">← 返回档案室</a>
+      <a href="../notes.html">去看笔记库 →</a>
+    </div>
+
   </div>
 </main>
 
-<footer class="foot">
-  <div class="foot-inner">
-    <b>INKBELL&nbsp;ASCENT</b> · GAME&nbsp;LIBRARY · <span>唤醒缄钟，攀上天塔</span>
-    <a class="up" href="#">回到顶部 ↑</a>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>ISAAC ARCHIVE</b> — THE BINDING OF ORDINARY DAYS · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
   </div>
 </footer>
 
-<script src="../portal.js"></script>
 </body>
 </html>

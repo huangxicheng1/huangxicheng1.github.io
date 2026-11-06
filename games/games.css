@@ -1,0 +1,357 @@
+/* ============================================================================
+ * 游戏库 · 游玩档案（games.css）
+ * ----------------------------------------------------------------------------
+ * 依附 archive.css 的档案室视觉体系：暖白底板 / 墨黑 / 莱茵橙 / DIN + 等宽。
+ * 这一页只负责「时长档案」的排版：统计条、排序筛选、条目列表。
+ * 夜间值班（body.light）完全靠 archive.css 的变量自动跟随。
+ * ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. 统计条 */
+
+.play-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 26px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.play-stats > div {
+  padding: 20px 22px 18px;
+  border-right: 1px solid var(--hair-soft);
+}
+
+.play-stats > div:last-child { border-right: 0; }
+
+.play-stats .label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .24em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.play-stats .value {
+  margin: 9px 0 0;
+  font-family: var(--din);
+  font-weight: 700;
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.1;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+.play-stats .value small {
+  margin-left: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .2em;
+  color: var(--muted);
+}
+
+.play-stats .value.is-orange { color: var(--orange); }
+
+.play-stats .who {
+  margin: 5px 0 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .08em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------------- 2. 工具条 */
+
+.play-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 22px 0 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tool-group .cap {
+  margin-right: 2px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: var(--muted);
+}
+
+.tool-btn {
+  padding: 5px 11px;
+  border: 1px solid var(--hair);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--ink-soft);
+  transition: color .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.tool-btn:hover { color: var(--orange); border-color: rgba(255, 117, 0, .5); }
+
+.tool-btn[aria-pressed="true"] {
+  color: var(--orange);
+  border-color: var(--orange);
+  background: var(--orange-soft);
+}
+
+.play-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 4px;
+}
+
+.play-search span { font-size: 12px; color: var(--muted); }
+
+.play-search input {
+  width: 200px;
+  border: 0;
+  background: transparent;
+  font-family: var(--zh);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+}
+
+.play-search input::placeholder { color: var(--muted); }
+.play-search:focus-within { border-bottom-color: var(--orange); }
+
+/* ---------------------------------------------------------------- 3. 条目 */
+
+.play-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.play-row {
+  display: grid;
+  grid-template-columns: 46px 132px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--hair-soft);
+  position: relative;
+  transition: background .16s ease;
+}
+
+.play-row:hover { background: var(--panel-2); }
+
+/* 前三名：左侧一道橙，标题也用橙 */
+.play-row.is-top::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--orange);
+}
+
+.pr-rank {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
+
+.play-row.is-top .pr-rank { color: var(--orange); }
+
+.pr-cover {
+  position: relative;
+  width: 132px;
+  height: 62px;
+  border: 1px solid var(--hair);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.pr-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.92);
+  transition: filter .16s ease, transform .3s ease;
+}
+
+.play-row:hover .pr-cover img { filter: saturate(1.05); transform: scale(1.02); }
+
+/* 没有封面（极少）时露出来的档案号 */
+.pr-cover b {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .2em;
+  color: var(--muted);
+}
+
+.pr-body { min-width: 0; }
+
+.pr-name {
+  margin: 0;
+  font-family: var(--din);
+  font-weight: 700;
+  font-size: 15.5px;
+  letter-spacing: .02em;
+  line-height: 1.4;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.play-row.is-top .pr-name { color: var(--ink); }
+
+.pr-meta {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+.pr-bar {
+  position: relative;
+  height: 2px;
+  margin-top: 9px;
+  background: var(--hair-soft);
+  overflow: hidden;
+}
+
+.pr-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--muted);
+  opacity: .6;
+  transition: width .5s cubic-bezier(.2, .8, .2, 1), background .16s ease, opacity .16s ease;
+}
+
+.play-row:hover .pr-bar i {
+  background: var(--orange);
+  opacity: 1;
+}
+
+.play-row.is-top .pr-bar i {
+  background: var(--orange);
+  opacity: 1;
+}
+
+.pr-hours {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  justify-content: flex-end;
+  min-width: 96px;
+}
+
+.pr-hours b {
+  font-family: var(--din);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: .01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.play-row.is-top .pr-hours b { color: var(--orange); }
+
+.pr-hours span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .2em;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- 4. 说明与空态 */
+
+.play-note {
+  margin: 20px 0 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 2;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+.play-note b { color: var(--ink-soft); font-weight: 400; }
+
+.play-empty {
+  padding: 46px 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- 5. 窄屏 */
+
+/* 这一页的栏头比别人长，别让它换行 */
+.section-head h2 { white-space: nowrap; }
+.section-head .idx { white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .play-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .play-stats > div:nth-child(2) { border-right: 0; }
+  .play-stats > div:nth-child(1),
+  .play-stats > div:nth-child(2) { border-bottom: 1px solid var(--hair-soft); }
+
+  .play-search { margin-left: 0; width: 100%; }
+  .play-search input { width: 100%; }
+
+  .play-row {
+    grid-template-columns: 36px 112px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 13px 2px;
+  }
+
+  .pr-cover { width: 112px; height: 53px; }
+  .pr-hours { min-width: 72px; }
+  .pr-hours b { font-size: 19px; }
+  .play-row.is-top::before { left: -8px; top: 8px; bottom: 8px; }
+}
+
+/* 栏头的英文副题在窄屏让位给中文标题 */
+@media (max-width: 720px) {
+  .section-head .en { display: none; }
+}
+
+@media (max-width: 560px) {
+  .play-row { grid-template-columns: 92px minmax(0, 1fr) auto; gap: 10px; }
+  .pr-rank { display: none; }
+  .pr-cover { width: 92px; height: 43px; }
+  .pr-name { font-size: 14px; line-height: 1.35; }
+  .pr-meta { font-size: 9px; gap: 2px 10px; margin-top: 3px; }
+  .pr-bar { margin-top: 7px; }
+  .pr-hours { min-width: 0; }
+  .pr-hours b { font-size: 16px; }
+
+  .play-stats .label { font-size: 8px; letter-spacing: .12em; }
+  .play-stats .value { font-size: 24px; }
+  .play-stats .who { font-size: 8.5px; }
+  .play-stats > div { padding: 16px 16px 14px; }
+}
