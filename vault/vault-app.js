@@ -252,7 +252,7 @@
         ${tags ? `<div class="vault-tags">${tags}</div>` : ''}`;
       listHost.appendChild(card);
     }
-    $('#vaultMeta').textContent = `UNSEALED · 共 ${state.notes.length} 篇 · ${state.query ? `筛出 ${notes.length} 篇` : '全部在位'}`;
+    $('#vaultMeta').textContent = `${window.VAULT_LOCAL ? 'LOCAL PREVIEW · 明文直读' : 'UNSEALED'} · 共 ${state.notes.length} 篇 · ${state.query ? `筛出 ${notes.length} 篇` : '全部在位'}`;
   }
 
   function openNote(id) {
@@ -340,6 +340,34 @@
     const year = $('#footerYear');
     if (year) year.textContent = new Date().getFullYear();
 
+    // 两种模式共用的交互：搜索、返回清单、锁定、地址栏路由。
+    const bindCommon = () => {
+      $('#vaultSearch').addEventListener('input', event => {
+        state.query = event.target.value.trim();
+        if (state.current) closeNote();
+        renderList();
+      });
+      $('#vaultLock').addEventListener('click', lock);
+      $('#vaultBack').addEventListener('click', () => {
+        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+        closeNote();
+      });
+      window.addEventListener('hashchange', route);
+    };
+
+    // 本机预览：明文由 tools/vault-local.mjs 直接内联，不走加密，也不需要口令。
+    if (window.VAULT_LOCAL) {
+      bindCommon();
+      $('#vaultFlag').hidden = false;
+      $('#vaultLock').hidden = true; // 本地没有密文，没什么可锁的
+      if (window.VAULT_LOCAL_WARNING) {
+        errorBox.textContent = '有笔记没读进来：' + window.VAULT_LOCAL_WARNING;
+      }
+      applyPayload(window.VAULT_LOCAL);
+      document.title = '封存室 · 本地预览';
+      return;
+    }
+
     if (!window.VAULT_DATA || !window.VAULT_DATA.ct) {
       showGate();
       errorBox.textContent = '没有找到 vault/data.js —— 先在本地跑一次 node tools/vault-build.mjs。';
@@ -382,18 +410,7 @@
       }
     });
 
-    $('#vaultSearch').addEventListener('input', event => {
-      state.query = event.target.value.trim();
-      if (state.current) closeNote();
-      renderList();
-    });
-
-    $('#vaultLock').addEventListener('click', lock);
-    $('#vaultBack').addEventListener('click', () => {
-      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-      closeNote();
-    });
-    window.addEventListener('hashchange', route);
+    bindCommon();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

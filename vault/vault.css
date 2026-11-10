@@ -62,6 +62,11 @@
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 16px; margin-top: 40px; padding-bottom: 14px; border-bottom: 1px solid var(--ink);
 }
+.vault-bar-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.vault-flag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .16em;
+  padding: 3px 9px; border: 1px solid var(--orange); color: var(--orange);
+}
 .vault-bar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .vault-search { min-width: 220px; }
 .vault-search input { background: var(--bg); }

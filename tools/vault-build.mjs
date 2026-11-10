@@ -15,9 +15,10 @@
  * 注意：口令丢了就解不回来，脚本不会也无法帮你恢复。
  */
 import { createCipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadNotes } from "./vault-shared.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PRIVATE = join(ROOT, "_private");
@@ -25,7 +26,6 @@ const VAULT = join(ROOT, "vault");
 const OUT = join(VAULT, "data.js");
 const PASS_FILE = join(PRIVATE, "pass.txt");
 const ITERATIONS = 600000;
-const REQUIRED = ["title", "date"];
 
 function readPassword() {
   const flag = process.argv.indexOf("--pass");
@@ -41,56 +41,6 @@ function readPassword() {
   console.log("· 没有找到口令，已生成一个并写入 _private/pass.txt");
   console.log("  口令：" + generated);
   return generated;
-}
-
-function walk(dir) {
-  if (!existsSync(dir)) return [];
-  const out = [];
-  for (const name of readdirSync(dir)) {
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) out.push(...walk(full));
-    else if (name.toLowerCase().endsWith(".md")) out.push(full);
-  }
-  return out.sort();
-}
-
-function parseNote(file) {
-  const raw = readFileSync(file, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
-  const where = relative(PRIVATE, file);
-  if (!raw.startsWith("---\n")) throw new Error(`${where}: 缺少开头的 --- 分隔线`);
-  const close = raw.indexOf("\n---\n", 4);
-  if (close < 0) throw new Error(`${where}: 缺少结尾的 --- 分隔线`);
-  const header = raw.slice(4, close);
-  const body = raw.slice(close + 5).trim();
-  if (!body) throw new Error(`${where}: 正文是空的`);
-
-  const fields = {};
-  for (const line of header.split("\n")) {
-    if (!line.trim() || line.trimStart().startsWith("#")) continue;
-    const cut = line.indexOf(":");
-    if (cut < 0) throw new Error(`${where}: front matter 行格式不对 -> ${JSON.stringify(line)}`);
-    const key = line.slice(0, cut).trim().toLowerCase();
-    if (key in fields) throw new Error(`${where}: 字段重复 -> ${key}`);
-    fields[key] = line.slice(cut + 1).trim().replace(/^["']|["']$/g, "");
-  }
-  for (const key of REQUIRED) {
-    if (!fields[key]) throw new Error(`${where}: 缺少字段 ${key}`);
-  }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.date)) throw new Error(`${where}: date 必须是 YYYY-MM-DD`);
-  const type = (fields.type || "note").toLowerCase();
-  if (!["note", "diary"].includes(type)) throw new Error(`${where}: type 只能是 note 或 diary`);
-
-  return {
-    id: relative(PRIVATE, file).replace(/\.md$/i, "").split(/[\\/]/).join("/"),
-    title: fields.title,
-    date: fields.date,
-    type,
-    category: fields.category || (type === "note" ? "未分类" : "生活"),
-    summary: fields.summary || "",
-    tags: (fields.tags || "").split(",").map(tag => tag.trim()).filter(Boolean),
-    review: fields.review || "",
-    content: body
-  };
 }
 
 function encrypt(payload, password) {
@@ -116,9 +66,8 @@ function main() {
   const password = readPassword();
   if (password.length < 8) throw new Error("口令太短：至少 8 位，建议 16 位以上");
 
-  const files = walk(PRIVATE);
-  const notes = files.map(parseNote);
-  notes.sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date < b.date ? 1 : -1));
+
+  const notes = loadNotes(PRIVATE);
 
   const blob = encrypt({ v: 1, notes }, password);
   mkdirSync(VAULT, { recursive: true });
