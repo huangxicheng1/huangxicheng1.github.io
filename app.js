@@ -5,6 +5,15 @@
     ? window.SITE_ENTRIES.filter(item => item && /^\d{4}-\d{2}-\d{2}$/.test(item.date))
         .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id))
     : [];
+  // 加密笔记：标题/日期/标签来自 vault/enc.js 里的公开元数据，正文是密文，点开时才解密。
+  if (window.SecretNotes && window.SecretNotes.ready) {
+    for (const meta of window.SecretNotes.meta) {
+      if (!entries.some(item => item.id === meta.id)) {
+        entries.push(Object.assign({}, meta, {secret: true, content: ''}));
+      }
+    }
+    entries.sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+  }
   const byDay = new Map();
   for (const entry of entries) {
     if (!byDay.has(entry.date)) byDay.set(entry.date, []);
@@ -200,6 +209,12 @@
     const meta = el('div', 'meta');
     const kind = el('span', entry.type === 'note' ? 'note-kind' : '', kindName(entry));
     meta.append(kind, document.createTextNode(fmt(entry.date)));
+    if (entry.secret) {
+      const badge = el('span', 'lock-badge', '加密');
+      badge.setAttribute('title', '封存档案 · 正文需要口令');
+      meta.append(badge);
+      card.classList.add('is-locked');
+    }
     body.append(meta);
     if (entry.type === 'note') body.append(el('div', 'category-line', entry.category || '未分类'));
     body.append(el('h3', '', entry.title), el('p', '', entry.summary || ''));
@@ -419,6 +434,56 @@
   }
   /* 编辑页（admin.html）复用同一个 Markdown 渲染器，保证"预览"和"线上"是同一套代码 */
   window.SITE_MD = markdown;
+  /** 加密笔记的阅读页：已解锁就直接渲染，否则先要口令。 */
+  function openSecretEntry(entry) {
+    const host = $('#articleBody');
+    const paint = content => { host.innerHTML = markdown(content); };
+    if (!window.SecretNotes) { host.textContent = '这篇加密档案需要在站内页面里打开。'; return; }
+
+    window.SecretNotes.content(entry.id).then(content => {
+      if (content !== null) { paint(content); return; }
+
+      host.replaceChildren();
+      const panel = el('div', 'lock-panel');
+      panel.append(el('p', 'lock-eyebrow', 'SEALED FILE · 封存档案'));
+      panel.append(el('h2', 'lock-title', '这篇的正文是加密的'));
+      panel.append(el('p', 'lock-lede', '列表里的标题和摘要可以公开看，正文只有输入口令才解得开。解密全部在你本机浏览器里完成，密钥不落地也不上传。'));
+
+      const form = document.createElement('form');
+      form.className = 'lock-form';
+      const input = document.createElement('input');
+      input.className = 'lock-input';
+      input.type = 'password';
+      input.placeholder = '输入口令';
+      input.autocomplete = 'current-password';
+      input.spellcheck = false;
+      input.setAttribute('aria-label', '封存档案口令');
+      const submit = el('button', 'lock-submit', '解封 ↗');
+      submit.type = 'submit';
+      const error = el('p', 'lock-error', '');
+      error.setAttribute('role', 'alert');
+      form.append(input, submit);
+      panel.append(form, error);
+      host.append(panel);
+      input.focus();
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!input.value) return;
+        submit.disabled = true;
+        error.textContent = '正在解封…';
+        const content2 = await window.SecretNotes.unlockWith(entry.id, input.value);
+        submit.disabled = false;
+        if (content2 === null) {
+          error.textContent = '口令不对，这份档案解不开。';
+          input.select();
+          return;
+        }
+        paint(content2);
+      });
+    });
+  }
+
   function initReader() {
     if (page !== 'entry') return;
     const id = new URLSearchParams(location.search).get('id');
@@ -434,7 +499,8 @@
     $('#articleDate').textContent = fmt(entry.date);
     $('#articleTitle').textContent = entry.title;
     $('#articleSummary').textContent = entry.summary || '';
-    $('#articleBody').innerHTML = markdown(entry.content);
+    if (entry.secret) openSecretEntry(entry);
+    else $('#articleBody').innerHTML = markdown(entry.content);
     const tags = $('#articleTags'); tags.replaceChildren();
     for (const tag of entry.tags || []) tags.append(el('span','',`# ${tag}`));
     const back = $('#readerBack'); back.replaceChildren();

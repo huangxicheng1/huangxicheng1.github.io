@@ -38,6 +38,8 @@ export function parseNote(file, root) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fields.date)) throw new Error(`${where}: date 必须是 YYYY-MM-DD`);
   const type = (fields.type || "note").toLowerCase();
   if (!["note", "diary"].includes(type)) throw new Error(`${where}: type 只能是 note 或 diary`);
+  const visibility = (fields.visibility || "locked").toLowerCase();
+  if (!["locked", "vault"].includes(visibility)) throw new Error(`${where}: visibility 只能是 locked（进笔记库）或 vault（只在封存室）`);
 
   return {
     id: relative(root, file).replace(/\.md$/i, "").split(/[\\/]/).join("/"),
@@ -48,6 +50,7 @@ export function parseNote(file, root) {
     summary: fields.summary || "",
     tags: (fields.tags || "").split(",").map(tag => tag.trim()).filter(Boolean),
     review: fields.review || "",
+    visibility,
     content: body
   };
 }
