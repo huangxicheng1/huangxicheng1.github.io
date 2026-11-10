@@ -463,7 +463,12 @@
       const error = el('p', 'lock-error', '');
       error.setAttribute('role', 'alert');
       form.append(input, submit);
-      panel.append(form, error);
+      const rememberLabel = document.createElement('label');
+      rememberLabel.className = 'lock-remember';
+      const rememberBox = document.createElement('input');
+      rememberBox.type = 'checkbox';
+      rememberLabel.append(rememberBox, document.createTextNode(' 在这台设备记住 30 天（存的是密钥，公用电脑别勾）'));
+      panel.append(form, rememberLabel, error);
       host.append(panel);
       input.focus();
 
@@ -472,7 +477,7 @@
         if (!input.value) return;
         submit.disabled = true;
         error.textContent = '正在解封…';
-        const content2 = await window.SecretNotes.unlockWith(entry.id, input.value);
+        const content2 = await window.SecretNotes.unlockWith(entry.id, input.value, rememberBox.checked);
         submit.disabled = false;
         if (content2 === null) {
           error.textContent = '口令不对，这份档案解不开。';

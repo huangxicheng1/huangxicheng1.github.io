@@ -7,6 +7,8 @@
 
   const data = window.SECRET_NOTES || null;
   const STORE = 'secret-notes-key';
+  const STORE_LOCAL = 'secret-notes-remember';
+  const REMEMBER_DAYS = 30;
   let key = null;
   const bodies = {};   // id -> {iv, ct}
   const plain = {};    // id -> 解密后的 markdown（本页内复用）
@@ -29,8 +31,14 @@
     if (key) return key;
     try {
       const saved = sessionStorage.getItem(STORE);
-      if (saved) key = b64ToBytes(saved);
+      if (saved) return (key = b64ToBytes(saved));
     } catch { /* 无痕模式下读不到，走口令输入 */ }
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_LOCAL) || 'null');
+      if (saved && saved.exp > Date.now() && saved.salt === data.salt && saved.k) {
+        return (key = b64ToBytes(saved.k));
+      }
+    } catch { /* ignore */ }
     return key;
   }
 
@@ -90,14 +98,24 @@
       } catch { return null; }
     },
 
-    /** 用口令解这一篇；口令错了返回 null（GCM 校验失败）。 */
-    async unlockWith(id, password) {
+    /** 用口令解这一篇；口令错了返回 null（GCM 校验失败）。
+     *  remember=true 时把派生密钥（不是口令）存到本机 30 天。 */
+    async unlockWith(id, password, remember) {
       const material = await derive(password);
       try {
         const text = await decryptBody(material, id);
         key = material;
         plain[id] = text;
         try { sessionStorage.setItem(STORE, bytesToB64(material)); } catch { /* 存不下也能看这一次 */ }
+        if (remember) {
+          try {
+            localStorage.setItem(STORE_LOCAL, JSON.stringify({
+              k: bytesToB64(material),
+              salt: data.salt,
+              exp: Date.now() + REMEMBER_DAYS * 864e5
+            }));
+          } catch { /* 隐私模式写不进去，忽略 */ }
+        }
         return text;
       } catch {
         return null;
@@ -109,6 +127,7 @@
       key = null;
       for (const id of Object.keys(plain)) delete plain[id];
       try { sessionStorage.removeItem(STORE); } catch { /* ignore */ }
+      try { localStorage.removeItem(STORE_LOCAL); } catch { /* ignore */ }
     }
   };
 })();

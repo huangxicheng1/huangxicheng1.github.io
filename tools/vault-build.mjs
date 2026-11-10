@@ -26,7 +26,27 @@ const VAULT = join(ROOT, "vault");
 const OUT = join(VAULT, "data.js");
 const ENC_DIR = join(VAULT, "enc");
 const PASS_FILE = join(PRIVATE, "pass.txt");
+const SALT_FILE = join(PRIVATE, "salt.b64");
 const ITERATIONS = 600000;
+
+/* salt 固定下来：同一口令永远派生出同一把钥匙，
+   这样"在这台设备记住 30 天"不会因为重新构建而失效。salt 本身不是秘密，
+   它已经明文躺在密文文件里，这里只是让它保持稳定。 */
+function loadOrCreateSalt() {
+  if (existsSync(SALT_FILE)) {
+    const saved = readFileSync(SALT_FILE, "utf8").trim();
+    if (saved) {
+      const bytes = Buffer.from(saved, "base64");
+      if (bytes.length === 16) return bytes;
+      console.warn("· _private/salt.b64 内容不对（不是 16 字节 base64），重新生成");
+    }
+  }
+  const fresh = randomBytes(16);
+  mkdirSync(PRIVATE, { recursive: true });
+  writeFileSync(SALT_FILE, fresh.toString("base64") + "\n", "utf8");
+  console.log("· 首次生成固定 salt -> _private/salt.b64（以后构建都用它，记住的解锁不会失效）");
+  return fresh;
+}
 
 function readPassword() {
   const flag = process.argv.indexOf("--pass");
@@ -56,7 +76,7 @@ function main() {
   if (password.length < 8) throw new Error("口令太短：至少 8 位，建议 16 位以上");
 
   const notes = loadNotes(PRIVATE);
-  const salt = randomBytes(16);
+  const salt = loadOrCreateSalt();
   const key = pbkdf2Sync(password, salt, ITERATIONS, 32, "sha256");
   const built = new Date().toISOString();
 
