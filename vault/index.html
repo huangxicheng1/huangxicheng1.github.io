@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e6e0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="封存档案：只在本机解密的私人笔记。">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=3">
+  <title>封存室 · Isaac’s life</title>
+  <link rel="stylesheet" href="../archive.css?v=3">
+  <link rel="stylesheet" href="./vault.css">
+  <script defer src="./data.js"></script>
+  <script defer src="./vault-app.js"></script>
+</head>
+<body data-page="vault">
+
+<div class="utility">
+  <div class="wrap">
+    <span>RHINE DIARY ORGANIZATION <b>■</b> 研究记录部</span>
+    <span>SEALED VAULT <b>●</b> ACCESS: ENCRYPTED</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo-mark" aria-label="hxc" style="background:none;box-shadow:none">
+      <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+        <path d="M7 19 H30 L37 27 H62 V62 H7 Z" fill="var(--logo-shadow, rgba(20,20,18,.9))" transform="translate(2 2)"/>
+        <path d="M3 15 H26 L33 23 H58 V58 H3 Z" fill="var(--panel,#f1efe9)" stroke="var(--ink,#141412)" stroke-width="2"/>
+        <rect x="47.5" y="27.5" width="6.5" height="6.5" fill="#ff7500"/>
+        <g transform="translate(6.5 30.9) scale(0.96)" fill="none" stroke="var(--ink,#141412)" stroke-width="3.2" stroke-linecap="square">
+          <path d="M2 0 V20"/>
+          <path d="M2 9.5 H8 Q13.5 9.5 13.5 14.75 V20"/>
+          <path d="M20 9 L32 20"/>
+          <path d="M32 9 L20 20"/>
+          <path d="M46.89 10.61 A5.5 5.5 0 1 0 46.89 18.39"/>
+        </g>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <strong>Isaac’s life</strong>
+      <small>THE BINDING OF ORDINARY DAYS</small>
+    </div>
+    <nav class="dept-nav" aria-label="主导航">
+      <a class="dept" href="../index.html"><b>档案室</b><span>ARCHIVE INDEX</span></a>
+      <a class="dept" href="../calendar.html"><b>日子的地图</b><span>CALENDAR</span></a>
+      <a class="dept" href="../notes.html"><b>笔记库</b><span>LIBRARY</span></a>
+      <a class="dept active" aria-current="page" href="./index.html"><b>封存室</b><span>VAULT</span></a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换档案室 / 夜间值班主题" title="切换档案室 / 夜间值班">☼</button>
+  </div>
+</header>
+
+<main id="main" class="inner-page">
+  <div class="wrap">
+
+    <!-- 上锁状态 -->
+    <section class="vault-gate" id="vaultGate" hidden>
+      <p class="eyebrow">SEALED ARCHIVE · 封存档案</p>
+      <h1 class="vault-title">这里的东西，<em>只给你自己看。</em></h1>
+      <p class="vault-lede">
+        这一页躺在公开仓库里，但里面只有密文。口令不落盘、不上传，解密全部发生在你的浏览器里——
+        输入正确口令之后，服务器和任何人都不知道你看到了什么。
+      </p>
+      <form class="vault-form" id="vaultForm" autocomplete="off">
+        <label class="vault-label" for="vaultPass">VAULT KEY · 口令</label>
+        <div class="vault-row">
+          <input class="vault-input" id="vaultPass" type="password" inputmode="text"
+                 placeholder="输入口令" autocomplete="current-password" spellcheck="false" required>
+          <button class="vault-btn" type="submit">解封 ↗</button>
+        </div>
+        <label class="vault-remember">
+          <input type="checkbox" id="vaultRemember"> 在这台设备上记住 30 天（会存下派生密钥，公用电脑别勾）
+        </label>
+        <p class="vault-error" id="vaultError" role="alert" aria-live="polite"></p>
+      </form>
+      <p class="vault-note">口令存在本机 <code>_private/pass.txt</code>，忘了就只能重新封存一份新的档案。</p>
+    </section>
+
+    <!-- 已解锁 -->
+    <section class="vault-shell" id="vaultShell" hidden>
+      <div class="vault-bar">
+        <p class="eyebrow" id="vaultMeta">UNSEALED</p>
+        <div class="vault-bar-actions">
+          <label class="search-wrap vault-search">
+            <span aria-hidden="true">⌕</span>
+            <span class="sr-only">搜索封存笔记</span>
+            <input id="vaultSearch" type="search" placeholder="搜索标题、标签、正文…">
+          </label>
+          <button class="vault-btn ghost" type="button" id="vaultLock">锁定</button>
+        </div>
+      </div>
+
+      <div id="vaultList" class="vault-list"></div>
+      <p class="empty-message" id="vaultEmpty" hidden>没有匹配的档案，换个词试试。</p>
+
+      <article id="vaultReader" class="vault-reader" hidden>
+        <button class="vault-back" type="button" id="vaultBack">← 回到封存清单</button>
+        <p class="eyebrow" id="readerMeta"></p>
+        <h1 id="readerTitle"></h1>
+        <p class="reader-summary" id="readerSummary"></p>
+        <div class="markdown-body" id="readerBody"></div>
+      </article>
+    </section>
+
+    <div class="bottom-navigation">
+      <a href="../index.html">← 返回档案室</a>
+      <a href="../notes.html">去公开笔记库 →</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="barcode" aria-hidden="true"></div>
+    <div class="fine">
+      <b>ISAAC ARCHIVE</b> — SEALED UNIT · <span id="footerYear"></span><br>
+      本站为个人研究记录档案 · 莱茵生命风格致敬稿 · 与任何现实组织无关
+    </div>
+    <a class="up" href="#main">回到顶部 ↑</a>
+  </div>
+</footer>
+
+</body>
+</html>
