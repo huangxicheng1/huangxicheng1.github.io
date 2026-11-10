@@ -1,12 +1,15 @@
 /* 加密笔记的解锁层：口令 → PBKDF2 派生密钥 → AES-GCM 解出正文。
+ * 正文密文按篇拆在 vault/enc/ 里，点开某篇时才临时加载，列表页不会为此多下几百 KB。
  * 密钥只放在本标签页的 sessionStorage 里，关掉页面就没了；不写 localStorage、不上传。
- * 与封存室共用同一个口令和同一份 salt，所以在封存室解过锁之后，这里会直接可用。 */
+ * 与封存室共用同一个口令和同一份 salt。 */
 (function () {
   'use strict';
 
   const data = window.SECRET_NOTES || null;
   const STORE = 'secret-notes-key';
   let key = null;
+  const bodies = {};   // id -> {iv, ct}
+  const plain = {};    // id -> 解密后的 markdown（本页内复用）
 
   function b64ToBytes(text) {
     const binary = atob(text);
@@ -31,6 +34,28 @@
     return key;
   }
 
+  /** 按需加载某一篇的密文脚本，返回 {iv, ct}。 */
+  function loadBody(id) {
+    if (bodies[id]) return Promise.resolve(bodies[id]);
+    if (window.SECRET_BODIES && window.SECRET_BODIES[id]) {
+      bodies[id] = window.SECRET_BODIES[id];
+      return Promise.resolve(bodies[id]);
+    }
+    const path = data && data.files ? data.files[id] : null;
+    if (!path) return Promise.resolve(null);
+    return new Promise(resolve => {
+      const script = document.createElement('script');
+      script.src = new URL(path, document.baseURI).href;
+      script.onload = () => {
+        const found = (window.SECRET_BODIES || {})[id];
+        if (found) bodies[id] = found;
+        resolve(found || null);
+      };
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    });
+  }
+
   async function derive(password) {
     const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
     const bits = await crypto.subtle.deriveBits(
@@ -40,42 +65,49 @@
   }
 
   async function decryptBody(material, id) {
-    const item = data.enc[id];
-    if (!item) return null;
+    const body = await loadBody(id);
+    if (!body) return null;
     const cryptoKey = await crypto.subtle.importKey('raw', material, 'AES-GCM', false, ['decrypt']);
-    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(item.iv) }, cryptoKey, b64ToBytes(item.ct));
-    return JSON.parse(new TextDecoder().decode(plain)).content;
+    const result = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(body.iv) }, cryptoKey, b64ToBytes(body.ct));
+    return JSON.parse(new TextDecoder().decode(result)).content;
   }
 
   window.SecretNotes = {
     ready: Boolean(data && Array.isArray(data.meta)),
     meta: data && Array.isArray(data.meta) ? data.meta : [],
-    has: id => Boolean(data && data.enc && data.enc[id]),
+    has: id => Boolean(data && data.files && data.files[id]),
     isUnlocked: () => Boolean(recall()),
 
     /** 已解锁则直接返回正文，否则返回 null。 */
     async content(id) {
+      if (plain[id] !== undefined) return plain[id];
       const material = recall();
       if (!material) return null;
-      try { return await decryptBody(material, id); } catch { return null; }
+      try {
+        const text = await decryptBody(material, id);
+        plain[id] = text;
+        return text;
+      } catch { return null; }
     },
 
     /** 用口令解这一篇；口令错了返回 null（GCM 校验失败）。 */
     async unlockWith(id, password) {
       const material = await derive(password);
       try {
-        const content = await decryptBody(material, id);
+        const text = await decryptBody(material, id);
         key = material;
+        plain[id] = text;
         try { sessionStorage.setItem(STORE, bytesToB64(material)); } catch { /* 存不下也能看这一次 */ }
-        return content;
+        return text;
       } catch {
         return null;
       }
     },
 
-    /** 锁定：清掉本页记住的密钥。 */
+    /** 锁定：清掉本页记住的密钥与已解密的正文。 */
     forget() {
       key = null;
+      for (const id of Object.keys(plain)) delete plain[id];
       try { sessionStorage.removeItem(STORE); } catch { /* ignore */ }
     }
   };

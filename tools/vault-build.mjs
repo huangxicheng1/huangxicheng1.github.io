@@ -15,7 +15,7 @@
  * 注意：口令丢了就解不回来，脚本不会也无法帮你恢复。
  */
 import { createCipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadNotes } from "./vault-shared.mjs";
@@ -24,6 +24,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PRIVATE = join(ROOT, "_private");
 const VAULT = join(ROOT, "vault");
 const OUT = join(VAULT, "data.js");
+const ENC_DIR = join(VAULT, "enc");
 const PASS_FILE = join(PRIVATE, "pass.txt");
 const ITERATIONS = 600000;
 
@@ -67,15 +68,27 @@ function main() {
     count: notes.length, built
   };
 
-  // 2) 笔记库用的分篇密文：只公开标题/日期/摘要这些元数据，正文单独加密
+  // 2) 笔记库用的条目索引：只公开标题/日期/摘要，正文单独成文件、点开才加载
   const shared = notes.filter(note => note.visibility !== "vault");
   const meta = shared.map(({ id, title, date, type, category, summary, tags, review }) =>
     ({ id, title, date, type, category, summary, tags, review }));
-  const enc = {};
-  for (const note of shared) enc[note.id] = seal(JSON.stringify({ content: note.content }), key);
+  if (existsSync(ENC_DIR)) rmSync(ENC_DIR, { recursive: true, force: true });
+  mkdirSync(ENC_DIR, { recursive: true });
+  const files = {};
+  for (const note of shared) {
+    const name = note.id.replace(/[\\/]+/g, "__").replace(/[^\w.\-]/g, "") + ".js";
+    const body = seal(JSON.stringify({ content: note.content }), key);
+    writeFileSync(
+      join(ENC_DIR, name),
+      "window.SECRET_BODIES = window.SECRET_BODIES || {};\n" +
+        "window.SECRET_BODIES[" + JSON.stringify(note.id) + "] = " + JSON.stringify(body) + ";\n",
+      "utf8"
+    );
+    files[note.id] = "vault/enc/" + name;
+  }
   const secret = {
     v: 1, kdf: "PBKDF2-SHA256", iter: ITERATIONS,
-    salt: salt.toString("base64"), meta, enc, built
+    salt: salt.toString("base64"), meta, files, built
   };
 
   mkdirSync(VAULT, { recursive: true });
@@ -86,12 +99,13 @@ function main() {
   const kb = (Buffer.byteLength(JSON.stringify(blob)) / 1024).toFixed(1);
   const kb2 = (Buffer.byteLength(JSON.stringify(secret)) / 1024).toFixed(1);
   console.log(`· 封存室：${notes.length} 篇（${kb} KB）-> vault/data.js`);
-  console.log(`· 笔记库加密条目：${shared.length} 篇（${kb2} KB）-> vault/enc.js`);
+  console.log(`· 笔记库索引：${shared.length} 条（${kb2} KB）-> vault/enc.js，正文分在 vault/enc/`);
   for (const note of notes) {
-    console.log(`  ${note.date}  ${note.title}${note.visibility === "vault" ? "  [只在封存室]" : "  [笔记库 · 加密正文]"}`);
+    const where = note.visibility === "vault" ? "  [只在封存室]" : `  [笔记库 · 加密正文 ${(Buffer.byteLength(note.content) / 1024).toFixed(1)} KB]`;
+    console.log(`  ${note.date}  ${note.title}${where}`);
   }
   if (!notes.length) console.log("  （_private/ 里还没有 .md 笔记）");
-  console.log("· 记得把 vault/data.js 和 vault/enc.js 一起提交。");
+  console.log("· 记得把 vault/data.js、vault/enc.js、vault/enc/ 一起提交。");
 }
 
 main();
