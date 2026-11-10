@@ -23,11 +23,23 @@
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* 只取有 id 的标题，跳过渲染失败的空标题 */
-  const heads = Array.prototype.filter.call(
-    articleBody.querySelectorAll('h2, h3'),
-    node => node.id && node.textContent.trim()
-  );
-  if (heads.length < MIN_SECTIONS) return;
+  function collectHeads() {
+    return Array.prototype.filter.call(
+      articleBody.querySelectorAll('h2, h3'),
+      node => node.id && node.textContent.trim()
+    );
+  }
+
+  /* 加密笔记的正文要等口令解开后才注入，所以目录不能只在脚本执行时抓一次：
+     先试一次，标题不够就盯着 #articleBody，等正文进来再建。 */
+  function boot() {
+    const heads = collectHeads();
+    if (heads.length < MIN_SECTIONS) return false;
+    start(heads);
+    return true;
+  }
+
+  function start(heads) {
 
   /* ------------------------------------------------------------ 结构 */
 
@@ -281,4 +293,12 @@
   }
 
   measure();
+  }
+
+  if (!boot() && window.MutationObserver) {
+    const observer = new MutationObserver(function () {
+      if (boot()) observer.disconnect();
+    });
+    observer.observe(articleBody, { childList: true, subtree: true });
+  }
 })();
