@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "entry": "notes/2026-11-10-agent",
+  "updated": "2026-11-11T06:23:59.946Z",
+  "annotations": [
+    {
+      "id": "an_sujqy732h",
+      "quote": "核心原则：永远把错误信息回传给模型，让它自己修正（这是 ReAct 的 Observation 精神）：",
+      "prefix": "反复调用同一工具（死循环）连续相同调用检测，达到阈值终止",
+      "suffix": "● ● ●Pythontry:\n    result =",
+      "start": 47243,
+      "body": "try/except 里把异常吞掉，或者直接 raise 抛给调用方，模型那边看到的上下文和出错前完全一样，那么它在同一位置必然再犯同一个错。把错误写回去，上下文就变了，模型才有机会换个参数、换个工具、换个策略。",
+      "author": "huangxicheng1",
+      "created": "2026-11-11T06:23:59.945Z",
+      "updated": "2026-11-11T06:23:59.945Z"
+    }
+  ]
+}
