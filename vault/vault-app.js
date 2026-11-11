@@ -102,23 +102,44 @@
     const py = /#[^\n]*|"""[\s\S]*?"""|'''[\s\S]*?'''|[fFrRbBuU]{0,2}"(?:\\.|[^"\\])*"|[fFrRbBuU]{0,2}'(?:\\.|[^'\\])*'|@[\w.]+|\b(?:def|class|return|if|elif|else|while|for|in|not|and|or|is|None|True|False|try|except|finally|raise|with|as|lambda|pass|break|continue|import|from|global|nonlocal|assert|del|yield|async|await)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*(?=\s*\()/g;
     /* JSON 没有关键字可言：键靠“后面紧跟冒号”判定为 property，值一律 string/number/literal */
     const json = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\b(?:true|false|null)\b/g;
+    /* Shell 也没有统一语法边界：命令名靠“是否处在命令位”判定，普通参数不着色（见下方 isSh 分支） */
+    const sh = /#[^\n]*|"(?:\\.|[^"\\])*"|'[^']*'|\$\{[^}]*\}|\$[A-Za-z_]\w*|\$[0-9@*?#!$-]|&&|\|\||\||\b\d+\b|--?[A-Za-z][\w-]*|\b[A-Za-z_][\w.-]*\b/g;
     const lang = String(language).toLowerCase();
     const isPy = /^(py|python|python3)$/.test(lang);
     const isJson = /^(json|jsonc)$/.test(lang);
+    const isSh = /^(bash|sh|shell|zsh)$/.test(lang);
     const pattern = /^(js|javascript|ts|typescript|jsx)$/.test(lang) ? js
       : lang === 'css' ? css
       : lang === 'html' ? htmlLang
       : lang === 'java' ? java
       : lang === 'sql' ? sql
       : isPy ? py
-      : isJson ? json : null;
+      : isJson ? json
+      : isSh ? sh : null;
     if (!pattern) return escapeHTML(source);
     let result = '', last = 0, match;
     while ((match = pattern.exec(source)) !== null) {
       result += escapeHTML(source.slice(last, match.index));
       const token = match[0];
       let kind;
-      if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--') || token.startsWith('--') || (isPy && token.startsWith('#'))) kind = 'comment';
+      if (isSh) {
+        if (token.startsWith('#')) kind = 'comment';
+        else if (/^['"]/.test(token)) kind = 'string';
+        else if (token.startsWith('$')) kind = 'property';
+        else if (/^-/.test(token)) kind = 'number';
+        else if (/^[|&]+$/.test(token)) kind = 'keyword';
+        else if (/^(?:if|then|else|elif|fi|for|while|until|do|done|case|esac|in|function|return|break|continue|export|local|readonly|declare|typeset|unset|shift|set|trap)$/.test(token)) kind = 'keyword';
+        else {
+          const after = source.slice(match.index + token.length);
+          if (/^[A-Za-z_]\w*$/.test(token) && /^=(?!=)/.test(after)) kind = 'property';  /* NAME=value 赋值左侧算变量 */
+          else {
+            /* 命令位：行首，或紧跟在 ; | && || ( { 或 sudo/env/nohup/time/xargs 这类包装命令之后 */
+            const before = source.slice(Math.max(0, match.index - 48), match.index);
+            kind = /(?:^|[\n;|&({]|\b(?:then|do|else|elif|sudo|env|nohup|time|xargs|exec|command|eval)\s)\s*$/.test(before) ? 'function' : '';
+          }
+        }
+      }
+      else if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--') || token.startsWith('--') || (isPy && token.startsWith('#'))) kind = 'comment';
       else if (/^(?:[fFrRbBuU]{1,2})?['"`]/.test(token)) kind = 'string';
       else if (/^-?\d/.test(token) || (lang === 'css' && token.startsWith('#'))) kind = 'number';
       else if (token.startsWith('<') || token === '>' || token === '/>') kind = 'tag';
@@ -127,7 +148,7 @@
       else if (lang === 'css' || lang === 'html' || token.startsWith('@')) kind = 'property';
       else kind = 'function';
       if (isJson && kind === 'string' && /^\s*:/.test(source.slice(match.index + token.length))) kind = 'property';
-      result += `<span class="tok tok-${kind}">${escapeHTML(token)}</span>`;
+      result += kind ? `<span class="tok tok-${kind}">${escapeHTML(token)}</span>` : escapeHTML(token);
       last = pattern.lastIndex;
     }
     return result + escapeHTML(source.slice(last));
@@ -135,7 +156,7 @@
 
   function codeBlock(lines, language) {
     const lang = /^[a-zA-Z0-9+#-]{1,20}$/.test(language) ? language.toLowerCase() : '';
-    const labels = { js: 'JavaScript', javascript: 'JavaScript', ts: 'TypeScript', typescript: 'TypeScript', css: 'CSS', html: 'HTML', json: 'JSON', jsonc: 'JSON', java: 'Java', sql: 'SQL', py: 'Python', python: 'Python' };
+    const labels = { js: 'JavaScript', javascript: 'JavaScript', ts: 'TypeScript', typescript: 'TypeScript', css: 'CSS', html: 'HTML', json: 'JSON', jsonc: 'JSON', java: 'Java', sql: 'SQL', py: 'Python', python: 'Python', bash: 'Bash', sh: 'Shell', shell: 'Shell', zsh: 'Zsh' };
     const label = Object.hasOwn(labels, lang) ? labels[lang] : (lang ? lang.toUpperCase() : 'CODE');
     return `<div class="md-code"><div class="md-code-head"><span class="code-dots" aria-hidden="true">● ● ●</span><span>${escapeHTML(label)}</span></div><pre><code>${highlightCode(lines.join('\n'), lang)}</code></pre></div>`;
   }
