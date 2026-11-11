@@ -344,19 +344,22 @@
     const java = /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|@\w+|\b(?:public|private|protected|class|new|return|if|else|try|catch|throw|final|static|void|long|int|boolean|true|false|null|this|extends|implements|import|package)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*(?=\s*\()/g;
     const lua = /--[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:local|if|then|else|elseif|end|return|and|or|not|false|true|nil|function)\b|\b\d+\b|\b[A-Za-z_][\w]*(?=\s*\()/g;
     const sql = /--[^\n]*|\/\*[\s\S]*?\*\/|'(?:''|[^'])*'|\b(?:SELECT|UPDATE|SET|WHERE|AND|OR|INSERT|INTO|VALUES|FROM|LIMIT|NOW|INTERVAL|MINUTE|NULL|NOT|INDEX|CREATE|UNIQUE|AS|ORDER|BY)\b|\b\d+\b|\b[A-Za-z_][\w]*(?=\s*\()/gi;
+    /* 注：三引号 docstring 必须排在普通引号之前，否则 """ 会被拆成两个空串 */
+    const py = /#[^\n]*|"""[\s\S]*?"""|'''[\s\S]*?'''|[fFrRbBuU]{0,2}"(?:\\.|[^"\\])*"|[fFrRbBuU]{0,2}'(?:\\.|[^'\\])*'|@[\w.]+|\b(?:def|class|return|if|elif|else|while|for|in|not|and|or|is|None|True|False|try|except|finally|raise|with|as|lambda|pass|break|continue|import|from|global|nonlocal|assert|del|yield|async|await)\b|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*(?=\s*\()/g;
     const lang = String(language).toLowerCase();
-    const pattern = /^(js|javascript|ts|typescript|jsx)$/.test(lang) ? js : lang === 'css' ? css : lang === 'html' ? html : lang === 'java' ? java : lang === 'lua' ? lua : lang === 'sql' ? sql : null;
+    const isPy = /^(py|python|python3)$/.test(lang);
+    const pattern = /^(js|javascript|ts|typescript|jsx)$/.test(lang) ? js : lang === 'css' ? css : lang === 'html' ? html : lang === 'java' ? java : lang === 'lua' ? lua : lang === 'sql' ? sql : isPy ? py : null;
     if (!pattern) return escapeHTML(source);
     let result = '', last = 0, match;
     while ((match = pattern.exec(source)) !== null) {
       result += escapeHTML(source.slice(last, match.index));
       const token = match[0];
       let kind;
-      if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--') || token.startsWith('--')) kind = 'comment';
-      else if (/^['"`]/.test(token)) kind = 'string';
+      if (token.startsWith('//') || token.startsWith('/*') || token.startsWith('<!--') || token.startsWith('--') || (isPy && token.startsWith('#'))) kind = 'comment';
+      else if (/^(?:[fFrRbBuU]{1,2})?['"`]/.test(token)) kind = 'string';
       else if (/^\d/.test(token) || (lang === 'css' && token.startsWith('#'))) kind = 'number';
       else if (token.startsWith('<') || token === '>' || token === '/>') kind = 'tag';
-      else if (/^(?:const|let|var|return|function|async|await|if|else|elseif|then|end|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined|public|private|protected|final|static|void|long|int|boolean|this|extends|implements|package|local|and|or|not|nil|SELECT|UPDATE|SET|WHERE|INSERT|INTO|VALUES|FROM|LIMIT|NOW|INTERVAL|MINUTE|NOT|INDEX|CREATE|UNIQUE|AS|ORDER|BY)$/i.test(token)) kind = 'keyword';
+      else if (/^(?:const|let|var|return|function|async|await|if|else|elseif|then|end|for|of|new|class|export|import|from|try|catch|throw|true|false|null|undefined|public|private|protected|final|static|void|long|int|boolean|this|extends|implements|package|local|and|or|not|nil|def|elif|while|in|is|as|with|except|finally|raise|yield|lambda|pass|break|continue|global|nonlocal|assert|del|None|True|False|SELECT|UPDATE|SET|WHERE|INSERT|INTO|VALUES|FROM|LIMIT|NOW|INTERVAL|MINUTE|NOT|INDEX|CREATE|UNIQUE|AS|ORDER|BY)$/i.test(token)) kind = 'keyword';
       else if (lang === 'css' && /^[.#]/.test(token)) kind = 'selector';
       else if (lang === 'css' || lang === 'html' || token.startsWith('@')) kind = 'property';
       else kind = 'function';
@@ -367,7 +370,7 @@
   }
   function codeBlock(lines, language) {
     const lang = /^[a-zA-Z0-9+#-]{1,20}$/.test(language) ? language.toLowerCase() : '';
-    const labels = {js:'JavaScript',javascript:'JavaScript',ts:'TypeScript',typescript:'TypeScript',css:'CSS',html:'HTML',json:'JSON',java:'Java',lua:'Lua',sql:'SQL'};
+    const labels = {js:'JavaScript',javascript:'JavaScript',ts:'TypeScript',typescript:'TypeScript',css:'CSS',html:'HTML',json:'JSON',java:'Java',lua:'Lua',sql:'SQL',py:'Python',python:'Python'};
     const label = Object.hasOwn(labels, lang) ? labels[lang] : (lang ? lang.toUpperCase() : 'CODE');
     return `<div class="md-code"><div class="md-code-head"><span class="code-dots" aria-hidden="true">● ● ●</span><span>${escapeHTML(label)}</span></div><pre><code>${highlightCode(lines.join('\n'), lang)}</code></pre></div>`;
   }
