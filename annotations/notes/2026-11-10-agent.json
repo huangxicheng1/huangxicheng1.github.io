@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-10-agent",
-  "updated": "2026-11-11T06:23:59.946Z",
+  "updated": "2026-11-11T06:26:49.602Z",
   "annotations": [
     {
       "id": "an_sujqy732h",
@@ -13,6 +13,17 @@
       "author": "huangxicheng1",
       "created": "2026-11-11T06:23:59.945Z",
       "updated": "2026-11-11T06:23:59.945Z"
+    },
+    {
+      "id": "an_j1vyntpz4",
+      "quote": "MRKL",
+      "prefix": "3.4 工具调用架构对比表维度Function Call",
+      "suffix": "ToolformerHuggingGPT核心思想通过 A",
+      "start": 49673,
+      "body": "它提出的时候（ChatGPT 还没出来），业界正卡在两个问题上：\n\nLLM 不知道训练数据之后的事，也不知道你公司的内部数据；\nLLM 不擅长离散符号推理——精确算数会算错，逻辑推演没保证，而且无法溯源（你不知道它哪句是编的）。\nMRKL 的回答是：别指望一个模型全包，把它拆成一个路由器加一堆专家。",
+      "author": "huangxicheng1",
+      "created": "2026-11-11T06:26:49.600Z",
+      "updated": "2026-11-11T06:26:49.600Z"
     }
   ]
 }
