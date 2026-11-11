@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悉尼蓝花楹街角 · Three.js 微缩场景</title>
+<meta name="description" content="可拖拽旋转、缩放的悉尼蓝花楹街角微缩场景，三渲二日式动画风格，支持白天、黄昏、夜晚切换。">
+<style>
+  :root {
+    --paper: #F4F2ED;
+    --ink: #2E2B33;
+    --muted: #8A8578;
+    --accent: #6E5CA8;
+    --hairline: rgba(46, 43, 51, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+                 "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(30px, 6.5vh, 78px) clamp(20px, 5vw, 64px)
+             clamp(34px, 7vh, 88px);
+  }
+
+  /* 画作说明牌：标题在左，时段开关在右 */
+  .caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 28px;
+    margin-bottom: clamp(20px, 3.4vh, 34px);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC",
+                 "STSong", "SimSun", serif;
+    font-weight: 600;
+    font-size: clamp(27px, 3.6vw, 42px);
+    letter-spacing: 0.05em;
+    line-height: 1.15;
+  }
+
+  .latin {
+    margin: 10px 0 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 13.5px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+
+  .switch {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    padding-bottom: 6px;
+  }
+
+  .pill {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    color: var(--ink);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    padding: 9px 22px;
+    transition: background-color 0.4s ease, color 0.4s ease,
+                border-color 0.4s ease;
+  }
+
+  .pill:hover { border-color: rgba(110, 92, 168, 0.55); }
+
+  .pill.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #F7F5F0;
+  }
+
+  .pill:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* 场景板 */
+  .plate {
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #DCEBF7;
+    box-shadow: 0 30px 70px -38px rgba(46, 43, 51, 0.45);
+  }
+
+  #stage {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    touch-action: none;
+    opacity: 0;
+    animation: rise 1s ease 0.1s both;
+  }
+
+  .hint {
+    margin: 20px 2px 0;
+    font-size: 12.5px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 720px) {
+    .caption {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .switch { padding-bottom: 0; }
+    #stage { aspect-ratio: 4 / 5; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    #stage { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="caption">
+      <div>
+        <h1>悉尼蓝花楹街角</h1>
+        <p class="latin">a miniature of Sydney in jacaranda season</p>
+      </div>
+      <div class="switch" role="group" aria-label="切换时段">
+        <button class="pill is-active" data-time="day" aria-pressed="true">白天</button>
+        <button class="pill" data-time="dusk" aria-pressed="false">黄昏</button>
+        <button class="pill" data-time="night" aria-pressed="false">夜晚</button>
+      </div>
+    </header>
+
+    <figure class="plate">
+      <canvas id="stage"></canvas>
+    </figure>
+
+    <p class="hint">拖动旋转视角，滚轮缩放，双击回到默认视角。</p>
+  </main>
+
+  <script src="lib/three.min.js"></script>
+  <script src="lib/OrbitControls.js"></script>
+  <script src="src/palette.js"></script>
+  <script src="src/utils.js"></script>
+  <script src="src/environment.js"></script>
+  <script src="src/building.js"></script>
+  <script src="src/trees.js"></script>
+  <script src="src/petals.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
