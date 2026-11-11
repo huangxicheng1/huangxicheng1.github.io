@@ -1,19 +1,8 @@
 {
   "version": 1,
   "entry": "notes/2026-11-10-agent",
-  "updated": "2026-11-11T08:06:47.756Z",
+  "updated": "2026-11-11T08:06:52.189Z",
   "annotations": [
-    {
-      "id": "an_64xt9fa6i",
-      "quote": "经典规划方法",
-      "prefix": "状态管理 + 记忆 + 人机交互 + 可观测性。2.3",
-      "suffix": "2.3.1 CoT（Chain of Thought，思",
-      "start": 7674,
-      "body": "层\t内容\t推理模型来了之后\nL1 思考结构层\tCoT 提示、ToT 的提示变体、Self-Discover 的推理结构选择\t基本被吸收。模型自带 thinking，内部就在做多路径尝试和回溯，你不用再手写「让我们一步步思考」\nL2 交互循环层\tReAct 的 Thought→Action→Observation、观察后改计划\t仍然需要，但形态简化。不再需要教它 Thought/Action 的文本格式（原生工具调用），但循环本身——迭代、停止条件、预算、状态累积——仍归框架\nL3 全局编排层\t任务分解、依赖排序、并行、子 Agent、检查点/恢复、人工审批、权限与审计\t完全无法被吸收，因为它发生在单次调用之外",
-      "author": "huangxicheng1",
-      "created": "2026-11-11T08:06:47.754Z",
-      "updated": "2026-11-11T08:06:47.754Z"
-    },
     {
       "id": "an_sujqy732h",
       "quote": "核心原则：永远把错误信息回传给模型，让它自己修正（这是 ReAct 的 Observation 精神）：",
