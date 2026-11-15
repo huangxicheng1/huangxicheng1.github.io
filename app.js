@@ -407,6 +407,19 @@
     const lines = String(source || '').replace(/\r\n/g,'\n').split('\n');
     const output = []; let paragraph = [], list = null, quote = [], code = [], fenced = false, codeLanguage = '';
     const headingIds = new Map();
+    /* 标题层级要按「本篇最浅的一级」对齐，不能按 # 的个数硬算：
+       正文里没有 h1（标题在 front matter），有的篇从 # 起、有的从 ## 起。
+       硬算的话 `# 三、分块大小的选择` 和 `## 3.1 …` 都会落成 h2 —— 正文看着同级，
+       左侧目录也排不出父子关系。先扫一遍（跳过代码块）拿到最浅一级，再补偏移。 */
+    let topLevel = 5;
+    for (let i = 0, inFence = false; i < lines.length; i++) {
+      const probeLine = lines[i];
+      if (/^```/.test(probeLine)) { inFence = !inFence; continue; }
+      if (inFence) continue;
+      const probe = /^(#{1,4})\s+(.+)$/.exec(probeLine);
+      if (probe && probe[1].length < topLevel) topLevel = probe[1].length;
+    }
+    if (topLevel > 4) topLevel = 1;
     const flushParagraph = () => { if (paragraph.length) { output.push(`<p>${inline(paragraph.join(' '))}</p>`); paragraph = []; } };
     const flushList = () => { if (list) { output.push(`</${list}>`); list = null; } };
     const flushQuote = () => { if (quote.length) { output.push(`<blockquote><p>${inline(quote.join(' '))}</p></blockquote>`); quote = []; } };
@@ -440,7 +453,7 @@
       const heading = /^(#{1,4})\s+(.+)$/.exec(line);
       if (heading) {
         flushParagraph(); flushList(); flushQuote();
-        const depth = Math.max(2, heading[1].length);
+        const depth = Math.min(5, Math.max(2, heading[1].length - topLevel + 2));
         const base = headingSlug(heading[2]) || 'section';
         const count = headingIds.get(base) || 0;
         headingIds.set(base, count + 1);

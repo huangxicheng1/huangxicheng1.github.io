@@ -22,10 +22,11 @@
   const OFFSET = 140;          // 判定「当前章节」的视口参考线
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  /* 只取有 id 的标题，跳过渲染失败的空标题 */
+  /* 只取有 id 的标题，跳过渲染失败的空标题。
+     h3 / h4 是正文里的两级小节（h4 只有三级结构的篇才有），目录跟着缩进。 */
   function collectHeads() {
     return Array.prototype.filter.call(
-      articleBody.querySelectorAll('h2, h3'),
+      articleBody.querySelectorAll('h2, h3, h4'),
       node => node.id && node.textContent.trim()
     );
   }
@@ -49,7 +50,8 @@
 
     heads.forEach(heading => {
       const item = document.createElement('li');
-      item.className = heading.tagName === 'H3' ? 'toc-item is-sub' : 'toc-item';
+      item.className = heading.tagName === 'H4' ? 'toc-item is-sub is-sub2'
+        : heading.tagName === 'H3' ? 'toc-item is-sub' : 'toc-item';
 
       const link = document.createElement('a');
       link.className = 'toc-link';

@@ -398,13 +398,15 @@ body.light .category-card.active { border-color: var(--orange); }
 /* —— Markdown 正文 —— */
 .markdown-body { margin-top: 24px; font-size: 14px; line-height: 2.15; color: var(--ink-soft); overflow-wrap: anywhere; }
 .markdown-body strong { color: var(--ink); }
-.markdown-body h2, .markdown-body h3, .markdown-body h4 {
+.markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5 {
   color: var(--ink); font-weight: 700; line-height: 1.5; margin: 34px 0 12px; letter-spacing: .05em;
 }
 .markdown-body h2 { font-size: 19px; padding-left: 14px; position: relative; }
 .markdown-body h2::before { content: ""; position: absolute; left: 0; top: .32em; width: 6px; height: 6px; background: var(--orange); }
 .markdown-body h3 { font-size: 16px; }
 .markdown-body h4 { font-size: 14px; }
+/* 第四级（从 # 起笔、有 #### 的篇才有，渲染时落成 h5）收得更紧一点，免得比正文还抢眼 */
+.markdown-body h5 { font-size: 13px; margin: 22px 0 8px; color: var(--ink-soft); }
 .markdown-body a { color: var(--orange); border-bottom: 1px solid rgba(255, 117, 0, .4); }
 .markdown-body ul, .markdown-body ol { padding-left: 24px; margin: 12px 0; }
 .markdown-body li { margin: 5px 0; }
