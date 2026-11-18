@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-17-harness-engineering",
-  "updated": "2026-11-18T10:04:51.632Z",
+  "updated": "2026-11-18T10:12:56.675Z",
   "annotations": [
     {
       "id": "an_b8z17u2su",
@@ -9,10 +9,10 @@
       "prefix": "Harness Engineering：",
       "suffix": "前置知识：TypeScript 基础、LLM API 调",
       "start": 20,
-      "body": "https://huangxicheng1.github.io/openmanus-vs-claude-code.html",
+      "body": "https://huangxicheng1.github.io/openmanus-vs-claude-code.html 跟openmause的对比内容",
       "author": "huangxicheng1",
       "created": "2026-11-18T10:04:51.630Z",
-      "updated": "2026-11-18T10:04:51.630Z"
+      "updated": "2026-11-18T10:12:56.672Z"
     }
   ]
 }
