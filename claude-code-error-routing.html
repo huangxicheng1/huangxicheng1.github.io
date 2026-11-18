@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 的错误分流：一次失败的五种归宿</title>
+<style>
+  /* ============================================================
+     双主题变量表 —— 照抄模板，不改结构
+     ============================================================ */
+  :root{
+    /* 结构色 */
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#fffdf6 0%,#f4f0e6 52%,#ece6d9 100%);
+    --panel:#fffefb;--panel2:#efe9dd;--line:#ddd4c4;
+    --txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+    /* 语义色 */
+    --accent:#1f5fa8;--accent2:#16724b;--warm:#b45309;--pink:#7a3ea8;
+    --red:#b3261e;--yellow:#8a6100;--cyan:#0e6f78;
+    /* 组件专用 */
+    --diag:#fffdf8;--rule-bg:#fbf8f1;
+    --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+    --node-bg:#fffefb;--node-line:#d9d0c0;
+    --flink:#c6bdac;--kids-line:#d8cfbe;--lane-line:#e8e1d3;--vmark:#c9c0af;
+    --model:#6b7280;--lbar-fg:#fff;
+    /* 半透明 tint */
+    --core-bg:linear-gradient(135deg,rgba(122,62,168,.08),rgba(31,95,168,.05));
+    --core-line:rgba(122,62,168,.55);
+    --quote-bg:rgba(22,114,75,.06);
+    --note-bg:rgba(31,95,168,.06);
+    --quiz-bg:rgba(122,62,168,.05);
+    --diag-shadow:0 2px 12px rgba(90,74,44,.06);
+    --stag-g-line:rgba(22,114,75,.35);--stag-g-bg:rgba(22,114,75,.06);
+    --stag-o-line:rgba(180,83,9,.35);--stag-o-bg:rgba(180,83,9,.06);
+    --chip-hot-line:rgba(180,83,9,.45);
+    --node-main-line:rgba(22,114,75,.5);--node-main-bg:rgba(22,114,75,.05);
+    --node-bad-line:rgba(179,38,30,.45);--node-bad-bg:rgba(179,38,30,.05);
+    --cbox-bad-line:rgba(179,38,30,.4);--cbox-good-line:rgba(22,114,75,.4);
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,monospace;
+  }
+  html[data-theme="dark"]{
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#1d232c 0%,#161a21 52%,#101419 100%);
+    --panel:#1a1f27;--panel2:#232932;--line:#313845;
+    --txt:#e9e7e2;--p:#c3c9d2;--muted:#8f98a5;
+    --accent:#7ab0f5;--accent2:#5ecf9e;--warm:#eda267;--pink:#c391f7;
+    --red:#f0796f;--yellow:#d9ad3f;--cyan:#5fcbd6;
+    --diag:#171c23;--rule-bg:#1c222a;
+    --code-bg:#232a33;--code-line:#39414d;--code-fg:#d0aef5;
+    --node-bg:#1d232b;--node-line:#39414d;
+    --flink:#4b5461;--kids-line:#39414d;--lane-line:#2b323c;--vmark:#414a57;
+    --model:#7a8494;--lbar-fg:#10151b;
+    --core-bg:linear-gradient(135deg,rgba(195,145,247,.11),rgba(122,176,245,.07));
+    --core-line:rgba(195,145,247,.5);
+    --quote-bg:rgba(94,207,158,.09);
+    --note-bg:rgba(122,176,245,.09);
+    --quiz-bg:rgba(195,145,247,.08);
+    --diag-shadow:0 2px 14px rgba(0,0,0,.38);
+    --stag-g-line:rgba(94,207,158,.4);--stag-g-bg:rgba(94,207,158,.1);
+    --stag-o-line:rgba(237,162,103,.4);--stag-o-bg:rgba(237,162,103,.1);
+    --chip-hot-line:rgba(237,162,103,.5);
+    --node-main-line:rgba(94,207,158,.45);--node-main-bg:rgba(94,207,158,.08);
+    --node-bad-line:rgba(240,121,111,.45);--node-bad-bg:rgba(240,121,111,.08);
+    --cbox-bad-line:rgba(240,121,111,.45);--cbox-good-line:rgba(94,207,158,.45);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--txt);
+    background:var(--page-bg);
+    background-attachment:fixed;
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.8;padding:26px 18px;-webkit-font-smoothing:antialiased;
+    transition:background .25s ease,color .25s ease}
+  .wrap{max-width:960px;margin:0 auto}
+
+  .nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .nav a{font-size:11.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px;background:var(--panel)}
+  .nav a:hover{color:var(--accent);border-color:var(--accent)}
+  .theme-btn{margin-left:auto;font-size:11.5px;color:var(--muted);border:1px solid var(--line);
+    border-radius:999px;padding:2px 12px;background:var(--panel);cursor:pointer;font-family:inherit;
+    transition:color .16s,border-color .16s}
+  .theme-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  h2{font-size:19px;margin:34px 0 10px;padding-left:11px;border-left:4px solid var(--accent);scroll-margin-top:16px}
+  h3{font-size:14px;margin:18px 0 6px;color:var(--p)}
+  p{color:var(--p);margin:8px 0;font-size:14px}
+
+  .b{color:var(--accent)}.g{color:var(--accent2)}.o{color:var(--warm)}.pk{color:var(--pink)}
+  .y{color:var(--yellow)}.r{color:var(--red)}.cy{color:var(--cyan)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0}
+  .core{background:var(--core-bg);
+    border:1px solid var(--core-line);border-radius:12px;padding:16px 20px;font-size:15px;margin:14px 0}
+  .quote{border-left:3px solid var(--accent2);background:var(--quote-bg);padding:10px 14px;
+    border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--p);font-style:italic}
+  .note{background:var(--note-bg);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz{background:var(--quiz-bg);border-left:3px solid var(--pink);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz b{color:var(--pink)}
+  .quiz ol{margin:6px 0 0;padding-left:20px}
+  .quiz li{margin:3px 0}
+  code{background:var(--code-bg);border:1px solid var(--code-line);padding:0 5px;border-radius:4px;
+    color:var(--code-fg);font-size:12px;font-family:var(--mono)}
+
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td:first-child{color:var(--yellow);font-weight:600;width:27%}
+  .fixt td:first-child{font-family:var(--mono);font-size:11.5px;font-weight:500;width:30%}
+  td{word-break:break-word}
+
+  .diag{background:var(--diag);border:1px solid var(--line);border-radius:12px;
+    padding:18px 18px 22px;margin:14px 0;box-shadow:var(--diag-shadow)}
+  .bigrule{text-align:center;font-family:var(--mono);font-size:13.5px;color:var(--txt);
+    background:var(--rule-bg);border:1px solid var(--code-line);border-radius:9px;padding:12px;margin:12px 0}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .stats>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .stats b{display:block;font-family:var(--mono);font-size:30px;line-height:1.15;color:var(--accent2)}
+  .stats span{font-size:11px;color:var(--muted)}
+  .stats .n2 b{color:var(--warm)}
+  .stats .n3 b{color:var(--pink)}
+
+  .lanes{margin:8px 0}
+  .lane{display:flex;align-items:center;height:36px}
+  .lanen{width:108px;flex:none;text-align:right;padding-right:12px;font-family:var(--mono);
+    font-size:10.5px;color:var(--p);white-space:nowrap}
+  .lanet{flex:1;position:relative;height:36px;border-left:1px solid var(--lane-line)}
+  .lbar{position:absolute;top:10px;height:16px;border-radius:5px;font-family:var(--mono);
+    font-size:9.5px;font-weight:700;color:var(--lbar-fg);display:flex;align-items:center;justify-content:center;
+    white-space:nowrap;overflow:hidden}
+  .lbar.model{background:var(--model)}
+  .lbar.safe{background:var(--accent2)}
+  .lbar.unsafe{background:var(--warm)}
+  .lbar.res{background:var(--pink)}
+  .vmark{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--vmark);z-index:2}
+  .axis{display:flex;padding-left:108px;font-size:9.5px;color:var(--muted);margin-bottom:2px;
+    font-family:var(--mono)}
+  .axis span{flex:1}
+
+  .sched{margin:10px 0}
+  .srow{display:flex;align-items:center;gap:6px;margin:7px 0;flex-wrap:wrap;font-size:14px}
+  .srow>span:last-child{flex:1;min-width:0}
+  .stag{flex:none;width:52px;text-align:center;font-size:10px;border-radius:5px;padding:1px 0;
+    font-family:var(--mono);border:1px solid transparent}
+  .stag.g{color:var(--accent2);border-color:var(--stag-g-line);background:var(--stag-g-bg)}
+  .stag.o{color:var(--warm);border-color:var(--stag-o-line);background:var(--stag-o-bg)}
+  .chip{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);background:var(--panel);
+    border-radius:6px;padding:2px 9px;color:var(--p)}
+  .chip.hot{border-color:var(--chip-hot-line)}
+  .snote{font-size:11px;color:var(--muted);margin-left:58px}
+
+  .flow{display:flex;align-items:center;gap:0;margin:10px 0}
+  .fnode{flex:1;background:var(--node-bg);border:1px solid var(--node-line);border-radius:9px;
+    padding:9px 6px;text-align:center;font-family:var(--mono);font-size:11.5px}
+  .fnode small{display:block;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;
+    font-size:10px;color:var(--muted)}
+  .flink{width:46px;flex:none;text-align:center;color:var(--flink);font-size:13px}
+
+  .tree{margin:10px 0}
+  .tnode{display:inline-block;font-family:var(--mono);font-size:11px;border-radius:8px;
+    padding:6px 12px;background:var(--panel);border:1px solid var(--line)}
+  .tnode{max-width:100%;word-break:break-word}
+  .tnode.main{border-color:var(--node-main-line);background:var(--node-main-bg)}
+  .tnode.bad{border-color:var(--node-bad-line);background:var(--node-bad-bg);color:var(--red)}
+  .tkids{margin:6px 0 0 14px;padding-left:18px;border-left:1px dashed var(--kids-line);
+    display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .mini div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:12px}
+
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  .cbox{border-radius:10px;padding:13px 15px;font-size:12px;background:var(--diag)}
+  .cbox.bad{border:1px solid var(--cbox-bad-line)}
+  .cbox.good{border:1px solid var(--cbox-good-line)}
+  .cbox .ct{font-size:12px;font-weight:700;margin-bottom:8px}
+  .cbox p{font-size:12px;margin:5px 0;line-height:1.7}
+
+  @media(max-width:760px){
+    .stats,.cmp,.mini{grid-template-columns:1fr}
+    .lanen{width:78px}
+    .axis{padding-left:78px}
+    .flow{flex-direction:column;gap:6px}
+    .flink{width:auto}
+    .snote{margin-left:0}
+    .theme-btn{margin-left:0}
+    table{font-size:11.5px}
+    .fixt td:first-child{width:36%;word-break:break-all}
+  }
+  @media print{
+    html,html[data-theme="dark"]{
+      --page-bg:#fff;--txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+      --panel:#fffefb;--panel2:#f7f4ec;--line:#ddd4c4;--diag:#fffdf8;--rule-bg:#fbf8f1;
+      --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+      --node-bg:#fffefb;--node-line:#d9d0c0;
+    }
+    body{background:#fff;padding:0}
+    .diag,.card,.core,.cmp,.mini>div{break-inside:avoid}
+    .nav{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a href="#s1">① 分诊台</a>
+    <a href="#s2">② 五种归宿</a>
+    <a href="#s3">③ 三种修法</a>
+    <a href="#s4">④ 两条硬边界</a>
+    <a href="#s5">⑤ 终止之前</a>
+    <a href="#s6">⑥ 速查表</a>
+    <a href="#s7">⑦ 反直觉</a>
+    <button id="themeToggle" class="theme-btn" type="button" aria-label="切换深色/浅色主题">深色</button>
+  </div>
+
+  <h1>Claude Code 的错误分流：一次失败的五种归宿</h1>
+  <div class="sub">它不做"错误分类学"，只做一件事：把每个失败分配给<b>唯一有能力修它的那一方</b></div>
+
+  <div class="core">
+    🎯 <b>一句话</b>：Claude Code 从不论错误的<b>严重程度</b>，只问一个问题——<b>谁能修？</b> 模型能修就写成数据，代码能修就静默重来，谁都修不了才停。<br>
+    最反直觉的是：<b class="pk">同一个失败要经过最多四层翻译才落到你眼前，而"停下来"永远是最后一个选项。</b>
+  </div>
+
+  <div class="stats">
+    <div><b>5</b><span>一次失败可能的归宿</span></div>
+    <div class="n2"><b>3</b><span>前台 529 给 3 次机会，后台 0 次</span></div>
+    <div class="n3"><b>4</b><span>从原生异常到你能看见，最多翻 4 层</span></div>
+  </div>
+
+  <h2 id="s1">① 打个比方：急诊分诊台</h2>
+  <div class="card">
+    <p>病人推进来，分诊护士<b>第一句话不是"病情多危险"</b>，而是"<b>这个该谁接手</b>"。轻重不是判据，谁能接才是。</p>
+    <p>· <b class="g">自己能处理</b>（清创、输液）→ 当场处理，病人家属甚至不知道出过状况<br>
+       · <b class="o">得转专科</b>（写会诊单交上去）→ 这叫"把信息交给有能力的人"<br>
+       · <b class="r">治不了</b>（设备不够、超出本院范围）→ 上报，而且必须如实写清病因<br>
+       · 还有一类：<b>旁边科室的仪器坏了</b> → 记一笔，<b>不影响这个病人</b></p>
+    <p style="margin-bottom:0">Claude Code 的错误处理就是这张分诊台。它<b class="b">只干三件事：判断谁能修、把信息翻译成那一方能用的形式、修不了就诚实上报。</b></p>
+  </div>
+
+  <h2 id="s2">② 五种归宿：一张图看完</h2>
+  <p>失败一发生，就按"在哪一层出的事"分流。注意每一行的<b>可见性</b>完全不同——有的模型知道、用户不知道；有的两边都不知道。</p>
+
+  <div class="diag">
+    <div class="sched">
+      <div class="srow"><span class="stag g">工具</span><span class="chip">is_error: true</span><span>命令非零退出 / 文件不存在 / 权限拒绝 / MCP 挂了 → 变成一条<b class="g">工具结果</b>。模型看得见，<b>这就是给它的</b></span></div>
+      <div class="srow"><span class="stag o">传输</span><span class="chip">withRetry</span><span>429 限流 / 529 过载 / socket 断 / token 过期 → 退避重试或刷新凭证，<b class="r">模型完全不知道</b></span></div>
+      <div class="srow"><span class="stag o">协议</span><span class="chip">withhold</span><span>输出截断 / 上下文超限 / 钩子打回 → 先<b>扣留</b>，内部恢复，<b class="r">用户看不见</b></span></div>
+      <div class="srow"><span class="stag o">装配</span><span class="chip">void</span><span>钩子自己崩了 / 记忆提取崩了 / 压缩连续失败 → 记日志当没发生，最多一条 warning</span></div>
+      <div class="srow"><span class="stag o">致命</span><span class="chip">return</span><span>鉴权彻底失败 / 非法请求 / 内部 bug → <b class="r">终止</b>，而且报<b>真实</b>错误</span></div>
+    </div>
+    <div class="snote" style="margin-top:10px">绿＝本来就该这样；橙＝都有代价（重复请求 / 扣留 / 静默吞掉 / 直接死）。<b>唯一"零代价"的那一行不存在。</b></div>
+  </div>
+
+  <div class="note">装配层那行有个默认值值得记：<b>Stop hook 自己崩了，代码返回的是"放行"</b>（<code>blockingErrors: []</code>, <code>preventContinuation: false</code>）。<b>基础设施出错时，选最不打扰使用者的那条路。</b></div>
+
+  <p>为什么偏偏只有工具层把错误"交出去"？因为它是唯一<b class="g">错误本身就是信息</b>的层：文件不存在，它才会换一个路径；命令报错，它才会改参数。所以这条错误必须是<b>可行动的</b>——"文件不存在，最接近的是 <code>src/Query.ts</code>"，远好于一整段调用堆栈。堆栈是写给工程师看的，它不是。</p>
+
+  <h2 id="s3">③ 三种"修法"：区别不在谁动手，在历史变没变</h2>
+  <p>很多人以为"代码修"和"交给模型"没区别——反正最后都要再发一次请求。区别在这儿：</p>
+
+  <div class="diag">
+    <div class="sched">
+      <div class="srow"><span class="stag g">①</span><span class="chip">历史一字不改</span><span>纯重试：<code>[U1, A1, U2]</code> → 原样再发。模型看到的输入和<b>它从未失败过完全相同</b>，它不知道有这回事</span></div>
+      <div class="srow"><span class="stag o">②</span><span class="chip">历史变了，没加错误</span><span>无感替换：<code>[摘要, A1, U2]</code> → 压缩 / 切 fallback 模型 / 8k→64k。模型<b>不知道为什么会变</b>，只是从新起点重来</span></div>
+      <div class="srow"><span class="stag o">③</span><span class="chip">历史多一条</span><span>告知：<code>[..., tool_result(is_error)]</code> → 模型<b>必须</b>改计划，因为它的世界线里出现了一个新事实</span></div>
+    </div>
+    <div class="snote" style="margin-top:10px">②最容易被忽略：请求确实又发出去了，但那不是"模型在处理错误"，而是<b>错误的成因被消掉了</b>。</div>
+  </div>
+
+  <div class="note"><b>所以判据不是"交给谁"，而是"这次失败要不要算数"。</b>算数才写进历史——因为只有模型能改变自己下一轮的行为。</div>
+
+  <p style="margin-bottom:0">③ 的代价是三重的：错误一旦进历史就<b>每轮都要重新付费</b>，直到被压缩掉为止；模型会被这条信息<b>带偏</b>，可能在后面几轮反复纠结它；最糟的是有些错误<b class="r">越告知越严重</b>——413 就是标本，喂回去只会让下一次更快撞墙。所以③是最贵、最慢、影响最久的一档，不是安全的默认档。</p>
+
+  <h2 id="s4">④ 两条硬边界：决定走哪条路</h2>
+  <p>把上图的五种归宿压成一句判断，只需要问两个问题。第二条比第一条更硬：</p>
+
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">失败发生 → 谁能修？</div>
+      <div class="tkids">
+        <div class="tnode main">① 与输入无关（瞬时）→ 直接重试　<b>[429 / 529 / socket / token]</b></div>
+        <div class="tkids">
+          <div class="tnode">前提：输入逐字节相同 ⇒ 同一模型输出分布也相同</div>
+        </div>
+        <div class="tnode">② 与输入有关，但代码能改 → 改掉成因再试　<b>[压缩 / 切模型 / 调大上限]</b></div>
+        <div class="tkids">
+          <div class="tnode">例：输入太长 → 压短它，而不是重发同一个</div>
+        </div>
+        <div class="tnode">③ 与输入有关，只有模型能改 → 写进历史　<b>[文件不存在 / 命令报错]</b></div>
+        <div class="tkids">
+          <div class="tnode bad">反例：413「喂回去会增加触发条件」→ 只会更快再撞一次</div>
+        </div>
+        <div class="tnode bad">④ 谁都改不了 → 终止　<b>[鉴权失败 / 非法请求 / 内部 bug]</b></div>
+        <div class="tkids">
+          <div class="tnode bad">模型读一百遍也改不了，喂进去只是烧 token</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>第一条尺子是<b class="b">"失败与输入有关吗"</b>——输入一样的重试注定失败，所以 <code>withRetry</code> 只重试 429/529/网络，<b>绝不重试 400</b>。</p>
+  <p>第二条尺子更硬：<b class="o">能重试的边界 = 副作用边界</b>。模型生成没有副作用，浪费了重来即可；工具执行有副作用（文件已写、命令已跑），<b>没法假装没发生</b>。所以工具失败一律走③。</p>
+
+  <p style="margin-bottom:0">还有一条不成文但更冷的尺子：<b class="b">值不值得重试，取决于有没有人在等</b>。只有前台会话（<code>FOREGROUND_529_RETRY_SOURCES</code>）才重试 529；生成摘要、起标题、跑分类器这些后台调用<b>立刻放弃</b>。因为容量雪崩时每一次重试都会把网关压力放大 3–10 倍，而这些结果此刻没人在盯着——<b>重试一个没人等的请求，是纯浪费</b>。</p>
+  <h2 id="s5">⑤ 终止之前：先把历史修成合法的</h2>
+  <p>决定放弃的那一刻，还有两件必做的事。这是"异常安全"——<b>可以失败，但不能留下一段别人再也用不了的数据</b>。</p>
+
+  <div class="cmp">
+    <div class="cbox bad">
+      <div class="ct r">❌ 直觉做法</div>
+      <p>出错了？抛出去、打印、进程退出。历史先不管。</p>
+      <p>结果：历史里留下一个<b>没有配对的 <code>tool_use</code></b>。API 要求每个 <code>tool_use</code> 必须有对应的 <code>tool_result</code>，所以<b>从这一刻起整段对话都是非法请求</b>，<code>/resume</code> 拉回来也照样 400。</p>
+    </div>
+    <div class="cbox good">
+      <div class="ct g">✅ 实际做法</div>
+      <p>① <code>yieldMissingToolResultBlocks</code>：给每个没执行的 <code>tool_use</code> 补一条"未执行"的结果。</p>
+      <p>② 报<b>真实</b>错误。旧版会伪装成"用户中断"，结果 SDK 用户看到一堆幻影 interrupt，真正的 bug 被埋了几个月。</p>
+    </div>
+  </div>
+
+  <p>这条规则的本质是：<b class="g">可以失败，但不可以留脏数据</b>。崩溃是局部事故，脏数据是永久污染——前者重启一下就好，后者让这段对话再也恢复不了。所以退出路径上的清理，优先级高于"退得体面"。</p>
+
+  <h2 id="s6">⑥ 速查表</h2>
+  <p>复习时只会翻这张表，所以名字必须准。</p>
+  <table class="fixt">
+    <tr><th>名字</th><th>它在干什么</th><th>没有它会怎样</th></tr>
+    <tr><td>is_error: true</td><td>把工具异常转成一条工具结果，交给模型</td><td>工具一报错整轮崩，模型永远学不会换路子</td></tr>
+    <tr><td>FOREGROUND_529_RETRY_SOURCES</td><td>只有前台会话（有人在等）才重试 529</td><td>后台摘要/起标题跟着重试，容量雪崩时放大 3–10 倍</td></tr>
+    <tr><td>MAX_529_RETRIES</td><td>= 3，连续 529 的上限</td><td>无限等下去，用户干瞪眼</td></tr>
+    <tr><td>FallbackTriggeredError</td><td>触发换模型；须回滚半成品</td><td>旧 tool_use_id 变孤儿，重试请求直接非法</td></tr>
+    <tr><td>stripSignatureBlocks</td><td>换模型前剥掉 thinking 签名</td><td>模型绑定的签名重放给另一个模型 → 400</td></tr>
+    <tr><td>discard()</td><td>扔掉旧的流式工具执行器</td><td>上一轮的半截结果漏进重试</td></tr>
+    <tr><td>yieldMissingToolResultBlocks</td><td>退出前给孤儿 tool_use 补配对</td><td>历史从此非法，这段对话再也用不了</td></tr>
+    <tr><td>StopFailure（vs Stop）</td><td>失败路径只许用"不能阻断"的钩子事件</td><td>钩子能阻断 → error→block→retry→error 死循环</td></tr>
+  </table>
+
+  <h2 id="s7">⑦ 三个反直觉的地方</h2>
+  <div class="mini">
+    <div><b class="y">反直觉一</b><br>以为：错误越严重越该上报。<br>实际：<b>越"没人能修"的才上报</b>。最"严重"的上下文爆掉，反而被完整扣留、静默抢救——因为代码真的能修。</div>
+    <div><b class="y">反直觉二</b><br>以为：重试就是"再试一次"。<br>实际：<b>输入一样的重试注定失败</b>。重试只对"与输入无关"的失败有效，这是它能成立的前提，不是技巧。</div>
+    <div><b class="y">反直觉三</b><br>以为：告诉模型它就能修。<br>实际：错误进历史是<b>永久的</b>，每一轮都重新付费；还会把模型带偏——给它 <code>ECONNRESET</code>，它开始"诊断网络"。</div>
+    <div><b class="y">常见误解</b><br>"崩了就结束了。" 不。崩溃前必须把数据结构修合法。<b>可以失败，不可以留脏数据</b>——这两件事的优先级是反的。</div>
+  </div>
+
+  <div class="quiz">
+    <b>合上页面前，试着答一下</b>
+    <ol>
+      <li>分流的判据是什么？为什么不是"错误严重程度"？</li>
+      <li>②"无感替换"和③"告知"都会重发请求，区别到底在哪？</li>
+      <li>为什么工具失败绝不重试，而模型调用失败可以重试？</li>
+    </ol>
+  </div>
+
+  <div class="bigrule">谁能修就给谁 · 谁都修不了就停 · 停之前先把历史修成合法的</div>
+
+  <div class="quote">跳出细节看职责边界：这套东西<b>不是在给错误分级，而是在分配修复责任</b>。它不判断"这个错有多糟"，只判断"这件事该由谁接手"。所以整份代码里没有一个"严重程度"字段——只有层、边界、和次数上限。这也是为什么通读它的错误处理会觉得"散"——它本来就不是一套分类学，而是一串责任交接点：每一处 catch 都在回答同一句话，下一个该谁。</div>
+
+  <div class="card" style="text-align:center;color:var(--muted);font-size:12px">
+    依据：<code>src/query.ts</code> · <code>src/services/tools/toolExecution.ts</code> · <code>src/services/api/withRetry.ts</code> · <code>src/services/api/errors.ts</code> · <code>src/query/stopHooks.ts</code>（v2.1.88 还原源码）。<br>
+    还原集不含 <code>reactiveCompact</code> / <code>contextCollapse</code> 实现，相关行为据调用点与注释推断。<b>实现细节以真实代码为准。</b>
+  </div>
+</div>
+
+<script>
+/* 主题开关：首次跟随系统，选择写入 localStorage，刷新后保持 */
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var KEY = 'vl-theme';
+  function apply(mode) {
+    root.setAttribute('data-theme', mode);
+    var dark = mode === 'dark';
+    btn.textContent = dark ? '浅色' : '深色';
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var initial = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+  apply(initial);
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
