@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-17-harness-engineering",
-  "updated": "2026-11-18T10:12:56.675Z",
+  "updated": "2026-11-18T15:04:20.888Z",
   "annotations": [
     {
       "id": "an_b8z17u2su",
@@ -13,6 +13,17 @@
       "author": "huangxicheng1",
       "created": "2026-11-18T10:04:51.630Z",
       "updated": "2026-11-18T10:12:56.672Z"
+    },
+    {
+      "id": "an_n7etfh7yt",
+      "quote": "错误恢复级联",
+      "prefix": "的流畅\"——你不需要知道原理，但你会注意到它快。3.5 ",
+      "suffix": "（含真实源码）Claude Code 对可恢复错误实现了",
+      "start": 22633,
+      "body": "https://huangxicheng1.github.io/claude-code-error-routing.html",
+      "author": "huangxicheng1",
+      "created": "2026-11-18T15:04:20.885Z",
+      "updated": "2026-11-18T15:04:20.885Z"
     }
   ]
 }
