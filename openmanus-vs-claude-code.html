@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenManus 和 Claude Code：两种 Agent 骨架的差别</title>
+<meta name="description" content="对比 OpenManus 的四层继承链与 Claude Code 的状态机骨架：主循环出口、失败粒度、止损策略与扩展方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenManus 和 Claude Code：两种 Agent 骨架的差别">
+<meta property="og:description" content="OpenManus 回答「agent 怎么跑起来」，Claude Code 回答「跑起来之后怎么不跑崩」。">
+<style>
+  /* ===== 色板：只许用这些变量，不要新增颜色 ===== */
+  :root{
+    --bg:#f3efe5;--panel:#fffefb;--panel2:#efe9dd;--line:#ddd4c4;
+    --txt:#1b1f24;--muted:#7c7468;--accent:#1f5fa8;--accent2:#16724b;
+    --warm:#b45309;--pink:#7a3ea8;--red:#b3261e;--yellow:#8a6100;--cyan:#0e6f78;
+    --diag:#fffdf8;
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--txt);
+    background:radial-gradient(1200px 700px at 50% -12%,#fffdf6 0%,#f4f0e6 52%,#ece6d9 100%);
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.8;padding:26px 18px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto}
+
+  /* 顶部目录胶囊（改成这一页的锚点目录） */
+  .nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .nav a{font-size:11.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px;background:var(--panel)}
+  .nav a:hover{color:var(--accent);border-color:var(--accent)}
+
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  h2{font-size:19px;margin:34px 0 10px;padding-left:11px;border-left:4px solid var(--accent);scroll-margin-top:16px}
+  h3{font-size:14px;margin:18px 0 6px;color:#3d4249}
+  p{color:#3d4249;margin:8px 0;font-size:14px}
+
+  /* 语义色：蓝=机制 绿=正确做法 橙=代价 紫=关键洞察 黄褐=数字/标识 红=坑 青=补充 */
+  .b{color:var(--accent)}.g{color:var(--accent2)}.o{color:var(--warm)}.pk{color:var(--pink)}
+  .y{color:var(--yellow)}.r{color:var(--red)}.cy{color:var(--cyan)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0}
+  /* 一句话核心：全页最高优先级，只出现一次 */
+  .core{background:linear-gradient(135deg,rgba(122,62,168,.08),rgba(31,95,168,.05));
+    border:1px solid rgba(122,62,168,.55);border-radius:12px;padding:16px 20px;font-size:15px;margin:14px 0}
+  .quote{border-left:3px solid var(--accent2);background:rgba(22,114,75,.06);padding:10px 14px;
+    border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:#3d4249;font-style:italic}
+  .note{background:rgba(31,95,168,.06);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:#3d4249}
+  .quiz{background:rgba(122,62,168,.05);border-left:3px solid var(--pink);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:#3d4249}
+  .quiz b{color:var(--pink)}
+  .quiz ol{margin:6px 0 0;padding-left:20px}
+  .quiz li{margin:3px 0}
+  code{background:#f1ece1;border:1px solid #e6dfd1;padding:0 5px;border-radius:4px;
+    color:#6b2f96;font-size:12px;font-family:var(--mono)}
+
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td:first-child{color:var(--yellow);font-weight:600;width:27%}
+  .fixt td:first-child{font-family:var(--mono);font-size:11.5px;font-weight:500;width:30%}
+
+  /* 图示区：所有图都放这里面，浅纸底 + 极轻阴影 */
+  .diag{background:var(--diag);border:1px solid var(--line);border-radius:12px;
+    padding:18px 18px 22px;margin:14px 0;box-shadow:0 2px 12px rgba(90,74,44,.06)}
+  .bigrule{text-align:center;font-family:var(--mono);font-size:13.5px;color:var(--txt);
+    background:#fbf8f1;border:1px solid #e6dfd1;border-radius:9px;padding:12px;margin:12px 0}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .stats>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .stats b{display:block;font-family:var(--mono);font-size:30px;line-height:1.15;color:var(--accent2)}
+  .stats span{font-size:11px;color:var(--muted)}
+  .stats .n2 b{color:var(--warm)}
+  .stats .n3 b{color:var(--pink)}
+
+  /* 时间轴：横向 lane + 条形 */
+  .lanes{margin:8px 0}
+  .lane{display:flex;align-items:center;height:36px}
+  .lanen{width:108px;flex:none;text-align:right;padding-right:12px;font-family:var(--mono);
+    font-size:10.5px;color:#3d4249;white-space:nowrap}
+  .lanet{flex:1;position:relative;height:36px;border-left:1px solid #e8e1d3}
+  .lbar{position:absolute;top:10px;height:16px;border-radius:5px;font-family:var(--mono);
+    font-size:9.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;
+    white-space:nowrap;overflow:hidden}
+  .lbar.model{background:#6b7280}
+  .lbar.safe{background:var(--accent2)}
+  .lbar.unsafe{background:var(--warm)}
+  .lbar.res{background:var(--pink)}
+  .vmark{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #c9c0af;z-index:2}
+  .axis{display:flex;padding-left:108px;font-size:9.5px;color:var(--muted);margin-bottom:2px;
+    font-family:var(--mono)}
+  .axis span{flex:1}
+
+  /* 调度/分支行：标签 + 若干 chip */
+  .sched{margin:10px 0}
+  .srow{display:flex;align-items:center;gap:6px;margin:7px 0;flex-wrap:wrap}
+  .stag{flex:none;width:52px;text-align:center;font-size:10px;border-radius:5px;padding:1px 0;
+    font-family:var(--mono);border:1px solid transparent}
+  .stag.g{color:var(--accent2);border-color:rgba(22,114,75,.35);background:rgba(22,114,75,.06)}
+  .stag.o{color:var(--warm);border-color:rgba(180,83,9,.35);background:rgba(180,83,9,.06)}
+  .chip{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);background:var(--panel);
+    border-radius:6px;padding:2px 9px;color:#3d4249}
+  .chip.hot{border-color:rgba(180,83,9,.45)}
+  .snote{font-size:11px;color:var(--muted);margin-left:58px}
+
+  /* 流程链：节点 + 箭头 */
+  .flow{display:flex;align-items:center;gap:0;margin:10px 0}
+  .fnode{flex:1;background:#fffefb;border:1px solid #d9d0c0;border-radius:9px;
+    padding:9px 6px;text-align:center;font-family:var(--mono);font-size:11.5px}
+  .fnode small{display:block;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;
+    font-size:10px;color:var(--muted)}
+  .flink{width:46px;flex:none;text-align:center;color:#c6bdac;font-size:13px}
+
+  /* 层级/作用域树 */
+  .tree{margin:10px 0}
+  .tnode{display:inline-block;font-family:var(--mono);font-size:11px;border-radius:8px;
+    padding:6px 12px;background:var(--panel);border:1px solid var(--line)}
+  .tnode.main{border-color:rgba(22,114,75,.5);background:rgba(22,114,75,.05)}
+  .tnode.bad{border-color:rgba(179,38,30,.45);background:rgba(179,38,30,.05);color:var(--red)}
+  .tkids{margin:6px 0 0 14px;padding-left:18px;border-left:1px dashed #d8cfbe;
+    display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+
+  /* 两列要点 */
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .mini div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:12px}
+
+  /* 正误对比 */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  .cbox{border-radius:10px;padding:13px 15px;font-size:12px;background:var(--diag)}
+  .cbox.bad{border:1px solid rgba(179,38,30,.4)}
+  .cbox.good{border:1px solid rgba(22,114,75,.4)}
+  .cbox .ct{font-size:12px;font-weight:700;margin-bottom:8px}
+  .cbox p{font-size:12px;margin:5px 0;line-height:1.7}
+
+  @media(max-width:760px){
+    .stats,.cmp,.mini{grid-template-columns:1fr}
+    .lanen{width:78px}
+    .axis{padding-left:78px}
+    .flow{flex-direction:column;gap:6px}
+    .flink{width:auto}
+    .snote{margin-left:0}
+  }
+  @media print{
+    body{background:#fff;padding:0}
+    .diag,.card,.core,.cmp,.mini>div{break-inside:avoid}
+    .nav{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p style="font-size:12.5px;margin:0 0 12px"><a href="./" style="color:#1f5fa8;text-decoration:none">← 暮色手帖</a></p>
+  <div class="nav">
+    <a href="#s1">① 打个比方</a>
+    <a href="#s2">② 骨架对比</a>
+    <a href="#s3">③ 主循环</a>
+    <a href="#s4">④ 出岔子</a>
+    <a href="#s5">⑤ 扩展观</a>
+    <a href="#s6">⑥ 速查</a>
+    <a href="#s7">⑦ 反直觉</a>
+  </div>
+
+  <h1>OpenManus 和 Claude Code：两种 Agent 骨架的差别</h1>
+  <div class="sub">同样是「想一步、做一步、再想一步」，为什么一个是 4 个文件，一个是几十兆的打包产物</div>
+
+  <div class="core">
+    🎯 <b>一句话</b>：你贴的这套结构（BaseAgent → ReActAgent → ToolCallAgent → Manus）回答的是「<b>agent 怎么跑起来</b>」；Claude Code 回答的是「<b>agent 跑起来之后，怎么不跑崩</b>」。<br>
+    所以真正的差别不在继承层级，而在 <b class="pk">主干上是成功路径，还是失败路径</b>——OpenManus 的主循环只写了一条「继续」，Claude Code 的主循环写了四条出口，其中三条是「出错了但继续」。
+  </div>
+
+  <div class="stats">
+    <div><b>4</b><span>OpenManus 用 4 个文件搭完整个 agent 层</span></div>
+    <div class="n2"><b>7</b><span>Claude Code 一次工具调用要过的关卡数</span></div>
+    <div class="n3"><b>3</b><span>Claude Code 的上下文/输出恢复链条数</span></div>
+  </div>
+
+  <h2 id="s1">① 打个比方：单机游戏 vs 网游服务端</h2>
+  <div class="card">
+    <p>你贴的这套代码，像一款<b class="g">单机游戏</b>：主循环六十行，能跑就行。卡住了怎么办？<b>重启</b>。存档就一个文件，坏了重来。</p>
+    <p>Claude Code 像<b class="o">网游服务端</b>：主循环也就那么几十行，但周边堆了断线重连、反外挂、防刷、限流、存档回滚、操作审计。因为它的用户是几十万人，<b class="r">一次崩溃就是一次事故</b>，没人会帮你重启。</p>
+    <p>这个比方能推下去，是因为两者的「难点」根本不在同一层：</p>
+    <p>· <b class="g">单机</b>的难点是「游戏好不好玩」＝ prompt 写得怎么样、工具够不够用</p>
+    <p>· <b class="o">网游</b>的难点是「玩家掉线了怎么算、刷金币怎么封、服务器满了怎么办」＝ 失败路径怎么收场</p>
+    <p style="margin-bottom:0">所以这一页的判断是：<b class="b">OpenManus 的类在管「怎么想、怎么动」；Claude Code 的循环在管「动了之后出岔子怎么办」。</b>两者都对，只是回答的不是同一个问题。</p>
+  </div>
+
+  <h2 id="s2">② 骨架对比：一条继承链 vs 一台状态机</h2>
+  <p>先看你贴的这套。它是标准的<b class="b">模板方法模式</b>：父类定好骨架，子类只填一个洞。</p>
+
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">BaseAgent —— 状态机 + run() 主循环 + stuck 检测</div>
+      <div class="tkids">
+        <div class="tnode">ReActAgent —— step() = think() + act()（两个都留空）</div>
+        <div class="tkids">
+          <div class="tnode">ToolCallAgent —— 把 think/act 用 function calling 填上</div>
+          <div class="tkids">
+            <div class="tnode">Manus —— 只做一件事：指定默认工具集 + 接 MCP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:12px">每一层只加一件事，加完就停。<b>想加能力 = 再往下继承一层。</b></div>
+  </div>
+
+  <p>再看 Claude Code。它<b class="r">没有这条链</b>。没有 <code>BaseAgent</code>，没有 <code>think()/act()</code> 两个抽象方法，也没有靠继承叠能力。它的形状是「<b class="b">一个循环 + 一圈横向关卡</b>」：</p>
+
+  <div class="diag">
+    <div class="flow">
+      <div class="fnode">Iteration<small>主循环入口</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">APICall<small>唯一耗时点</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">ToolExec<small>执行工具</small></div>
+      <div class="flink">↩</div>
+    </div>
+    <div class="sched" style="margin-top:6px">
+      <div class="srow"><span class="stag g">横向</span><span class="chip">zod 校验</span><span class="chip">PreToolUse hook</span><span class="chip">权限引擎</span><span class="chip">沙箱</span><span class="chip hot">PostToolUse hook</span></div>
+      <div class="srow"><span class="stag g">纵向</span><span class="chip">TokenBudget</span><span class="chip">ReactiveCompact</span><span class="chip">MaxOutputRecovery</span><span class="chip">StopHook</span></div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:10px">主干极短，真正的代码量全在这些「关卡」上。加能力不靠继承，靠<b>配置和挂载</b>。</div>
+  </div>
+
+  <div class="note">
+    <b>一句话说清这个差别</b>：继承是「<b class="g">编译期确定的能力组合</b>」——你能列出这个 agent 会做哪几件事；关卡是「<b class="o">运行期逐次判断的约束</b>」——你列不出它不会做什么，只能保证每一步都被拦一道。
+  </div>
+
+  <h2 id="s3">③ 主循环：都是几十行，但重心完全相反</h2>
+  <p>OpenManus 的 <code>run()</code> 骨架，剥掉日志之后大概就是：</p>
+
+  <div class="diag">
+    <div class="flow">
+      <div class="fnode">while step &lt; max_steps<small>还有步数</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">step()<small>think + act</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">追加消息<small>记忆列表</small></div>
+      <div class="flink">↩</div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:10px">只有<b>一条</b>继续路径：一切正常，就再转一圈。异常怎么办？外层 <code>try/except</code> 抓住，状态置 ERROR，<b class="r">整个任务结束</b>。</div>
+  </div>
+
+  <p>Claude Code 的循环长这样，注意出口数量：</p>
+
+  <div class="diag">
+    <div class="flow">
+      <div class="fnode">Iteration<small>转一圈</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">APICall<small>问模型</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">四个出口<small>见下</small></div>
+    </div>
+    <div class="sched" style="margin-top:14px">
+      <div class="srow"><span class="stag g">出口 1</span><span>有工具调用 → <b class="b">ToolExec</b> → 回 Iteration（正常路径）</span></div>
+      <div class="srow"><span class="stag g">出口 2</span><span>模型说完了（end_turn）→ <b class="b">Completed</b> → 查预算 → 过 StopHook → 结束</span></div>
+      <div class="srow"><span class="stag o">出口 3</span><span>输出被截断 → <b class="o">MaxOutputRecovery</b>（注入一条「接着写」）→ 回 Iteration</span></div>
+      <div class="srow"><span class="stag o">出口 4</span><span>上下文太长 → <b class="o">ReactiveCompact</b>（压缩历史）→ 排空队列 → 回 Iteration</span></div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:10px">四个出口，<b class="o">两个是「出错了但继续」</b>。这就是全部差别的来源。</div>
+  </div>
+
+  <div class="mini">
+    <div><b class="b">OpenManus 的假设</b><br>一次调用失败 = 这个任务大概率做不成了，交给用户重来。</div>
+    <div><b class="b">Claude Code 的假设</b><br>一次调用失败 = 这一步不行，换个写法再试，任务本身还有救。</div>
+    <div><b class="b">代价（OpenManus 侧）</b><br>便宜、好读、好改。做原型、教学、单机工具都够用。</div>
+    <div><b class="b">代价（Claude Code 侧）</b><br>状态机节点数远超业务逻辑，新人读起来像在读错误码大全。</div>
+  </div>
+
+  <h2 id="s4">④ 出岔子了：两种完全不同的「止损」</h2>
+  <p>这是两套代码最有意思的对照。同样是「模型卡住不动了」，两边的做法几乎相反。</p>
+
+  <div class="cmp">
+    <div class="cbox bad">
+      <div class="ct">OpenManus：检测「行为」</div>
+      <p>把最近几条消息拿出来比，<b>内容一模一样</b>就判定卡住（<code>is_stuck()</code>），然后往上下文里注入一句「你重复了，换个策略」，同时把判定阈值调高（<code>handle_stuck_state()</code>）。</p>
+      <p>这是<b>启发式</b>：聪明，但会误判——正常的重试也会被判成卡住。</p>
+    </div>
+    <div class="cbox good">
+      <div class="ct">Claude Code：检测「资源」</div>
+      <p>没有重复检测这一说。它靠四道硬闸：<b>恢复次数上限</b>（截断重试最多 3 次）、<b>token 预算</b>、<b>StopHook</b>（模型想收工，外部可以否掉）、<b>用户中断</b>。</p>
+      <p>这是<b>确定性</b>：笨，但绝不漏——钱花光了就是花光了。</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>为什么 Claude Code 敢不做 stuck 检测？</b>因为它有 token 预算和人的中断当兜底。<b class="pk">当你有硬止损的时候，软检测就是冗余</b>——而软检测本身还会误伤正常重试。反过来，OpenManus 没有预算概念（本地跑，不按 token 计费），所以它必须靠「猜模型是不是卡了」来兜。
+  </div>
+
+  <p>再看第二个差异，也是我认为最值钱的一条：<b>失败的时候，停在哪一层。</b></p>
+
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">OpenManus：run() —— 整个任务 ✓ 继续？</div>
+      <div class="tkids">
+        <div class="tnode">step() —— 一轮</div>
+        <div class="tkids">
+          <div class="tnode">think / act —— 一次调用</div>
+          <div class="tkids">
+            <div class="tnode bad">这里抛异常 ✗ → 一路冒到 run()，state = ERROR，整个任务结束</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:12px">失败粒度 = <b class="r">任务</b>。一次工具调不通，整个活儿就废了。</div>
+  </div>
+
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">Claude Code：会话 —— 继续 ✓</div>
+      <div class="tkids">
+        <div class="tnode">Iteration —— 这一轮</div>
+        <div class="tkids">
+          <div class="tnode">一次 tool call —— 被 hook 拒 / 被沙箱拒 / 工具失败</div>
+          <div class="tkids">
+            <div class="tnode bad">只终止这一次调用 ✗，把拒绝原因回喂模型，循环继续</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="snote" style="margin-left:0;margin-top:12px">失败粒度 = <b class="g">调用</b>。拦下这一下，下一轮换个姿势接着干。</div>
+  </div>
+
+  <p style="margin-bottom:0">这一条能解释 Claude Code 里那两个看起来很奇怪的设计：<b class="b">为什么 <code>HookStopped</code> 是个「终止状态」，但会话没结束？</b>因为它终止的只是<b>这一次工具调用</b>；模型收到「你被拒了，原因是 X」之后，下一轮会自己换方案。<b class="pk">终止的是调用，不是任务。</b></p>
+
+  <h2 id="s5">⑤ 两种扩展观：改代码 vs 改配置</h2>
+  <p>假设你现在要加一条规则：<b>不许改 <code>.env</code></b>。两边分别怎么做？</p>
+
+  <div class="cmp">
+    <div class="cbox bad">
+      <div class="ct r">❌ 继承式：要动代码</div>
+      <p>新建 <code>SafeToolCallAgent(ToolCallAgent)</code>，覆写 <code>act()</code>，在执行前检查工具参数里的路径。然后 <code>Manus</code> 改成继承它。</p>
+      <p>问题是：<b>改一次策略 = 一次发版</b>。而且策略越多，子类越多，继承链越长——最后你会得到一个 7 层深的 <code>XXXToolCallAgent</code>。</p>
+    </div>
+    <div class="cbox good">
+      <div class="ct g">✅ 关卡式：只动配置</div>
+      <p>写一行 <code>"deny": ["Read(./.env)"]</code>，或者扔一个 hook 脚本进去。主程序一行不改，热生效，还能按项目分别配。</p>
+      <p>代价是<b>你没法靠读代码知道 agent 会做什么</b>——必须同时读配置、hook、插件。调试成本从开发侧挪到了运维侧。</p>
+    </div>
+  </div>
+
+  <p>这个取舍背后是一条更硬的道理：<b class="b">agent 的失败模式是无穷的，没法用继承预先枚举。</b>你写代码的时候想不到「模型会用 <code>python -c</code> 绕开 curl 的限制」，但你可以挂一个 hook 说「所有出网请求先过我这」。<b class="pk">继承只能表达「你会什么」，关卡才能表达「你不许什么」。</b></p>
+
+  <h2 id="s6">⑥ 速查表</h2>
+  <p>复习时只看这张表。左边是你贴的那套，右边是 Claude Code。</p>
+
+  <table class="fixt">
+    <tr><th>维度</th><th>OpenManus（base/react/toolcall/manus）</th><th>Claude Code</th></tr>
+    <tr><td>组织方式</td><td>4 层继承链，模板方法</td><td>单循环 + 横向关卡，无继承链</td></tr>
+    <tr><td>加能力</td><td>再继承一层，覆写方法</td><td>改配置、挂 hook、装插件、接 MCP</td></tr>
+    <tr><td>主循环出口</td><td>1 条（正常继续）</td><td>4 条（2 正常 + 2 恢复）</td></tr>
+    <tr><td>卡住处理</td><td>重复检测 + 注入「换个策略」</td><td>恢复次数上限 + token 预算 + StopHook</td></tr>
+    <tr><td>失败粒度</td><td>整个任务（state = ERROR）</td><td>单次调用（回喂原因，循环继续）</td></tr>
+    <tr><td>上下文管理</td><td>memory 列表 + 工具输出截断</td><td>TokenBudget + Compact + Drain 三级</td></tr>
+    <tr><td>工具校验</td><td>Pydantic 的 args_schema</td><td>zod + 7 道关卡流水线</td></tr>
+    <tr><td>安全边界</td><td>无（靠沙箱外的东西）</td><td>权限引擎 + 内核级沙箱</td></tr>
+    <tr><td>代码形态</td><td>多文件 Python，可直接读</td><td>打包混淆的单文件，读不到干净源码</td></tr>
+    <tr><td>适合谁</td><td>学原理、做原型、单机工具</td><td>给几十万非技术用户长期跑</td></tr>
+  </table>
+
+  <div class="note">
+    <b>别把这理解成「OpenManus 简陋」。</b>它那个规模（agent 层几百行）用继承是最省的表达，硬套 Claude Code 那套状态机反而没人看得懂。<b class="y">架构是规模的函数</b>——这句话比任何具体对比都重要。
+  </div>
+
+  <h2 id="s7">⑦ 三个反直觉的地方</h2>
+  <div class="mini">
+    <div><b class="y">反直觉一</b><br>大家以为 agent 难在「推理、prompt、模型能力」。实际看下来，Claude Code 状态机里 <b>八成节点在处理「输出被截断」「上下文满了」「模型说完了但其实没完」</b>，跟智能一点关系都没有。<b>难的是收场，不是思考。</b></div>
+    <div><b class="y">反直觉二</b><br>大家以为「继承链深 = 设计差」。但在 OpenManus 这个体量下，4 层继承是<b>最省读者脑力</b>的写法。<b>层数本身不是罪，超出规模才是。</b></div>
+    <div><b class="y">反直觉三</b><br>大家以为 Claude Code 不做 stuck 检测是「漏了」。恰恰相反：<b>它有预算和人的中断，软检测就是冗余，还会误伤正常重试。</b>有硬止损就不需要软检测。</div>
+    <div><b class="y">常见误解</b><br>「读 Claude Code 源码就能学会」——它是<b>打包混淆的单文件</b>，社区做的是行为逆向。所以任何「源码级对比」最多到「可观测行为」这一层，函数名、变量名基本都是推测。</div>
+  </div>
+
+  <div class="quiz">
+    <b>合上页面前，试着答一下</b>
+    <ol>
+      <li>为什么 Claude Code 不用继承链来叠能力？它的「关卡」解决了继承做不到的什么事？</li>
+      <li>一次工具调用失败，在两边分别停在哪一层？这个差别带来什么实际后果？</li>
+      <li>OpenManus 的重复检测和 Claude Code 的预算上限，各自在防什么？为什么后者敢不做前者？</li>
+    </ol>
+  </div>
+
+  <div class="bigrule">OpenManus 决定「怎么想、怎么动」；Claude Code 决定「动了之后出岔子怎么收场」；你的规模决定该用哪一种</div>
+
+  <div class="quote">
+    跳出细节看：OpenManus 是「agent 的最小完备定义」——把 think / act / loop 三件事讲清楚了，几百行就能读完。Claude Code 是「agent 的生产化封装」——它默认模型一定会犯错、上下文一定会满、用户一定会点错，然后围着这些「一定」建了一圈防线。前者教你 agent 是什么，后者教你 agent 怎么活下来。面试里能把这两句话分开说，比背多少实现细节都有用。
+  </div>
+
+  <div class="card" style="text-align:center;color:var(--muted);font-size:12px">
+    依据：<code>app/agent/{base,react,toolcall,manus}.py</code> 的公开结构 · Claude Code 官方文档（hooks / permissions / sandbox）· 社区对其状态机的逆向分析<br>
+    Claude Code 未开源，发布物为打包混淆产物；上表中涉及它内部结构的描述属「可观测行为 + 官方文档」层面的推断，<b>具体实现以实际版本为准</b>。
+  </div>
+</div>
+</body>
+</html>
