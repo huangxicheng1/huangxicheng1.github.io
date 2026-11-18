@@ -137,6 +137,21 @@ body.an-drawer-open .an-rail { opacity: .14; pointer-events: none; }
   font-size: 12.5px;
 }
 
+/* 批注正文里的链接：可直接点击，长 URL 允许在任意位置折行 */
+.an-card-body a,
+.an-item-body a {
+  color: var(--orange);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.an-card-body a:hover,
+.an-item-body a:hover {
+  text-decoration-thickness: 2px;
+}
+
 .an-card-quote {
   margin: 0 0 7px;
   padding-left: 8px;

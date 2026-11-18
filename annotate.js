@@ -70,6 +70,39 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+  // 把批注正文里的 http(s) 链接渲染成可点击的 <a>；其余内容先转义再拼接，避免 HTML 注入。
+  function richText(node, text) {
+    const raw = String(text == null ? '' : text);
+    const urlRe = /https?:\/\/[^\s<>"'）)】」，。；、！？\u3000-\u303f\uff00-\uffef\u4e00-\u9fff]+/g;
+    const trimRe = /[.]+$/;
+    let html = '';
+    let last = 0;
+    let match;
+    while ((match = urlRe.exec(raw)) !== null) {
+      let url = match[0];
+      let tail = '';
+      const trimmed = url.replace(trimRe, '');
+      if (trimmed !== url) {
+        tail = url.slice(trimmed.length);
+        url = trimmed;
+      }
+      html += escapeHtml(raw.slice(last, match.index));
+      html += '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>';
+      html += escapeHtml(tail);
+      last = match.index + match[0].length;
+    }
+    html += escapeHtml(raw.slice(last));
+    node.innerHTML = html;
+    node.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', event => event.stopPropagation());
+    });
+    return node;
+  }
   function b64encode(text) {
     const bytes = new TextEncoder().encode(text);
     let binary = '';
@@ -251,7 +284,7 @@
     const time = el('span', '', stamp(ann.created));
     head.append(label, time);
     const quote = el('p', 'an-card-quote', '“' + String(ann.quote || '').trim() + '”');
-    const body = el('div', 'an-card-body', ann.body || '');
+    const body = richText(el('div', 'an-card-body'), ann.body || '');
     const actions = el('div', 'an-card-actions');
     const edit = el('button', '', '编辑');
     edit.type = 'button';
@@ -399,7 +432,7 @@
         top.append(document.createTextNode('批注 ' + String(annotationIndex(ann.id)).padStart(2, '0') + ' · ' + stamp(ann.created)));
         if (orphan) top.append(document.createTextNode('  · 未定位'));
         const quote = el('div', 'an-item-quote', '“' + String(ann.quote || '').trim() + '”');
-        const text = el('div', 'an-item-body', ann.body || '');
+        const text = richText(el('div', 'an-item-body'), ann.body || '');
         item.append(top, quote, text);
         item.addEventListener('click', () => {
           setDrawer(false);
