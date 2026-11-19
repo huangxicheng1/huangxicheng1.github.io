@@ -263,6 +263,25 @@ window.GEN_WORKS = {
       "desc": "一座能走进去的武陵山谷：田埂、屋舍、桑竹都在，桃溪上架着石桥，瓣子一直在落。WASD 或方向键沿谷地漫步，点地面前往，右上「春昼 / 月夜」一键换光；Three.js 与像素材质全部内联，断网也能打开。",
       "tags": ["桃源", "山水", "可漫游", "昼夜切换", "无外部依赖"],
       "interactive": true
+    },
+    {
+      "id": "quidditch-grounds",
+      "index": "014",
+      "scene": "quidditch",
+      "sceneName": "魁地奇 · 霍格沃茨立体模型",
+      "title": "霍格沃茨魁地奇球场",
+      "subtitle": "QUIDDITCH GROUNDS · WIZARDING ATLAS",
+      "cover": "covers/quidditch-grounds.jpg",
+      "href": "works/quidditch-grounds.html",
+      "theme": "球场 · 白昼",
+      "medium": "等距 · 图鉴",
+      "engine": "GPT 6.2 Astra",
+      "date": "2026-11-19",
+      "pick": false,
+      "prompt": "",
+      "desc": "同一道题的第四个答案，也是唯一做成图鉴版式的一版：苏格兰高地上一座浮岛，霍格沃茨城堡踞在坡顶，钟楼、礼堂与石桥层层压着湖岸；球场被彩条帐篷和棋盘格看台围成一圈，草地上画着金色圆环，十四名球员骑着扫帚在场上穿行。右上「场景手册」是一页真正的场地导览，点「定位金色飞贼」会标出哈利正在追的那枚金点，空格随时暂停。",
+      "tags": ["等距", "魁地奇", "霍格沃茨", "图鉴", "飞贼定位", "播放控制"],
+      "interactive": true
     }
   ]
 };
