@@ -15,11 +15,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  # 构建与上传放在 build job；部署单独一个 job。
+  # 原因：upload-pages-artifact 与 deploy-pages 在同一个 job 里连续执行时，
+  # deploy-pages 查不到刚 finalize 的产物（间歇性 "No artifacts named github-pages"）。
+  # 见 actions/deploy-pages#451、#305。
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,6 +40,14 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
