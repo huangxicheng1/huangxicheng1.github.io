@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>普通 RAG、Agentic RAG 与当前 Read 方案 · 谁来决定检索</title>
+<meta name="description" content="三种检索方案的分水岭：检索由固定程序触发、由 Agent 反复决定，还是 Agent 驱动一个更小的文件循环。含当前 Read 方案的真实实现细节。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="普通 RAG、Agentic RAG 与当前 Read 方案">
+<meta property="og:description" content="决定检索的人是谁，比有没有向量库更能定义一套方案是不是 Agentic。">
+<style>
+  /* ============================================================
+     ① 令牌表 —— 只许用这些变量，不要新增颜色
+     ============================================================ */
+  :root{
+    /* 结构色：亮色 = 暖纸 */
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#fffdf6 0%,#f4f0e6 52%,#ece6d9 100%);
+    --panel:#fffefb;--panel2:#efe9dd;--line:#ddd4c4;
+    --txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+    /* 语义色 */
+    --accent:#1f5fa8;   /* 蓝：机制、名词 */
+    --accent2:#16724b;  /* 绿：正确做法、正常路径 */
+    --warm:#b45309;     /* 橙：代价、权衡 */
+    --pink:#7a3ea8;     /* 紫：关键洞察 */
+    --red:#b3261e;      /* 红：坑、错误 */
+    --yellow:#8a6100;   /* 黄褐：数字、标识 */
+    --cyan:#0e6f78;     /* 青：补充说明 */
+    /* 组件专用 */
+    --diag:#fffdf8;--rule-bg:#fbf8f1;
+    --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+    --node-bg:#fffefb;--node-line:#d9d0c0;
+    --flink:#c6bdac;--kids-line:#d8cfbe;--lane-line:#e8e1d3;--vmark:#c9c0af;
+    --model:#6b7280;--lbar-fg:#fff;
+    /* 半透明 tint */
+    --core-bg:linear-gradient(135deg,rgba(122,62,168,.08),rgba(31,95,168,.05));
+    --core-line:rgba(122,62,168,.55);
+    --quote-bg:rgba(22,114,75,.06);
+    --note-bg:rgba(31,95,168,.06);
+    --quiz-bg:rgba(122,62,168,.05);
+    --diag-shadow:0 2px 12px rgba(90,74,44,.06);
+    --stag-g-line:rgba(22,114,75,.35);--stag-g-bg:rgba(22,114,75,.06);
+    --stag-o-line:rgba(180,83,9,.35);--stag-o-bg:rgba(180,83,9,.06);
+    --chip-hot-line:rgba(180,83,9,.45);
+    --node-main-line:rgba(22,114,75,.5);--node-main-bg:rgba(22,114,75,.05);
+    --node-bad-line:rgba(179,38,30,.45);--node-bad-bg:rgba(179,38,30,.05);
+    --cbox-bad-line:rgba(179,38,30,.4);--cbox-good-line:rgba(22,114,75,.4);
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,monospace;
+  }
+  /* 深色 = 冷墨；每个变量都要有对应值，漏一个就会出现深底黑字 */
+  html[data-theme="dark"]{
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#1d232c 0%,#161a21 52%,#101419 100%);
+    --panel:#1a1f27;--panel2:#232932;--line:#313845;
+    --txt:#e9e7e2;--p:#c3c9d2;--muted:#8f98a5;
+    --accent:#7ab0f5;--accent2:#5ecf9e;--warm:#eda267;--pink:#c391f7;
+    --red:#f0796f;--yellow:#d9ad3f;--cyan:#5fcbd6;
+    --diag:#171c23;--rule-bg:#1c222a;
+    --code-bg:#232a33;--code-line:#39414d;--code-fg:#d0aef5;
+    --node-bg:#1d232b;--node-line:#39414d;
+    --flink:#4b5461;--kids-line:#39414d;--lane-line:#2b323c;--vmark:#414a57;
+    --model:#7a8494;--lbar-fg:#10151b;
+    --core-bg:linear-gradient(135deg,rgba(195,145,247,.11),rgba(122,176,245,.07));
+    --core-line:rgba(195,145,247,.5);
+    --quote-bg:rgba(94,207,158,.09);
+    --note-bg:rgba(122,176,245,.09);
+    --quiz-bg:rgba(195,145,247,.08);
+    --diag-shadow:0 2px 14px rgba(0,0,0,.38);
+    --stag-g-line:rgba(94,207,158,.4);--stag-g-bg:rgba(94,207,158,.1);
+    --stag-o-line:rgba(237,162,103,.4);--stag-o-bg:rgba(237,162,103,.1);
+    --chip-hot-line:rgba(237,162,103,.5);
+    --node-main-line:rgba(94,207,158,.45);--node-main-bg:rgba(94,207,158,.08);
+    --node-bad-line:rgba(240,121,111,.45);--node-bad-bg:rgba(240,121,111,.08);
+    --cbox-bad-line:rgba(240,121,111,.45);--cbox-good-line:rgba(94,207,158,.45);
+  }
+
+  /* ============================================================
+     ② 基础排版
+     ============================================================ */
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--txt);
+    background:var(--page-bg);
+    background-attachment:fixed;
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.8;padding:26px 18px;-webkit-font-smoothing:antialiased;
+    transition:background .25s ease,color .25s ease}
+  .wrap{max-width:960px;margin:0 auto}
+
+  /* 顶部：胶囊目录 + 主题开关 */
+  .nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .nav a{font-size:11.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px;background:var(--panel)}
+  .nav a:hover{color:var(--accent);border-color:var(--accent)}
+  .theme-btn{margin-left:auto;font-size:11.5px;color:var(--muted);border:1px solid var(--line);
+    border-radius:999px;padding:2px 12px;background:var(--panel);cursor:pointer;font-family:inherit;
+    transition:color .16s,border-color .16s}
+  .theme-btn:hover{color:var(--accent);border-color:var(--accent)}
+  .backlink{font-size:12.5px;margin:0 0 12px}
+  .backlink a{color:var(--accent);text-decoration:none}
+
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  h2{font-size:19px;margin:34px 0 10px;padding-left:11px;border-left:4px solid var(--accent);scroll-margin-top:16px}
+  h3{font-size:14px;margin:18px 0 6px;color:var(--p)}
+  p{color:var(--p);margin:8px 0;font-size:14px}
+
+  /* 语义色工具类：一个颜色只干一件事 */
+  .b{color:var(--accent)}.g{color:var(--accent2)}.o{color:var(--warm)}.pk{color:var(--pink)}
+  .y{color:var(--yellow)}.r{color:var(--red)}.cy{color:var(--cyan)}
+
+  /* ============================================================
+     ③ 叙述块
+     ============================================================ */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0}
+  /* 最关键的那句判断，建议只出现一次 */
+  .core{background:var(--core-bg);border:1px solid var(--core-line);
+    border-radius:12px;padding:16px 20px;font-size:15px;margin:14px 0}
+  .quote{border-left:3px solid var(--accent2);background:var(--quote-bg);padding:10px 14px;
+    border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--p);font-style:italic}
+  .note{background:var(--note-bg);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz{background:var(--quiz-bg);border-left:3px solid var(--pink);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz b{color:var(--pink)}
+  .quiz ol{margin:6px 0 0;padding-left:20px}
+  .quiz li{margin:3px 0}
+  code{background:var(--code-bg);border:1px solid var(--code-line);padding:0 5px;border-radius:4px;
+    color:var(--code-fg);font-size:12px;font-family:var(--mono)}
+
+  /* ============================================================
+     ④ 数字条：两三个就够
+     ============================================================ */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .stats>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .stats b{display:block;font-family:var(--mono);font-size:30px;line-height:1.15;color:var(--accent2)}
+  .stats span{font-size:11px;color:var(--muted)}
+  .stats .n2 b{color:var(--warm)}
+  .stats .n3 b{color:var(--pink)}
+
+  /* ============================================================
+     ⑤ 表格
+     ============================================================ */
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td:first-child{color:var(--yellow);font-weight:600;width:27%}
+  .fixt td:first-child{font-family:var(--mono);font-size:11.5px;font-weight:500;width:30%}
+  td{word-break:break-word}
+
+  /* ============================================================
+     ⑥ 图示盒：所有图都住在这里
+     ============================================================ */
+  .diag{background:var(--diag);border:1px solid var(--line);border-radius:12px;
+    padding:18px 18px 22px;margin:14px 0;box-shadow:var(--diag-shadow)}
+  .bigrule{text-align:center;font-family:var(--mono);font-size:13.5px;color:var(--txt);
+    background:var(--rule-bg);border:1px solid var(--code-line);border-radius:9px;padding:12px;margin:12px 0}
+
+  /* 6.1 时间轴 */
+  .lanes{margin:8px 0}
+  .lane{display:flex;align-items:center;height:36px}
+  .lanen{width:108px;flex:none;text-align:right;padding-right:12px;font-family:var(--mono);
+    font-size:10.5px;color:var(--p);white-space:nowrap}
+  .lanet{flex:1;position:relative;height:36px;border-left:1px solid var(--lane-line)}
+  .lbar{position:absolute;top:10px;height:16px;border-radius:5px;font-family:var(--mono);
+    font-size:9.5px;font-weight:700;color:var(--lbar-fg);display:flex;align-items:center;justify-content:center;
+    white-space:nowrap;overflow:hidden}
+  .lbar.model{background:var(--model)}
+  .lbar.safe{background:var(--accent2)}
+  .lbar.unsafe{background:var(--warm)}
+  .lbar.res{background:var(--pink)}
+  .vmark{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--vmark);z-index:2}
+  .axis{display:flex;padding-left:108px;font-size:9.5px;color:var(--muted);margin-bottom:2px;
+    font-family:var(--mono)}
+  .axis span{flex:1}
+
+  /* 6.2 分类行：平级条目 */
+  .sched{margin:10px 0}
+  .srow{display:flex;align-items:center;gap:6px;margin:7px 0;flex-wrap:wrap;font-size:14px}
+  .srow>span:last-child{flex:1;min-width:0}
+  .stag{flex:none;width:52px;text-align:center;font-size:10px;border-radius:5px;padding:1px 0;
+    font-family:var(--mono);border:1px solid transparent}
+  .stag.g{color:var(--accent2);border-color:var(--stag-g-line);background:var(--stag-g-bg)}
+  .stag.o{color:var(--warm);border-color:var(--stag-o-line);background:var(--stag-o-bg)}
+  .chip{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);background:var(--panel);
+    border-radius:6px;padding:2px 9px;color:var(--p)}
+  .chip.hot{border-color:var(--chip-hot-line)}
+  .snote{font-size:11px;color:var(--muted);margin-left:58px}
+
+  /* 6.3 主干流程：横向，窄屏转竖向 */
+  .flow{display:flex;align-items:center;gap:0;margin:10px 0}
+  .fnode{flex:1;background:var(--node-bg);border:1px solid var(--node-line);border-radius:9px;
+    padding:9px 6px;text-align:center;font-family:var(--mono);font-size:11.5px}
+  .fnode small{display:block;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;
+    font-size:10px;color:var(--muted)}
+  .flink{width:46px;flex:none;text-align:center;color:var(--flink);font-size:13px}
+
+  /* 6.4 层级树 */
+  .tree{margin:10px 0}
+  .tnode{display:inline-block;font-family:var(--mono);font-size:11px;border-radius:8px;
+    padding:6px 12px;background:var(--panel);border:1px solid var(--line)}
+  .tnode{max-width:100%;word-break:break-word}
+  .tnode.main{border-color:var(--node-main-line);background:var(--node-main-bg)}
+  .tnode.bad{border-color:var(--node-bad-line);background:var(--node-bad-bg);color:var(--red)}
+  .tkids{margin:6px 0 0 14px;padding-left:18px;border-left:1px dashed var(--kids-line);
+    display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+
+  /* ============================================================
+     ⑦ 并排块
+     ============================================================ */
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .mini div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:12px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  .cbox{border-radius:10px;padding:13px 15px;font-size:12px;background:var(--diag)}
+  .cbox.bad{border:1px solid var(--cbox-bad-line)}
+  .cbox.good{border:1px solid var(--cbox-good-line)}
+  .cbox .ct{font-size:12px;font-weight:700;margin-bottom:8px}
+  .cbox p{font-size:12px;margin:5px 0;line-height:1.7}
+
+  /* ============================================================
+     ⑧ 响应式 & 打印
+     ============================================================ */
+  @media(max-width:760px){
+    .stats,.cmp,.mini{grid-template-columns:1fr}
+    .lanen{width:78px}
+    .axis{padding-left:78px}
+    .flow{flex-direction:column;gap:6px;align-items:stretch}
+    .fnode{width:100%;flex:none}
+    .flink{width:auto}
+    .snote{margin-left:0}
+    .theme-btn{margin-left:0}
+    table{font-size:11.5px}
+    .fixt td:first-child{width:36%;word-break:break-all}
+  }
+  @media print{
+    html,html[data-theme="dark"]{
+      --page-bg:#fff;--txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+      --panel:#fffefb;--panel2:#f7f4ec;--line:#ddd4c4;--diag:#fffdf8;--rule-bg:#fbf8f1;
+      --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+      --node-bg:#fffefb;--node-line:#d9d0c0;
+    }
+    body{background:#fff;padding:0}
+    .diag,.card,.core,.cmp,.mini>div{break-inside:avoid}
+    .nav,.theme-btn{display:none}
+  }
+  @media(prefers-reduced-motion:reduce){
+    body{transition:none}
+    .nav a,.theme-btn{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav">
+    <a href="#s1">三方对照</a>
+    <a href="#s2">三条路径</a>
+    <a href="#s3">Read 方案怎么跑</a>
+    <a href="#s4">返回协议</a>
+    <a href="#s5">省了多少</a>
+    <a href="#s6">盲区与失败模式</a>
+    <a href="#s7">往哪演进</a>
+    <button id="themeToggle" class="theme-btn" type="button" aria-label="切换深色/浅色主题">深色</button>
+  </div>
+
+  <h1>普通 RAG、Agentic RAG 与当前 Read 方案：差在谁来决定检索</h1>
+  <div class="sub">名字只差一个词，定位差一整个架构——一期没有 Chunk、Embedding、向量库，它用 50 行预览、临时文件和 grep 换多轮取证，准确的名字是 <b>Agentic Retrieval</b>。</div>
+
+  <div class="core">
+    🎯 <b>一句话</b>：决定检索的人是谁，比有没有向量库更能定义一套方案是不是 Agentic。<br>
+    当前 Read 方案已经把决定权交给了 Agent，代价是召回靠关键词——所以它是<b class="pk">Agentic Retrieval，不是完整的 Agentic RAG</b>。
+  </div>
+
+  <h2 id="s1">一、先把三种方案摆在一起</h2>
+  <p>三者不是同一条升级链上的三档，而是三种分工：<b class="b">谁</b>决定检索、检索跑<b class="b">几次</b>、跑完由谁判断<b class="b">够不够</b>。看第二列就够了。</p>
+  <table>
+    <tr><th>方式</th><th>谁决定检索</th><th>检索过程</th><th>适用场景</th></tr>
+    <tr><td>普通 RAG</td><td>固定程序</td><td>一次 Query → Top-K → Generate</td><td>FAQ、稳定知识库、单跳问题</td></tr>
+    <tr><td>Agentic RAG</td><td>Agent</td><td>拆题、路由、检索、评价、改写、再检索</td><td>多跳问题、多数据源、复杂调研</td></tr>
+    <tr><td>当前 Read 方案</td><td>Agent + 文件工具</td><td>Preview → grep → Range Read，可循环</td><td>一次性长文件、日志、代码、明确关键词</td></tr>
+  </table>
+  <p>第三行不是类比，是代码里真实跑的一条路径：<b class="y">50 行</b>阈值、Session 临时文件、<code>snapshot_id</code>、按命中位置读取。下面把它拆开看。</p>
+
+  <h2 id="s2">二、三条路径长得不一样</h2>
+  <p>差别一眼可见：一条是直线，另外两条带回头箭头。</p>
+  <div class="diag">
+    <h3 style="color:var(--muted);margin-top:0">普通 RAG · 固定管道，只跑一次</h3>
+    <div class="flow">
+      <div class="fnode">Query<small>用户问题</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">Top-K<small>向量召回</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">Generate<small>拼进 prompt</small></div>
+    </div>
+
+    <h3>Agentic RAG · Agent 控制的循环</h3>
+    <div class="flow">
+      <div class="fnode">拆题<small>子问题</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">路由<small>选数据源</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">检索<small>Top-K</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">评价<small>够不够</small></div>
+      <div class="flink">↺</div>
+      <div class="fnode">改写<small>再检索</small></div>
+    </div>
+    <div class="snote">评价说"不够"就走回头箭头，换 query 再来一轮；说"够"才进生成。循环次数由判断和预算共同封顶。</div>
+
+    <h3>当前 Read 方案 · 先判定，再取证</h3>
+    <div class="flow">
+      <div class="fnode">Read file<small>请求</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">超过 50 行？<small>阈值判定</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">预览 + 落盘<small>返回 truncated</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">grep<small>Agent 选词</small></div>
+    </div>
+    <div class="flow">
+      <div class="fnode">grep<small>命中位置</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">Range Read<small>读附近片段</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">证据充分？<small>自查</small></div>
+      <div class="flink">↺</div>
+      <div class="fnode">改写查询<small>回到 grep</small></div>
+    </div>
+    <div class="snote" style="margin-top:10px">同样是一个环，但没有向量库：环里的"检索"是 grep，环里的"读取"是按行区间取片段。</div>
+  </div>
+
+  <h2 id="s3">三、当前 Read 方案怎么跑</h2>
+  <p>先讲它为什么存在：原逻辑把文件全文当 Tool Result 返回，遇到约 <b class="y">200k</b> 文本时，上下文、推理、系统、失败四种成本会同时放大。于是 Read 的职责从"把文件返回"变成——在权限、文件版本、任务意图和 Token 预算的约束下，<b class="g">逐步提供足够且可追溯的证据</b>。</p>
+  <div class="diag">
+    <div class="sched">
+      <div class="srow"><span class="stag g">判定</span><span class="chip">50 行阈值</span><span>未超阈值直接完整返回，不引入任何额外开销</span></div>
+      <div class="srow"><span class="stag g">预览</span><span class="chip">前 50 行</span><span>先给结构和开头，让 Agent 想清楚要搜什么</span></div>
+      <div class="srow"><span class="stag g">落盘</span><span class="chip">Session 临时文件</span><span>全文保留可寻址，模型只拿到句柄和引用</span></div>
+      <div class="srow"><span class="stag g">定位</span><span class="chip">grep</span><span>关键词由 Agent 自己生成，命中位置清楚可解释</span></div>
+      <div class="srow"><span class="stag g">取证</span><span class="chip">Range Read</span><span>只读命中位置附近的片段；不够就改写查询再来</span></div>
+    </div>
+    <div class="snote" style="margin-top:10px">五个动作串起来，就是"观察 → 决定 → 读取 → 判断"的循环。</div>
+  </div>
+  <div class="note">
+    这不是简单截断。普通截断把后半段永久丢掉；当前方案保留可寻址全文，本质是把<b class="b">一次性推送</b>改成<b class="g">按需拉取</b>。它和 ReAct 的"推理与行动交错"同构，和 Self-RAG 的"按需检索 + 自我评价"同向，差别是评价发生在 Agent 的循环里，而不是模型内部的反思 token。
+  </div>
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">Agentic RAG 的完整形态</div>
+      <div class="tkids">
+        <div class="tnode main">检索决定权在 Agent —— 已有 ✓</div>
+        <div class="tnode bad">Chunk 切块 —— 一期未确认 ✗</div>
+        <div class="tnode bad">Embedding 向量化 —— 一期未确认 ✗</div>
+        <div class="tnode bad">向量库 / 索引召回 —— 一期未确认 ✗</div>
+      </div>
+    </div>
+    <div class="snote" style="margin-top:12px">红框不是"做得差"，是"这套方案里根本没有这个零件"。名字要跟着零件走。</div>
+  </div>
+
+  <h2 id="s4">四、返回协议：让 Agent 的下一步可计算</h2>
+  <p>Read 返回的不是一段文本，而是一个<b class="b">带状态的引用</b>。字段设计的目标只有一件事：让 Agent 能判断"还有多少没看、行号会不会漂、下一步该怎么查"。</p>
+  <table class="fixt">
+    <tr><th>字段</th><th>它解决什么问题</th></tr>
+    <tr><td>status = truncated</td><td>显式声明被截断；静默截断会让模型误以为看到了全文</td></tr>
+    <tr><td>file_handle</td><td>不透明句柄，不把真实磁盘路径暴露给模型</td></tr>
+    <tr><td>snapshot_id</td><td>Search 与 Range Read 绑定同一快照，防止两次调用间文件被改导致行号漂移</td></tr>
+    <tr><td>total_bytes / total_lines</td><td>让 Agent 知道全文规模，判断要不要继续挖</td></tr>
+    <tr><td>estimated_tokens</td><td>比行数更贴近真实的上下文压力</td></tr>
+    <tr><td>returned_range</td><td>本次实际返回的行区间，和 grep 命中对齐</td></tr>
+    <tr><td>suggested_actions</td><td>提示下一步可用 search / read_range</td></tr>
+    <tr><td>expires_at</td><td>引用带 TTL，并绑定 tenant / workspace / session</td></tr>
+  </table>
+  <div class="note">
+    最容易出错的一条是 snapshot：没有它，Agent 上一轮 grep 拿到的行号和这一轮读到的内容可能对不上，错得还很隐蔽。文件引用必须绑定租户、工作区、会话和 TTL，否则临时文件会变成跨会话的泄漏面。
+  </div>
+
+  <h2 id="s5">五、省了多少：按 200k 中文字符算</h2>
+  <p>按原文的容量模型：200k 中文字符约 18 万 Token，预览 50 行、两轮检索、每轮 4 个 15 行片段。结果是——</p>
+  <div class="stats">
+    <div><b>94.5%</b><span>理论 Token 节省率（中心测算）</span></div>
+    <div class="n2"><b>9,980</b><span>新方案进入上下文的 Token 估算</span></div>
+    <div class="n3"><b>3–5 次</b><span>Tool 调用次数，原方案为 1 次</span></div>
+  </div>
+  <div class="card">
+    <p style="margin-top:0">原方案：200,000 字符 × 0.9 ≈ <b class="y">180,000</b> Token</p>
+    <p>预览：50 行 × 60 字符 × 0.9 ≈ <b class="y">2,700</b></p>
+    <p>局部证据：2 轮 × 4 片段 × 15 行 × 60 字符 × 0.9 ≈ <b class="y">6,480</b></p>
+    <p>查询与 Tool 元数据：约 <b class="y">800</b></p>
+    <p style="margin-bottom:0">合计 <b class="g">9,980</b>，节省率 = 1 − 9,980 / 180,000 ≈ <b class="g">94.5%</b>。代价是 Tool 调用从 1 次变成 3～5 次。</p>
+  </div>
+  <div class="note">
+    对外口径是 <b class="y">85%～95%</b>，且只适用于关键词定位类的长文档任务；全文摘要、风险穷举这类需要完整覆盖的任务不适用。这是容量测算，不是线上实测。
+  </div>
+  <p>50 行是"开销最小的工程止血"，不是理论最优——单行 JSON 或压缩文本仍可能很长，关键内容也可能不在开头。演进方向是动态预算：</p>
+  <div class="bigrule">B_read = min(B_read_max, floor(ρ × B_available))</div>
+
+  <h2 id="s6">六、代价：grep 的强项与盲区</h2>
+  <p>这套方案强在精确、便宜、位置清楚；弱在字面匹配，换个说法就接不住。</p>
+  <div class="cmp">
+    <div class="cbox good">
+      <div class="ct g">✅ 能命中</div>
+      <p>日志、代码、错误码、Trace ID、函数名、合同编号——这些是唯一 token。</p>
+      <p>无需预建索引、时延与成本低、命中位置可解释、可复用 Agent 已有原子工具、文件更新后不用处理索引一致性。</p>
+      <p>代价：<b>只认字面</b>，同义词和概念问法接不住。</p>
+    </div>
+    <div class="cbox bad">
+      <div class="ct r">⚠️ 会漏</div>
+      <p>同义词、OCR 错字、概念性问题可能零命中；PDF 转文本后行结构未必稳定；单个片段缺少跨段上下文。</p>
+      <p>更关键的是：<b>Top-K 命中无法证明"全文不存在某项内容"</b>。</p>
+      <p>代价：<b>得补 BM25 / Embedding</b>，或为否定性结论走完整扫描。</p>
+    </div>
+  </div>
+  <p>所以一期是低成本基础路径，不是所有检索问题的最终解。常见失败模式与对策如下（原文第 10 节）：</p>
+  <table>
+    <tr><th>失败模式</th><th>表现</th><th>处理方式</th></tr>
+    <tr><td>前 50 行没有代表性</td><td>关键内容在中后部</td><td>同时提供目录、尾部和结构采样</td></tr>
+    <tr><td>单行超长</td><td>50 行仍爆 Token</td><td>增加单行字节和 Token 上限</td></tr>
+    <tr><td>grep 零命中</td><td>同义词或 OCR 错字</td><td>查询扩展，必要时转 BM25 / Embedding</td></tr>
+    <tr><td>命中太多</td><td>Search 再次撑爆上下文</td><td>Top-K、分页、总命中数、is_capped</td></tr>
+    <tr><td>片段太窄</td><td>有关键词但语义不完整</td><td>按段落 / 标题扩窗，合并相邻区间</td></tr>
+    <tr><td>文件在调用间变化</td><td>引用和行号失效</td><td>不可变 Snapshot 与版本冲突检查</td></tr>
+    <tr><td>检索无限循环</td><td>成本和延迟失控</td><td>轮数、Token、Deadline 三重预算</td></tr>
+    <tr><td>临时文件泄漏</td><td>跨 Session 访问</td><td>不透明句柄、租户鉴权、TTL、回收</td></tr>
+    <tr><td>文档 Prompt Injection</td><td>内容诱导 Agent 越权</td><td>正文视为不可信数据，权限仍由 Runtime 决定</td></tr>
+  </table>
+
+  <h2 id="s7">七、往哪演进：Agentic Retrieval Router</h2>
+  <p>不是"以后都上向量"，而是按任务类型路由到最便宜的检索方式。</p>
+  <table>
+    <tr><th>任务类型</th><th>首选检索</th><th>原因</th></tr>
+    <tr><td>Trace ID、错误码、函数名</td><td>literal / grep</td><td>精确、便宜</td></tr>
+    <tr><td>组合条件</td><td>regex、关键词扩展</td><td>不需要索引</td></tr>
+    <tr><td>标题、页码、函数、Sheet</td><td>结构化索引</td><td>保留原文结构</td></tr>
+    <tr><td>同义表达、概念问答</td><td>BM25 或 Embedding</td><td>弥补字面不匹配</td></tr>
+    <tr><td>跨章节、多跳问题</td><td>查询拆解 + 多轮取证</td><td>单次 Top-K 证据不全</td></tr>
+    <tr><td>全文摘要、合规穷举</td><td>流式扫描或 Map-Reduce</td><td>检索无法证明覆盖完整</td></tr>
+  </table>
+  <p>循环还得有明确的退出规则，否则成本和延迟都会失控：</p>
+  <div class="diag">
+    <div class="sched">
+      <div class="srow"><span class="stag g">证据</span><span>每个子问题都已经拿到可定位的证据</span></div>
+      <div class="srow"><span class="stag g">轮数</span><span>达到最大轮数</span></div>
+      <div class="srow"><span class="stag g">预算</span><span>达到总 Token 或 Tool 预算</span></div>
+      <div class="srow"><span class="stag g">增量</span><span>连续一轮没有新增证据</span></div>
+      <div class="srow"><span class="stag o">覆盖</span><span>任务需要完整覆盖时，切换到 exhaustive 模式</span></div>
+    </div>
+    <div class="snote" style="margin-top:10px">特别注意：<b>"没有检索到"不等于"文档中不存在"</b>。否定性结论必须基于完整扫描或可证明覆盖的索引。</div>
+  </div>
+
+  <h2 id="s8">八、记住这一句</h2>
+  <div class="bigrule">决定权在 Agent，证据落在行号——这就是 Agentic Retrieval。</div>
+
+  <div class="quiz">
+    <b>合上页面前，试着答一下</b>
+    <ol>
+      <li>把 grep 换成向量检索，这套方案会离 Agentic RAG 近一步吗？还差什么？</li>
+      <li>为什么"grep 零命中"不能作为"文档里没有"的证据？</li>
+      <li>50 行阈值、动态 Token Budget、Agentic Retrieval Router，三者的关系是什么？</li>
+    </ol>
+  </div>
+
+  <div class="quote">
+    三者的关系不是升级链条，而是三种分工：普通 RAG 把检索固化进程序；Agentic RAG 把检索交给 Agent 并配齐 Chunk、Embedding、向量库；当前方案把决定权交给了 Agent，但没配三件套，靠 50 行预览、临时文件和 grep 完成多轮取证——所以它准确的名字是 Agentic Retrieval。这个选择在眼下是合理的：一次性长文件、日志、代码本来就是关键词检索的主场。等要跨文档、要语义模糊的召回时，再补那三件、上 Router，也不迟。
+  </div>
+
+  <div class="card" style="text-align:center;color:var(--muted);font-size:12px">
+    依据：<code>MiniMax-Agent-详细讲解.md</code> 第 3–11、30–35 节（原始出处：飞书 wiki，作者可瑞吉 / 梁泽明）；ReAct（Yao et al., 2022, arXiv:2210.03629）与 Self-RAG（Asai et al., 2023, arXiv:2310.11511）为论文原名。<br>
+    文中数字均为原文的容量测算或验收目标，不是线上实测；「缺三件套所以叫 Agentic Retrieval」是对原文的解读。实现细节以真实代码为准。
+  </div>
+</div>
+
+<script>
+/* 主题开关：首次跟随系统，选择写入 localStorage，刷新后保持 */
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var KEY = 'vl-theme';
+  function apply(mode) {
+    root.setAttribute('data-theme', mode);
+    var dark = mode === 'dark';
+    btn.textContent = dark ? '浅色' : '深色';
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var initial = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+  apply(initial);
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
