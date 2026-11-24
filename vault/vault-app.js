@@ -82,8 +82,9 @@
     html = html.replace(/==([^=\n]+)==/g, '<mark class="md-highlight">$1</mark>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-    /* 图片要先于链接处理，否则 ![...](...) 会被链接规则啃掉一半（与 app.js 保持一致） */
-    html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s<>)"']+|\.{0,2}\/[\w\-./%]+)\)/g,
+    /* 图片要先于链接处理，否则 ![...](...) 会被链接规则啃掉一半（与 app.js 保持一致）。
+       data:image/...;base64 是内嵌图：随正文一起加密，不外链、不落盘。 */
+    html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s<>)"']+|\.{0,2}\/[\w\-./%]+|data:image\/[\w.+-]+;base64,[A-Za-z0-9+/=]+)\)/g,
       '<img src="$2" alt="$1" loading="lazy" decoding="async">');
     html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s<>)"']+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     html = html.replace(/\[([^\]]+)\]\(#([\p{L}\p{N}_-]+)\)/gu, '<a href="#$2">$1</a>');
