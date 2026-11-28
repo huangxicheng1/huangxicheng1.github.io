@@ -1,8 +1,19 @@
 {
   "version": 1,
   "entry": "notes/2026-11-24-minimax-agent",
-  "updated": "2026-11-28T02:51:23.001Z",
+  "updated": "2026-11-28T12:14:23.440Z",
   "annotations": [
+    {
+      "id": "an_qkjhdj68e",
+      "quote": "Gateway",
+      "prefix": "分为三层：层节点职责控制面（蓝）用户 / Chat → ",
+      "suffix": " / Session Authority → Agent",
+      "start": 799,
+      "body": "Gateway 是真实会话状态的唯一裁决者",
+      "author": "huangxicheng1",
+      "created": "2026-11-28T12:14:23.438Z",
+      "updated": "2026-11-28T12:14:23.439Z"
+    },
     {
       "id": "an_mqu6g752w",
       "quote": "问题不是文件太大，而是上下文预算失控",
