@@ -103,6 +103,80 @@
     });
     return node;
   }
+
+  /* ------------------------------------------------------------ 表格识别 */
+  // 从网页上「选中复制」一段表格，剪贴板里单元格之间是 TAB、行之间是换行（TSV）；
+  // 手写的 Markdown 表格则是 | 分隔。两种都认，解析成二维数组交给竖排渲染。
+  function dominantCount(rows) {
+    const tally = new Map();
+    let best = 0;
+    let bestCount = 0;
+    for (const row of rows) {
+      if (row.length < 2) continue;
+      const next = (tally.get(row.length) || 0) + 1;
+      tally.set(row.length, next);
+      if (next > bestCount) { bestCount = next; best = row.length; }
+    }
+    return best;
+  }
+  function parseTable(raw) {
+    const lines = String(raw == null ? '' : raw)
+      .split(/\r?\n/)
+      .filter(line => line.trim() !== '');
+    if (lines.length < 2) return null;
+    // 一、TAB 分隔（网页复制）
+    const tabbed = lines.filter(line => line.indexOf('\t') !== -1);
+    if (tabbed.length >= 2) {
+      const rows = lines.map(line => line.split('\t').map(cell => cell.trim()));
+      const cols = dominantCount(rows);
+      if (cols >= 2) {
+        const kept = rows.filter(row => row.length === cols);
+        if (kept.length >= 2) return kept;
+      }
+    }
+    // 二、竖线分隔（Markdown 表格）
+    const piped = lines.filter(line => (line.match(/\|/g) || []).length >= 2);
+    if (piped.length >= 3) {
+      const rows = piped
+        .filter(line => !/^[\s|:\-]+$/.test(line))
+        .map(line => line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(cell => cell.trim()));
+      const cols = dominantCount(rows);
+      if (cols >= 2) {
+        const kept = rows.filter(row => row.length === cols);
+        if (kept.length >= 2) return kept;
+      }
+    }
+    return null;
+  }
+  // 卡片只有 262px，真表格放进去每列不到 80px，中文一行六七个字，没法看。
+  // 所以改成竖排：第一列当小标题，其余列渲染成「列名：值」。
+  function renderTable(node, rows) {
+    const header = rows[0];
+    const body = rows.slice(1);
+    node.classList.add('has-tbl');
+    const wrap = el('div', 'an-tbl');
+    wrap.append(el('div', 'an-tbl-meta', `${body.length} 行 × ${header.length} 列`));
+    for (const row of body) {
+      const item = el('div', 'an-tbl-item');
+      item.append(el('b', 'an-tbl-key', row[0] || '—'));
+      for (let i = 1; i < header.length; i++) {
+        const value = String(row[i] || '').trim();
+        if (!value) continue;
+        const line = el('div', 'an-tbl-line');
+        line.append(el('span', 'an-tbl-label', header[i] || `列 ${i + 1}`));
+        line.append(richText(el('span', 'an-tbl-val'), value));
+        item.append(line);
+      }
+      wrap.append(item);
+    }
+    node.append(wrap);
+    return node;
+  }
+  function renderBody(node, text) {
+    const rows = parseTable(text);
+    if (rows) return renderTable(node, rows);
+    return richText(node, text);
+  }
   function b64encode(text) {
     const bytes = new TextEncoder().encode(text);
     let binary = '';
@@ -284,7 +358,7 @@
     const time = el('span', '', stamp(ann.created));
     head.append(label, time);
     const quote = el('p', 'an-card-quote', '“' + String(ann.quote || '').trim() + '”');
-    const body = richText(el('div', 'an-card-body'), ann.body || '');
+    const body = renderBody(el('div', 'an-card-body'), ann.body || '');
     const actions = el('div', 'an-card-actions');
     const edit = el('button', '', '编辑');
     edit.type = 'button';
@@ -432,7 +506,7 @@
         top.append(document.createTextNode('批注 ' + String(annotationIndex(ann.id)).padStart(2, '0') + ' · ' + stamp(ann.created)));
         if (orphan) top.append(document.createTextNode('  · 未定位'));
         const quote = el('div', 'an-item-quote', '“' + String(ann.quote || '').trim() + '”');
-        const text = richText(el('div', 'an-item-body'), ann.body || '');
+        const text = renderBody(el('div', 'an-item-body'), ann.body || '');
         item.append(top, quote, text);
         item.addEventListener('click', () => {
           setDrawer(false);

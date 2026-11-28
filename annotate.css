@@ -137,6 +137,84 @@ body.an-drawer-open .an-rail { opacity: .14; pointer-events: none; }
   font-size: 12.5px;
 }
 
+/* ---------------------------------------------------- 批注里的表格（竖排） */
+/* 卡片只有 262px，真表格塞进来每列不到 80px，中文一行六七个字没法读。
+   所以表格改成竖排：第一列当小标题，其余列「列名：值」逐行往下排。 */
+.an-card-body.has-tbl,
+.an-item-body.has-tbl {
+  white-space: normal;
+}
+
+.an-tbl {
+  max-height: 268px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  scrollbar-width: thin;
+}
+
+.an-tbl::-webkit-scrollbar { width: 4px; }
+.an-tbl::-webkit-scrollbar-thumb {
+  background: var(--an-line);
+  border-radius: 2px;
+}
+
+.an-tbl-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 2px;
+  border-bottom: 1px dashed var(--an-line);
+}
+
+.an-tbl-item {
+  padding: 7px 0 0;
+  border-top: 1px solid var(--an-line);
+}
+
+.an-tbl-item:first-of-type { border-top: 0; padding-top: 0; }
+
+.an-tbl-key {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.an-tbl-line {
+  display: block;
+  margin-top: 5px;
+}
+
+.an-tbl-label {
+  display: inline-block;
+  margin-bottom: 1px;
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: .06em;
+  padding: 0 4px;
+  border: 1px solid var(--an-line);
+  border-radius: 3px;
+  line-height: 1.6;
+}
+
+.an-tbl-val {
+  display: block;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+/* 抽屉里空间宽裕一点，行高放松些 */
+.an-item-body .an-tbl { max-height: none; }
+.an-item-body .an-tbl-key { font-size: 12.5px; }
+
 /* 批注正文里的链接：可直接点击，长 URL 允许在任意位置折行 */
 .an-card-body a,
 .an-item-body a {
