@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同一份 20 万字文档，六种 harness 读到了第几章</title>
+<meta name="description" content="同样都会截断，差别在截断之后模型有没有地方可去。用一份 20 万字文档的六条读取轨迹，比较 harness 的上下文预算控制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="同一份 20 万字文档，六种 harness 读到了第几章">
+<meta property="og:description" content="截断不省 token，省 token 的是不读。">
+<style>
+  :root{
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#fffdf6 0%,#f4f0e6 52%,#ece6d9 100%);
+    --panel:#fffefb;--panel2:#efe9dd;--line:#ddd4c4;
+    --txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+    --accent:#1f5fa8;
+    --accent2:#16724b;
+    --warm:#b45309;
+    --pink:#7a3ea8;
+    --red:#b3261e;
+    --yellow:#8a6100;
+    --cyan:#0e6f78;
+    --diag:#fffdf8;--rule-bg:#fbf8f1;
+    --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+    --node-bg:#fffefb;--node-line:#d9d0c0;
+    --flink:#c6bdac;--kids-line:#d8cfbe;--lane-line:#e8e1d3;--vmark:#c9c0af;
+    --model:#6b7280;--lbar-fg:#fff;
+    --core-bg:linear-gradient(135deg,rgba(122,62,168,.08),rgba(31,95,168,.05));
+    --core-line:rgba(122,62,168,.55);
+    --quote-bg:rgba(22,114,75,.06);
+    --note-bg:rgba(31,95,168,.06);
+    --quiz-bg:rgba(122,62,168,.05);
+    --diag-shadow:0 2px 12px rgba(90,74,44,.06);
+    --stag-g-line:rgba(22,114,75,.35);--stag-g-bg:rgba(22,114,75,.06);
+    --stag-o-line:rgba(180,83,9,.35);--stag-o-bg:rgba(180,83,9,.06);
+    --chip-hot-line:rgba(180,83,9,.45);
+    --node-main-line:rgba(22,114,75,.5);--node-main-bg:rgba(22,114,75,.05);
+    --node-bad-line:rgba(179,38,30,.45);--node-bad-bg:rgba(179,38,30,.05);
+    --cbox-bad-line:rgba(179,38,30,.4);--cbox-good-line:rgba(22,114,75,.4);
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,monospace;
+  }
+  html[data-theme="dark"]{
+    --page-bg:radial-gradient(1200px 700px at 50% -12%,#1d232c 0%,#161a21 52%,#101419 100%);
+    --panel:#1a1f27;--panel2:#232932;--line:#313845;
+    --txt:#e9e7e2;--p:#c3c9d2;--muted:#8f98a5;
+    --accent:#7ab0f5;--accent2:#5ecf9e;--warm:#eda267;--pink:#c391f7;
+    --red:#f0796f;--yellow:#d9ad3f;--cyan:#5fcbd6;
+    --diag:#171c23;--rule-bg:#1c222a;
+    --code-bg:#232a33;--code-line:#39414d;--code-fg:#d0aef5;
+    --node-bg:#1d232b;--node-line:#39414d;
+    --flink:#4b5461;--kids-line:#39414d;--lane-line:#2b323c;--vmark:#414a57;
+    --model:#7a8494;--lbar-fg:#10151b;
+    --core-bg:linear-gradient(135deg,rgba(195,145,247,.11),rgba(122,176,245,.07));
+    --core-line:rgba(195,145,247,.5);
+    --quote-bg:rgba(94,207,158,.09);
+    --note-bg:rgba(122,176,245,.09);
+    --quiz-bg:rgba(195,145,247,.08);
+    --diag-shadow:0 2px 14px rgba(0,0,0,.38);
+    --stag-g-line:rgba(94,207,158,.4);--stag-g-bg:rgba(94,207,158,.1);
+    --stag-o-line:rgba(237,162,103,.4);--stag-o-bg:rgba(237,162,103,.1);
+    --chip-hot-line:rgba(237,162,103,.5);
+    --node-main-line:rgba(94,207,158,.45);--node-main-bg:rgba(94,207,158,.08);
+    --node-bad-line:rgba(240,121,111,.45);--node-bad-bg:rgba(240,121,111,.08);
+    --cbox-bad-line:rgba(240,121,111,.45);--cbox-good-line:rgba(94,207,158,.45);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--txt);
+    background:var(--page-bg);
+    background-attachment:fixed;
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.8;padding:26px 18px;-webkit-font-smoothing:antialiased;
+    transition:background .25s ease,color .25s ease}
+  .wrap{max-width:960px;margin:0 auto}
+
+  .nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .nav a{font-size:11.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px;background:var(--panel)}
+  .nav a:hover{color:var(--accent);border-color:var(--accent)}
+  .theme-btn{margin-left:auto;font-size:11.5px;color:var(--muted);border:1px solid var(--line);
+    border-radius:999px;padding:2px 12px;background:var(--panel);cursor:pointer;font-family:inherit;
+    transition:color .16s,border-color .16s}
+  .theme-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+  h1{font-size:25px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  h2{font-size:19px;margin:34px 0 10px;padding-left:11px;border-left:4px solid var(--accent);scroll-margin-top:16px}
+  h3{font-size:14px;margin:18px 0 6px;color:var(--p)}
+  p{color:var(--p);margin:8px 0;font-size:14px}
+
+  .b{color:var(--accent)}.g{color:var(--accent2)}.o{color:var(--warm)}.pk{color:var(--pink)}
+  .y{color:var(--yellow)}.r{color:var(--red)}.cy{color:var(--cyan)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0}
+  .core{background:var(--core-bg);border:1px solid var(--core-line);
+    border-radius:12px;padding:16px 20px;font-size:15px;margin:14px 0}
+  .quote{border-left:3px solid var(--accent2);background:var(--quote-bg);padding:10px 14px;
+    border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--p);font-style:italic}
+  .note{background:var(--note-bg);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz{background:var(--quiz-bg);border-left:3px solid var(--pink);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:13px;color:var(--p)}
+  .quiz b{color:var(--pink)}
+  .quiz ol{margin:6px 0 0;padding-left:20px}
+  .quiz li{margin:3px 0}
+  code{background:var(--code-bg);border:1px solid var(--code-line);padding:0 5px;border-radius:4px;
+    color:var(--code-fg);font-size:12px;font-family:var(--mono)}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .stats>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+  .stats b{display:block;font-family:var(--mono);font-size:30px;line-height:1.15;color:var(--accent2)}
+  .stats span{font-size:11px;color:var(--muted)}
+  .stats .n2 b{color:var(--warm)}
+  .stats .n3 b{color:var(--pink)}
+
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td:first-child{color:var(--yellow);font-weight:600;width:27%}
+  .fixt td:first-child{font-family:var(--mono);font-size:11.5px;font-weight:500;width:26%}
+  td{word-break:break-word}
+
+  .diag{background:var(--diag);border:1px solid var(--line);border-radius:12px;
+    padding:18px 18px 22px;margin:14px 0;box-shadow:var(--diag-shadow)}
+  .bigrule{text-align:center;font-family:var(--mono);font-size:13.5px;color:var(--txt);
+    background:var(--rule-bg);border:1px solid var(--code-line);border-radius:9px;padding:12px;margin:12px 0}
+
+  .lanes{margin:8px 0}
+  .lane{display:flex;align-items:center;height:36px}
+  .lanen{width:108px;flex:none;text-align:right;padding-right:12px;font-family:var(--mono);
+    font-size:10.5px;color:var(--p);white-space:nowrap}
+  .lanet{flex:1;position:relative;height:36px;border-left:1px solid var(--lane-line)}
+  .lbar{position:absolute;top:10px;height:16px;border-radius:5px;font-family:var(--mono);
+    font-size:9.5px;font-weight:700;color:var(--lbar-fg);display:flex;align-items:center;justify-content:center;
+    white-space:nowrap;overflow:hidden}
+  .lbar.model{background:var(--model)}
+  .lbar.safe{background:var(--accent2)}
+  .lbar.unsafe{background:var(--warm)}
+  .lbar.res{background:var(--pink)}
+  .vmark{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--vmark);z-index:2}
+  .axis{position:relative;height:15px;margin:0 0 4px 108px;font-size:9.5px;color:var(--muted);
+    font-family:var(--mono)}
+  .axis span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+  .axis span:first-child{transform:none}
+  .axis span:last-child{transform:translateX(-100%)}
+
+  .sched{margin:10px 0}
+  .srow{display:flex;align-items:center;gap:6px;margin:7px 0;flex-wrap:wrap;font-size:14px}
+  .srow>span:last-child{flex:1;min-width:0}
+  .stag{flex:none;width:52px;text-align:center;font-size:10px;border-radius:5px;padding:1px 0;
+    font-family:var(--mono);border:1px solid transparent}
+  .stag.g{color:var(--accent2);border-color:var(--stag-g-line);background:var(--stag-g-bg)}
+  .stag.o{color:var(--warm);border-color:var(--stag-o-line);background:var(--stag-o-bg)}
+  .chip{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);background:var(--panel);
+    border-radius:6px;padding:2px 9px;color:var(--p)}
+  .chip.hot{border-color:var(--chip-hot-line)}
+  .snote{font-size:11px;color:var(--muted);margin-left:58px}
+
+  .flow{display:flex;align-items:center;gap:0;margin:10px 0}
+  .fnode{flex:1;background:var(--node-bg);border:1px solid var(--node-line);border-radius:9px;
+    padding:9px 6px;text-align:center;font-family:var(--mono);font-size:11.5px}
+  .fnode small{display:block;font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;
+    font-size:10px;color:var(--muted)}
+  .flink{width:46px;flex:none;text-align:center;color:var(--flink);font-size:13px}
+
+  .tree{margin:10px 0}
+  .tnode{display:inline-block;font-family:var(--mono);font-size:11px;border-radius:8px;
+    padding:6px 12px;background:var(--panel);border:1px solid var(--line)}
+  .tnode{max-width:100%;word-break:break-word}
+  .tnode.main{border-color:var(--node-main-line);background:var(--node-main-bg)}
+  .tnode.bad{border-color:var(--node-bad-line);background:var(--node-bad-bg);color:var(--red)}
+  .tkids{margin:6px 0 0 14px;padding-left:18px;border-left:1px dashed var(--kids-line);
+    display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .mini div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:12px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  .cbox{border-radius:10px;padding:13px 15px;font-size:12px;background:var(--diag)}
+  .cbox.bad{border:1px solid var(--cbox-bad-line)}
+  .cbox.good{border:1px solid var(--cbox-good-line)}
+  .cbox .ct{font-size:12px;font-weight:700;margin-bottom:8px}
+  .cbox p{font-size:12px;margin:5px 0;line-height:1.7}
+
+  @media(max-width:760px){
+    .stats,.cmp,.mini{grid-template-columns:1fr}
+    .lanen{width:78px}
+    .axis{padding-left:78px}
+    .flow{flex-direction:column;gap:6px;align-items:stretch}
+    .fnode{width:100%;flex:none}
+    .flink{width:auto}
+    .snote{margin-left:0}
+    .theme-btn{margin-left:0}
+    table{font-size:11.5px}
+    .fixt td:first-child{width:36%;word-break:break-all}
+  }
+  @media print{
+    html,html[data-theme="dark"]{
+      --page-bg:#fff;--txt:#1b1f24;--p:#3d4249;--muted:#7c7468;
+      --panel:#fffefb;--panel2:#f7f4ec;--line:#ddd4c4;--diag:#fffdf8;--rule-bg:#fbf8f1;
+      --code-bg:#f1ece1;--code-line:#e6dfd1;--code-fg:#6b2f96;
+      --node-bg:#fffefb;--node-line:#d9d0c0;
+    }
+    body{background:#fff;padding:0}
+    .diag,.card,.core,.cmp,.mini>div{break-inside:avoid}
+    .nav,.theme-btn{display:none}
+  }
+  @media(prefers-reduced-motion:reduce){
+    body{transition:none}
+    .nav a,.theme-btn{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav">
+    <a href="#s1">同一个任务</a>
+    <a href="#s2">六条轨迹</a>
+    <a href="#s3">三层边界</a>
+    <a href="#s4">机制还是策略</a>
+    <a href="#s5">两个必问</a>
+    <a href="#s6">数字口径</a>
+    <button id="themeToggle" class="theme-btn" type="button" aria-label="切换深色/浅色主题">深色</button>
+  </div>
+
+  <h1>同一份 20 万字文档，六种 harness 读到了第几章</h1>
+  <div class="sub">都会截断。差别在于截断之后，模型<b>有没有地方可去</b>。</div>
+
+  <div class="core">
+    🎯 <b>截断不省 token</b>。真想读完，总量还是 18 万，只是分成 25 次付。<br>
+    分水岭不在上限多大，而在截断提示把下一步指向<b class="pk">「继续读」还是「去搜」</b>。
+  </div>
+
+  <div class="stats">
+    <div><b>20 万字</b><span>文档规模（约 600 KB / 18 万 token）</span></div>
+    <div class="n2"><b>25 次</b><span>24 KB 一刀，顺序读完要几轮</span></div>
+    <div class="n3"><b>第 17 次</b><span>才第一次碰到第 14 章</span></div>
+  </div>
+
+  <h2 id="s1">同一个任务，两种命运的分叉点</h2>
+
+  <div class="card">
+    <p>用户拖进来一份技术规范：<b class="y">20 万中文字符</b>，约 600 KB，约 18 万 token。问的是<b>「第十四章的限流阈值是多少」</b>。</p>
+    <p style="margin-bottom:0">答案在文档<b class="o"> 65% 的位置</b>——不巧。所有「从头往下读」的策略，都得先走过前 13 章；所有「先定位再读」的策略，一次都不用走。</p>
+  </div>
+
+  <div class="diag">
+    <div class="axis"><span>开头</span><span>25%</span><span>50%</span><span>75%</span><span>结尾</span></div>
+    <div class="lanes">
+      <div class="lane"><div class="lanen">第 14 章</div><div class="lanet"><div class="vmark" style="left:65%"></div></div></div>
+      <div class="lane"><div class="lanen">Aider</div><div class="lanet">
+        <div class="lbar unsafe" style="left:0;width:100%">整篇 18 万 token，每次请求重发一遍</div></div></div>
+      <div class="lane"><div class="lanen">Codex</div><div class="lanet">
+        <div class="lbar unsafe" style="left:0;width:100%">先全量进上下文，再把中间挖掉</div></div></div>
+      <div class="lane"><div class="lanen">pi / 快照</div><div class="lanet">
+        <div class="lbar unsafe" style="left:0%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:4%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:8%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:12%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:16%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:20%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:24%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:28%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:32%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:36%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:40%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:44%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:48%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:52%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:56%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:60%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:64%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:68%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:72%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:76%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:80%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:84%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:88%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:92%;width:3.4%"></div>
+        <div class="lbar unsafe" style="left:96%;width:3.4%"></div>
+      </div></div>
+      <div class="lane"><div class="lanen">Gemini CLI</div><div class="lanet">
+        <div class="lbar model" style="left:0;width:20%">前 40k 字符</div></div></div>
+      <div class="lane"><div class="lanen">Claude Code</div><div class="lanet">
+        <div class="lbar model" style="left:65%;width:8%">Grep</div></div></div>
+      <div class="lane"><div class="lanen">你的方案</div><div class="lanet">
+        <div class="lbar safe" style="left:0;width:2%"></div>
+        <div class="lbar safe" style="left:65%;width:3%"></div></div></div>
+    </div>
+    <div class="snote" style="margin-top:10px">条形按<b>文档中的位置</b>画，不是按 token 账单；宽度是比例示意。绿条很窄，正因为窄才省。</div>
+  </div>
+
+  <div class="note">
+    <b>这不是「上限大小」的差别。</b>Aider 和 Codex 的条形满，因为它们把整篇塞进去；pi 的条形也满，因为它是<b>一页一页读满</b>——总量一样，只是分成 25 次付。第 17 次那一格，正是绿条跳过的全部。<br>
+    Claude Code 那条只画了 Grep 命中后的读取；在那之前，整文件会被直接拒绝（&gt;256 KB），模型必须先自己想到去搜。
+  </div>
+
+  <h2 id="s2">六条轨迹，逐个看截断之后给了什么</h2>
+
+  <table class="fixt">
+    <tr><th>harness</th><th>一次的上限</th><th>截断后交给模型什么</th><th>模型下一步</th></tr>
+    <tr><td>Aider</td><td>没有上限（/add 全文进 prompt）</td><td>没有「截断」这回事</td><td>整篇 + 每次请求重发</td></tr>
+    <tr><td>Codex</td><td>按模型解析的 bytes/tokens 策略</td><td>保留头尾、挖掉中间 + 警告</td><td>猜，或者自己再 <code>sed -n</code> 一次</td></tr>
+    <tr><td>pi</td><td>2000 行 / 50 KB（truncate.ts:11–12）</td><td><code>Use offset=N to continue</code></td><td>顺序续读</td></tr>
+    <tr><td>Gemini CLI</td><td>40,000 字符</td><td>完整输出存临时文件 + 路径</td><td>去读那个文件（它自己还有 2000 行上限）</td></tr>
+    <tr><td>Claude Code</td><td>25,000 token；整文件 &gt;256 KB 直接拒</td><td>PARTIAL view；超大文件报错里点名 Grep</td><td>offset 续读，或用 Grep</td></tr>
+    <tr><td>你的方案</td><td>先判阈值：未超走完整返回；超了给 50 行</td><td>显式 truncated + 全文句柄</td><td>grep 关键词 → Range Read</td></tr>
+  </table>
+
+  <p>把最后一列连起来看：<b class="b">五家指向「再来一次读」，只有一家指向「换个动作」</b>。而 grep 这个能力，五家其实都有——Claude Code 有 Grep，Gemini CLI 有 <code>search_file_content</code>，OpenCode 有 grep/glob，SWE-agent 有 <code>search_file</code>。缺的不是工具，是<b class="r">提示里那句话</b>。</p>
+
+  <h2 id="s3">你的底座长什么样：三层边界</h2>
+
+  <div class="diag">
+    <div class="tree">
+      <div class="tnode main">第一层 · pi 上游：2000 行 / 50 KB 头截 + offset 续读 → <b>复用的，不是自研</b></div>
+      <div class="tkids">
+        <div class="tnode">第二层 · 宿主 wrapper：设备与二进制守卫、PDF/notebook/video 分派、24 KB 二次截断、重写续读提示 → <b>多数改动在这里</b></div>
+        <div class="tkids">
+          <div class="tnode bad">第三层 · 设计方案：落盘 + 句柄 + 截断即告知 → <b>只在讲解文档里，快照里没有</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="snote" style="margin-top:12px">模型真正看到的线是 <b class="o">24 KB</b>（output-limit.ts:4），不是 pi 的 50 KB。所以绿条其实应该更短——前提是它真的落在代码里。</div>
+  </div>
+
+  <div class="diag">
+    <div class="flow">
+      <div class="fnode">预览<small>50 行 ≈ 2k</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">落盘<small>句柄 + TTL</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">truncated<small>显式状态</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">grep<small>2 次 ≈ 1k</small></div>
+      <div class="flink">──▶</div>
+      <div class="fnode">Range Read<small>60 行 ≈ 2.4k</small></div>
+    </div>
+    <div class="snote" style="margin-top:10px">合计约 <b class="y">1 万 token</b>。省下来的不是「截断」的功劳，是这条路径的功劳。</div>
+  </div>
+
+  <h2 id="s4">机制还是策略：这才是你和他们的分野</h2>
+
+  <div class="cmp">
+    <div class="cbox bad">
+      <div class="ct r">业界做法 · 写进 prompt</div>
+      <p>「先 grep 定位，再读片段」写进 system prompt。Claude Code 起家就是 glob + grep，Cursor 有 codebase_search。</p>
+      <p>代价：<b>建议可以被忽略</b>。截断提示还在说 <code>Use offset=N</code>，模型顺着提示往下读最省事。</p>
+    </div>
+    <div class="cbox good">
+      <div class="ct g">你的做法 · 写进返回值</div>
+      <p>截断这件事本身成为 Tool Result 的一部分：内容被切了、全文在这、用关键词来取。</p>
+      <p>代价：<b>落盘要付 TTL / 租户 / 回收</b>；多一轮检索；而且快照里还没落地。</p>
+    </div>
+  </div>
+
+  <p>所以那句「别人不做检索」站不住——<b class="r">别人做的是策略，你做的是机制</b>。策略是建议，机制是返回值的一部分，模型绕不过去。这个差别站得住，也经得起一句反问。</p>
+
+  <h2 id="s5">两个 review 必问的问题</h2>
+
+  <div class="mini">
+    <div><b class="y">为什么是 50 行，不是剩余预算</b><br>Claude Code 的 <code>allow_large</code> 是按「会话剩余上下文」读全文件的。窗口是全局资源，只有运行时知道还剩多少——工具层的硬阈值要有理由。</div>
+    <div><b class="y">入口都覆盖住了吗</b><br>Gemini CLI 的 ACP 路径曾整个绕过 truncate，一次 24 MB 输出打爆 1M 输入。你自己 PTC 通道的 8 MiB 上限是同一类洞。</div>
+  </div>
+
+  <div class="quiz">
+    <b>合上页面前，试着答一下</b>
+    <ol>
+      <li>如果模型就是不 grep、一路续读，你的方案退化成哪一档？还省吗？</li>
+      <li>「50 行预览」在没有落盘的情况下，还剩多少价值？</li>
+      <li>94.5% 的分母，应该按工具返回值算，还是按模型实际收到的字符串算？</li>
+    </ol>
+  </div>
+
+  <h2 id="s6">每个数字的口径</h2>
+
+  <table class="fixt">
+    <tr><th>数字</th><th>怎么来的</th><th>性质</th></tr>
+    <tr><td>18 万 token</td><td>20 万中文字符的容量模型估值</td><td>估算（讲解文档 :1217）</td></tr>
+    <tr><td>600 KB</td><td>20 万字符 × 3 字节（UTF-8 中文）</td><td>算式</td></tr>
+    <tr><td>24 KB</td><td>desktop read 路径真正生效的字节上限</td><td>代码常量 output-limit.ts:4</td></tr>
+    <tr><td>25 次</td><td>600 KB ÷ 24 KB ≈ 25</td><td>算式</td></tr>
+    <tr><td>第 17 次</td><td>第 14 章起于 65%，每次读 4%（24 KB ÷ 600 KB）</td><td>算式</td></tr>
+    <tr><td>≈1 万 token</td><td>50 行预览 + 2 次 grep + 60 行 Range Read</td><td>估算（容量模型）</td></tr>
+    <tr><td>94.5%</td><td>18 万 → 1 万</td><td>自述「不是线上监控值」</td></tr>
+  </table>
+
+  <div class="bigrule">截断只解决「一次别炸」，检索才解决「总量别炸」</div>
+
+  <div class="quote">
+    这页比较的不是谁的上限更小——上限小只是把爆炸切成 25 次分期付款。真正的分野在返回值的最后半句：它让模型<b>继续往下读</b>，还是让模型<b>去别处找</b>。你的方案做对了这件事，但做对的是设计，不是代码——快照里还没有落盘那一步。
+  </div>
+
+  <div class="card" style="text-align:center;color:var(--muted);font-size:12px">
+    依据：<code>MiniMax-Agent-详细讲解.md:1217</code> · <code>pi-read改造-三层边界.html</code> · <code>output-limit.ts:4</code> · <code>truncate.ts:11–12</code> ·
+    <a href="https://code.claude.com/docs/en/tools-reference">Claude Code Tools reference</a> ·
+    <a href="https://opencode.ai/docs/tools/">OpenCode Tools</a> ·
+    <a href="https://latenteval.ai/research/tool-output-truncation">LatentEval 截断对照</a> ·
+    <a href="https://github.com/google-gemini/gemini-cli/issues/27738">gemini-cli #27738</a><br>
+    进度与 token 账均为容量模型推算，非线上监控值；闭源产品（Cursor / Windsurf / Amp）未公开上限，本页不作断言。
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var KEY = 'vl-theme';
+  function apply(mode) {
+    root.setAttribute('data-theme', mode);
+    var dark = mode === 'dark';
+    btn.textContent = dark ? '浅色' : '深色';
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var initial = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+  apply(initial);
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
