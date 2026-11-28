@@ -869,12 +869,19 @@
     const card = buildCard(ann);
     pop.replaceChildren(card);
     pop.classList.add('is-on');
+    card.style.transform = 'none';
     const rect = mark.getBoundingClientRect();
     const width = Math.min(300, window.innerWidth - 32);
     const left = Math.min(Math.max(rect.left, 16), window.innerWidth - width - 16);
-    const top = Math.min(Math.max(rect.bottom + 10, 70), window.innerHeight - 280);
+    let top = Math.min(Math.max(rect.bottom + 10, 70), Math.max(70, window.innerHeight - 280));
     pop.style.left = `${left}px`;
     pop.style.top = `${top}px`;
+    // 表格卡片可能比预留的 280px 高，量完实际高度再回夹，别让卡片掉出视口
+    const cardH = card.offsetHeight || 0;
+    if (cardH && top + cardH > window.innerHeight - 12) {
+      top = Math.max(12, window.innerHeight - 12 - cardH);
+      pop.style.top = `${top}px`;
+    }
     if (editing) beginEdit(ann, card);
   }
   function closePopover() {
