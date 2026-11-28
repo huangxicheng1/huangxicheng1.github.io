@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "entry": "notes/2026-11-24-minimax-agent",
+  "updated": "2026-11-28T02:51:23.001Z",
+  "annotations": [
+    {
+      "id": "an_mqu6g752w",
+      "quote": "问题不是文件太大，而是上下文预算失控",
+      "prefix": "—从\"读文件\"到 Agentic Retrieval3.",
+      "suffix": "原逻辑把文件全文作为 Tool Result 返回模型。",
+      "start": 1281,
+      "body": "https://huangxicheng1.github.io/harness-context-budget.html",
+      "author": "huangxicheng1",
+      "created": "2026-11-28T02:51:23.000Z",
+      "updated": "2026-11-28T02:51:23.000Z"
+    }
+  ]
+}
