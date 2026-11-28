@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-24-minimax-agent",
-  "updated": "2026-11-28T13:51:02.910Z",
+  "updated": "2026-11-28T13:56:02.445Z",
   "annotations": [
     {
       "id": "an_qkjhdj68e",
@@ -46,6 +46,17 @@
       "author": "huangxicheng1",
       "created": "2026-11-28T13:51:02.909Z",
       "updated": "2026-11-28T13:51:02.909Z"
+    },
+    {
+      "id": "an_l8cyjow98",
+      "quote": "Idempotency-Key",
+      "prefix": "数判断格式，检查大小、页数、加密、病毒和解压炸弹；使用 ",
+      "suffix": " 查询同一逻辑请求；服务端计算权威 SHA-256，按租",
+      "start": 6189,
+      "body": "它是调用方给“这一次操作”起的身份证号。重试的时候带同一个号，服务端就还你第一次的结果，而不是再执行一遍。",
+      "author": "huangxicheng1",
+      "created": "2026-11-28T13:56:02.444Z",
+      "updated": "2026-11-28T13:56:02.444Z"
     }
   ]
 }
