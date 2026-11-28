@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-24-minimax-agent",
-  "updated": "2026-11-28T12:14:23.440Z",
+  "updated": "2026-11-28T12:14:54.246Z",
   "annotations": [
     {
       "id": "an_qkjhdj68e",
@@ -9,10 +9,10 @@
       "prefix": "分为三层：层节点职责控制面（蓝）用户 / Chat → ",
       "suffix": " / Session Authority → Agent",
       "start": 799,
-      "body": "Gateway 是真实会话状态的唯一裁决者",
+      "body": "Gateway 是真实会话状态的唯一裁决者,入口和会话网关，负责鉴权、会话、事件、配额；",
       "author": "huangxicheng1",
       "created": "2026-11-28T12:14:23.438Z",
-      "updated": "2026-11-28T12:14:23.439Z"
+      "updated": "2026-11-28T12:14:54.245Z"
     },
     {
       "id": "an_mqu6g752w",
