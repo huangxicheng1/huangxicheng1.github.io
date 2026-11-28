@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-24-minimax-agent",
-  "updated": "2026-11-28T12:14:54.246Z",
+  "updated": "2026-11-28T13:10:25.130Z",
   "annotations": [
     {
       "id": "an_qkjhdj68e",
@@ -24,6 +24,17 @@
       "author": "huangxicheng1",
       "created": "2026-11-28T02:51:23.000Z",
       "updated": "2026-11-28T02:51:23.000Z"
+    },
+    {
+      "id": "an_sxny0j84o",
+      "quote": "grep",
+      "prefix": "TL。6. 为什么先使用 grep，而不是直接上 RAG",
+      "suffix": "适合一次性日志、代码、错误码、Trace ID、函数名和",
+      "start": 2457,
+      "body": "不理解文件内容，而是逐行扫描，再按正则匹配",
+      "author": "huangxicheng1",
+      "created": "2026-11-28T13:10:25.128Z",
+      "updated": "2026-11-28T13:10:25.128Z"
     }
   ]
 }
