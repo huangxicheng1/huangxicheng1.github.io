@@ -1,7 +1,7 @@
 {
   "version": 1,
   "entry": "notes/2026-11-24-minimax-agent",
-  "updated": "2026-11-28T13:10:25.130Z",
+  "updated": "2026-11-28T13:51:02.910Z",
   "annotations": [
     {
       "id": "an_qkjhdj68e",
@@ -35,6 +35,17 @@
       "author": "huangxicheng1",
       "created": "2026-11-28T13:10:25.128Z",
       "updated": "2026-11-28T13:10:25.128Z"
+    },
+    {
+      "id": "an_friyr3h4t",
+      "quote": "文件魔数",
+      "prefix": "否属于当前租户和 Session，并固定不可变版本；通过",
+      "suffix": "判断格式，检查大小、页数、加密、病毒和解压炸弹；使用 I",
+      "start": 6158,
+      "body": "魔数（magic number / magic bytes）就是文件开头固定位置上的那几个固定字节，由格式规范规定，用来证明“我是什么格式”。\n\n名字来自早期 Unix：可执行文件 a.out 的第一个字（0x0107）被称为 magic number，file 命令靠一张 /etc/magic 表去比对文件头，判断“这是个什么”。今天所有语言的标准库、所有浏览器的 MIME 嗅探，用的都是同一套办法。",
+      "author": "huangxicheng1",
+      "created": "2026-11-28T13:51:02.909Z",
+      "updated": "2026-11-28T13:51:02.909Z"
     }
   ]
 }
